@@ -64,15 +64,6 @@ if( isset($_GET["q"]) and $_GET["q"] === "head" ) {
    include( DIR_ASSETS . "js/events.min.js");
    include( DIR_ASSETS . "js/initiator.min.js");
 
-} else if( isset($_GET["q"]) and $_GET["q"] === "cs" ) {
-
-    include( DIR_ASSETS . "3rd-party/jssip/jssip-3.8.2.min.js");
-    include( DIR_ASSETS . "js/callCenter.min.js");
-
-} else if( isset($_GET["q"]) and $_GET["q"] === "voiceMessage" ) {
-
-    include( DIR_ASSETS . "3rd-party/jssip/jssip-3.8.2.min.js");
-    include( DIR_ASSETS . "js/voiceMessage.min.js");
-
 } 
+
 ?>
