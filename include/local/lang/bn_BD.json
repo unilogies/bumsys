@@ -1,0 +1,19 @@
+{
+  "emptyTable": "কোনো তথ্য নেই",
+  "info": "_TOTAL_টির ভিতর _START_ থেকে _END_টি দেখাচ্ছে",
+  "infoEmpty": "০টির ভিতর ০টি দেখাচ্ছে",
+  "infoFiltered": "(সর্বমোট _MAX_টি তথ্য থেকে)",
+  "infoThousands": ",",
+  "lengthMenu": "_MENU_ টি দেখান",
+  "loadingRecords": "লোড হচ্ছে...",
+  "search": "খুজুন:",
+  "zeroRecords": "কোনো তথ্য খুজে পাওয়া যায়নি",
+  "thousands": ",",
+  "processing": "<i style='color: #3c8dbc;' class='fa fa-spinner fa-2x fa-spin fa-fw'></i><span style='margin-left: 10px;'>প্রসেস হচ্ছে...</span>",
+  "paginate": {
+      "first": "প্রথম",
+      "last": "শেষ",
+      "next": "পরবর্তী",
+      "previous": "পূর্ববর্তী"
+  }
+}
