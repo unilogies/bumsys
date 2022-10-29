@@ -6,6 +6,12 @@ An open sources project called Business Management System.
 PHP Version: At least 7.0.  
 MySQL Version: At least 5.6
 
+## Demo
+For see a demo please visit following address:
+- Link: https://demo.bumsys.org/
+- Username: bumsys
+- Password: 12345678
+
 
 ## Installation
 Create a MySQL database and import the following file:
