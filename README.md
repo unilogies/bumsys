@@ -33,12 +33,15 @@ Please note, the domain must be in following format:
 - The domain can not be ended with a slash (/)
 - ~~https://bumsys.org~~ (incorrect)
 - ~~bumsys.org/~~ (incorrect)
-- **example.com** (correct)
+- **bumsys.org** (correct)
 
 
 ## Contribution
 If you want to contribute in this project, you are welcome!  
 You can help us on this project by **Testing**, increasing the security by **Finding Security Issue**.  
 Please feel free to open an issue if you found anything ugly. 
+
+## Contact
+Please feel free to mail us when you found any big security issue: talk@bumsys.org  
 
 Thank you.
