@@ -8,7 +8,7 @@ MySQL Version: At least 5.6
 
 # Key Features
 - Point of Sale (POS)  
-- Muli Location Shop/ Warehouse  
+- Multi Location Shop/ Warehouse  
 - Stock Management  
 - Product Variation, Batch Number and Unit
 - Accounts Module  
