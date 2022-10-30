@@ -6,6 +6,24 @@ An open sources project called Business Management System.
 PHP Version: At least 7.0.  
 MySQL Version: At least 5.6
 
+# Key Features
+- Point of Sale (POS)  
+- Muli Location Shop/ Warehouse  
+- Stock Management  
+- Product Variation, Batch Number and Unit
+- Accounts Module  
+- Various type of Ledger  
+- Journal Creation and Records  
+- Expenses Management  
+- Loan Management  
+- Customer Support  
+- Call Center Module  
+- Marketing Module  
+- Production Module  
+- Employee and Salary Management  
+- Various Type of Reports  
+
+
 ## Demo
 For see a demo please visit following address:
 - Link: https://demo.bumsys.org/
