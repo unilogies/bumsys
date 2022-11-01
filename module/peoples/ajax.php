@@ -485,7 +485,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editEmployee") {
               <!-- Column three -->
             </div> <!-- row -->
 
-            <input type="hidden" name="emp_id" value="<?php echo htmlentities($_GET['id']); ?>">
+            <input type="hidden" name="emp_id" value="<?php echo safe_entities($_GET['id']); ?>">
 
 
     <?php
@@ -867,7 +867,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editPermissions") {
     
     ?>
             <div class="box-body">
-                <input type="hidden" name="user_id" value="<?php echo htmlentities($_GET['id']); ?>">
+                <input type="hidden" name="user_id" value="<?php echo safe_entities($_GET['id']); ?>">
 
                 <style>
                 
@@ -1056,7 +1056,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editUser") {
             <label for="confirmUserPassword"><?= __("Confirm User Password:"); ?></label>
             <input type="password" name="confirmUserPassword" id="confirmUserPassword" class="form-control">
         </div>
-        <input type="hidden" name="user_id" value="<?php echo htmlentities($_GET['id']); ?>">
+        <input type="hidden" name="user_id" value="<?php echo safe_entities($_GET['id']); ?>">
             
     </div>
     <!-- /Box body-->
@@ -1218,7 +1218,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editProfile") {
         <label for="confirmNewPassword"><?= __("Confirm New Password:"); ?></label>
         <input type="password" name="confirmNewPassword" id="confirmNewPassword" class="form-control">
       </div>
-      <input type="hidden" name="user_id" value="<?php echo htmlentities($_GET['id']); ?>">
+      <input type="hidden" name="user_id" value="<?php echo safe_entities($_GET['id']); ?>">
             
     </div>
     <!-- /Box body-->
@@ -2221,7 +2221,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editCustomer") {
             <textarea name="customerAddress" id="customerAddress" rows="3" class="form-control"> <?php echo $customers["customer_address"]; ?> </textarea>
         </div>
 
-      <input type="hidden" name="customer_id" value="<?php echo htmlentities($_GET['id']); ?>">
+      <input type="hidden" name="customer_id" value="<?php echo safe_entities($_GET['id']); ?>">
             
     </div>
     <!-- /Box body-->
@@ -2683,7 +2683,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editCompany") {
         <label for="companyWebsite"><?= __("Website:"); ?></label>
         <input type="text" name="companyWebsite" id="companyWebsite" value="<?php echo $companies["company_website"]; ?>" class="form-control">
       </div>
-      <input type="hidden" name="company_id" value="<?php echo htmlentities($_GET['id']); ?>">
+      <input type="hidden" name="company_id" value="<?php echo safe_entities($_GET['id']); ?>">
             
     </div>
     <!-- /Box body-->

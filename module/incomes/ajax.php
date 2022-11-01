@@ -1464,7 +1464,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editIncome") {
             <label for="incomeDescription"><?= __("Description:"); ?></label>
             <textarea name="incomeDescription" id="incomeDescription" rows="3" class="form-control"><?php echo $income["incomes_description"]; ?></textarea>
         </div>
-        <input type="hidden" name="income_id" value="<?php echo htmlentities($_GET["id"]); ?>">
+        <input type="hidden" name="income_id" value="<?php echo safe_entities($_GET["id"]); ?>">
 
       </div>
       <!-- /Box body-->

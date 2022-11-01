@@ -52,9 +52,9 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
  
     if(!empty($requestData["search"]["value"]) or !empty($requestData["columns"][1]['search']['value']) or !empty($requestData["columns"][2]['search']['value']) or !empty($requestData["columns"][3]['search']['value']) or !empty($requestData["columns"][4]['search']['value']) ) {  // get data with search
         
-        $edition_filter = empty($requestData["columns"][4]['search']['value']) ? "AND product.product_type != 'Child'" : "AND product_edition = {$requestData["columns"][4]['search']['value']} ";
+        $edition_filter = empty($requestData["columns"][4]['search']['value']) ? "AND product.product_type != 'Child'" : "AND product_edition = '". safe_input($requestData["columns"][4]['search']['value']) ."' ";
 
-        $warehouse_filter = empty($requestData["columns"][1]['search']['value']) ? "" : " = " . safe_input($requestData["columns"][1]['search']['value']);
+        $warehouse_filter = empty($requestData["columns"][1]['search']['value']) ? "" : " = '". safe_input($requestData["columns"][1]['search']['value']) ."'";
 
         
         $getData = easySelectA(array(
@@ -407,7 +407,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProductStock") {
     $pid = safe_input($_POST["datatoUpdate"]);
 
     // Delete previous stock belongs to this product id
-    runQuery("DELETE FROM product_base_stock WHERE product_id = {$pid}");
+    runQuery("DELETE FROM product_base_stock WHERE product_id = '{$pid}'");
 
     // Insert New Stocks
     runQuery("
@@ -503,7 +503,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerReports") {
 
     $getDateRange = ( isset( $requestData['columns'][1]['search']['value']) and !empty($requestData['columns'][1]['search']['value']) )  ? safe_input($requestData['columns'][1]['search']['value']) : "1970-01-01 - " . date("Y-12-31");
     $dateRange = explode(" - ", $getDateRange);
-
+    $orderBy = $requestData['order'][0]['dir'];
          
     $getData = easySelectD(
         "select customer_id, customer_name,
@@ -559,8 +559,8 @@ if(isset($_GET['page']) and $_GET['page'] == "customerReports") {
             from {$table_prefeix}received_payments where is_trash = 0 and received_payments_type = 'Discounts' group by received_payments_from
         ) as given_discounts on customer_id = given_discounts.received_payments_from
         where customer.is_trash = 0 and customer_name like '{$search}%'
-        group by customer_id order by customer_name {$requestData['order'][0]['dir']}
-        LIMIT {$requestData['start']}, {$requestData['length']}
+        group by customer_id order by customer_name {$orderBy}
+        LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
         "
     );
 
@@ -658,7 +658,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                 where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) < '{$dateRange[0]}'
                 group by payments_return_customer_id
             ) as payment_return on customer_id = payments_return_customer_id
-			where customer_id = {$customer_id}
+			where customer_id = '{$customer_id}'
 	    ");
  
             
@@ -776,7 +776,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                 from {$table_prefeix}incomes where is_trash = 0 and incomes_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by incomes_id
 
             ) as get_data
-            where customers = {$customer_id} and date(dates) between '{$dateRange[0]}' and '{$dateRange[1]}'
+            where customers = '{$customer_id}' and date(dates) between '{$dateRange[0]}' and '{$dateRange[1]}'
             order by dates, sortby
         ");
 
@@ -909,8 +909,8 @@ if(isset($_GET['page']) and $_GET['page'] == "showInvoiceProducts") {
 
         <div class="no-print">
             <div style="display: block; width: 200px; margin: auto;" class="form-group">
-                <a onClick='BMS.MAIN.printPage(this.href, event);' class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?autoPrint=true&invoiceType=posSale&id=<?php echo htmlentities($_GET["id"]); ?>"> <i class="fa fa-print"></i> Print</a>
-                <a target="_blank" class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?invoiceType=posSale&id=<?php echo htmlentities($_GET["id"]); ?>"> <i class="fa fa-eye"></i> View Invoice</a>
+                <a onClick='BMS.MAIN.printPage(this.href, event);' class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?autoPrint=true&invoiceType=posSale&id=<?php echo safe_entities($_GET["id"]); ?>"> <i class="fa fa-print"></i> Print</a>
+                <a target="_blank" class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?invoiceType=posSale&id=<?php echo safe_entities($_GET["id"]); ?>"> <i class="fa fa-eye"></i> View Invoice</a>
             </div>
         </div>
     
@@ -1021,7 +1021,7 @@ if(isset($_GET['page']) and $_GET['page'] == "showReturnProducts") {
 
         <div class="no-print">
             <div style="display: block; width: 200px; margin: auto;" class="form-group">
-                <a target="_blank" class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?autoPrint=true&invoiceType=produtReturn&id=<?php echo htmlentities($_GET["id"]); ?>"> <i class="fa fa-print"></i> Print</a>
+                <a target="_blank" class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?autoPrint=true&invoiceType=produtReturn&id=<?php echo safe_entities($_GET["id"]); ?>"> <i class="fa fa-print"></i> Print</a>
             </div>
         </div>
     
@@ -1048,7 +1048,7 @@ if(isset($_GET['page']) and $_GET['page'] == "totalPurchasedQuantityOfThisCustom
             left join {$table_prefeix}products on stock_product_id = product_id
             left join {$table_prefeix}sales on sales_id = stock_sales_id
             left join {$table_prefeix}customers on sales_customer_id = customer_id
-            where product_stock.is_trash = 0 and product_stock.stock_type = 'sale' and sales_customer_id = {$cid} and stock_product_id = {$pid}
+            where product_stock.is_trash = 0 and product_stock.stock_type = 'sale' and sales_customer_id = '{$cid}' and stock_product_id = '{$pid}'
             group by stock_entry_date
         ");
 
@@ -1124,7 +1124,7 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsAll") {
         "table" => "payments_categories",
         "fields" => "count(*) as totalRow",
         "where" => array(
-        "is_trash = 0"
+            "is_trash = 0"
         )
     ))["data"][0]["totalRow"];
 
@@ -1149,8 +1149,8 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsAll") {
         ) as bill_items on bill_items_category = payment_category_id
         where payments_categorie.is_trash = 0 and payment_category_name LIKE '{$search}%'
         having total_amount_in_this_category > 0
-        order by payment_category_name {$requestData['order'][0]['dir']}
-        LIMIT {$requestData['start']}, {$requestData['length']}
+        order by payment_category_name ". safe_input($requestData['order'][0]['dir']) ."
+        LIMIT ". safe_input($requestData['start']) .", ". $requestData['length'] ."
         "
     );
 
@@ -1239,7 +1239,7 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsSignle") {
                 bill_items_category as category_id
             from {$table_prefeix}bill_items where is_trash = 0 and date(bill_items_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}')
         ) as getData
-        where category_id = {$cat_id}
+        where category_id = '{$cat_id}'
         "
     )["count"];
 
@@ -1266,10 +1266,9 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsSignle") {
                 bill_items_note as item_description
             from {$table_prefeix}bill_items where is_trash = 0 and date(bill_items_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}')
         ) as getData
-        where category_id = {$cat_id}
-        order by item_date {$requestData['order'][0]['dir']}, sortby ASC, item_description DESC
-        LIMIT {$requestData['start']}, {$requestData['length']}
-        "
+        where category_id = '{$cat_id}'
+        order by item_date ". safe_input($requestData['order'][0]['dir']) .", sortby ASC, item_description DESC
+        LIMIT ". safe_input($requestData['start']) .", " . safe_input($requestData['length'])
     );
 
 
@@ -1415,15 +1414,15 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeReports") {
     $empTypeFilter = (array)json_decode($requestData['columns'][3]['search']['value']);
 
     if( isset($departmentFilter["operator"]) ) {
-        $departmentFilter = "and emp_department_id {$departmentFilter["operator"]} '{$departmentFilter["search"]}'";
+        $departmentFilter = "and emp_department_id {$departmentFilter["operator"]} '". safe_input($departmentFilter["search"]) ."'";
     } else {
-        $departmentFilter = empty($requestData['columns'][2]['search']['value']) ? "" : "and emp_department_id = '{$requestData['columns'][2]['search']['value']}'";
+        $departmentFilter = empty($requestData['columns'][2]['search']['value']) ? "" : "and emp_department_id = '". safe_input($requestData['columns'][2]['search']['value']) ."'";
     }
 
     if( isset($empTypeFilter["operator"]) ) {
-        $empTypeFilter = "and emp_type {$empTypeFilter["operator"]} '{$empTypeFilter["search"]}'";
+        $empTypeFilter = "and emp_type {$empTypeFilter["operator"]} '". safe_input($empTypeFilter["search"]) ."'";
     } else {
-        $empTypeFilter = empty($requestData['columns'][3]['search']['value']) ? "" : "and emp_type = '{$requestData['columns'][3]['search']['value']}'";
+        $empTypeFilter = empty($requestData['columns'][3]['search']['value']) ? "" : "and emp_type = '". safe_input($requestData['columns'][3]['search']['value']) ."'";
     }
 
 
@@ -1935,7 +1934,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     {$warehouse_filter}
                     GROUP BY stock_id
                 
-
             ) as get_data
             LEFT JOIN {$table_prefeix}users as user on user.user_id = get_data.record_user_id
             LEFT JOIN {$table_prefeix}employees on emp_id = user_emp_id
@@ -1943,12 +1941,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
         ");
 
 
-
-        // ('initial', 'sale-production', 'sale-processing', 'sale', 'sale-order', 'wastage-sale', 'sale-return', 'purchase', 'purchase-order', 
-        //             'purchase-return', 'transfer-in', 'transfer-out', 'specimen-copy', 'specimen-copy-return', 'undeclared') default 'undeclared',
-            
-
-        //print_r($getData);
 
         $totalFilteredRecords = $totalRecords = $getData !== false ? $getData["count"] : 0;
 

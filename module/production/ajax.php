@@ -658,14 +658,6 @@ if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
 
             $product = $selectProduct["data"][0];
 
-            // Delete Privous bg product
-            easyPermDelete(
-                "bg_product_items",
-                array(
-                    "bg_product_id" => $_POST["mainProduct"]
-                )
-            );
-
 
             // Insert Bundle/ Sub product
             $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
@@ -676,7 +668,78 @@ if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
                 is_raw_materials
             ) VALUES";
 
-             
+            
+            // If the main product is variable
+            if( $product["product_type"] === "Variable" ) {
+
+                /**
+                 * If the main product is variable
+                 * Then add sub product in all child product
+                 */
+
+
+                // Select all Child product of this variable product
+                easySelectA(array(
+                    "table" => "products",
+                    "where" => array(
+                        "parent_product_id" => $_POST["mainProduct"]
+                    )
+                ));
+
+                
+
+                // Delete Privous bg product
+                easyPermDelete(
+                    "bg_product_items",
+                    array(
+                        "bg_product_id" => $_POST["mainProduct"]
+                    )
+                );
+
+                
+                foreach($_POST["bgProductID"] as $pkey => $bgProductId) {
+
+                    // If there have any unit in this product
+                    // Then multiply the bgProductQnt with unit base qty
+                    if( !empty($product['product_unit']) ) {
+
+                        $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefeix}product_units where unit_name = '{$product['product_unit']}' )";
+
+                    } else {
+                        
+                        $bgProductQty = safe_input($_POST["bgProductQnt"][$pkey]);
+
+                    }
+
+                    $insertSubProduct .= "(
+                        '{$product['product_id']}',
+                        '{$bgProductId}',
+                        '". safe_input($_POST["bgProductSalePrice"][$pkey]) ."',
+                        '{$bgProductQty}',
+                        '1'
+                    ),";
+                    
+
+                }
+
+
+            }
+
+
+            /**
+             * Either The main product is variable or normal or child
+             * Add sub product on it along with child product
+             */
+
+            // Delete Privous bg product
+            easyPermDelete(
+                "bg_product_items",
+                array(
+                    "bg_product_id" => $_POST["mainProduct"]
+                )
+            );
+
+            
             foreach($_POST["bgProductID"] as $pkey => $bgProductId) {
 
                 // If there have any unit in this product
@@ -701,6 +764,8 @@ if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
                 
 
             }
+
+            
 
 
             // Run query to insert sub products

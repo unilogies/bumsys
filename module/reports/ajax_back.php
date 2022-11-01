@@ -975,8 +975,8 @@ if(isset($_GET['page']) and $_GET['page'] == "showInvoiceProducts") {
 
         <div class="no-print">
             <div style="display: block; width: 200px; margin: auto;" class="form-group">
-                <a onClick='BMS.MAIN.printPage(this.href, event);' class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?autoPrint=true&invoiceType=posSale&id=<?php echo htmlentities($_GET["id"]); ?>"> <i class="fa fa-print"></i> Print</a>
-                <a target="_blank" class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?invoiceType=posSale&id=<?php echo htmlentities($_GET["id"]); ?>"> <i class="fa fa-eye"></i> View Invoice</a>
+                <a onClick='BMS.MAIN.printPage(this.href, event);' class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?autoPrint=true&invoiceType=posSale&id=<?php echo safe_entities($_GET["id"]); ?>"> <i class="fa fa-print"></i> Print</a>
+                <a target="_blank" class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?invoiceType=posSale&id=<?php echo safe_entities($_GET["id"]); ?>"> <i class="fa fa-eye"></i> View Invoice</a>
             </div>
         </div>
     
@@ -1087,7 +1087,7 @@ if(isset($_GET['page']) and $_GET['page'] == "showReturnProducts") {
 
         <div class="no-print">
             <div style="display: block; width: 200px; margin: auto;" class="form-group">
-                <a target="_blank" class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?autoPrint=true&invoiceType=produtReturn&id=<?php echo htmlentities($_GET["id"]); ?>"> <i class="fa fa-print"></i> Print</a>
+                <a target="_blank" class="btn btn-primary" href="<?php echo full_website_address(); ?>/invoice-print/?autoPrint=true&invoiceType=produtReturn&id=<?php echo safe_entities($_GET["id"]); ?>"> <i class="fa fa-print"></i> Print</a>
             </div>
         </div>
     

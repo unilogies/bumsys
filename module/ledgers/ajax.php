@@ -44,7 +44,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
 					sum(payment_items_amount) as total_salary_paid_before_filtered_date
 				from {$table_prefeix}payment_items where is_trash = 0 and payment_items_type != 'Bill' and payment_items_date < '{$dateRange[0]}' group by payment_items_employee 
 			) as payments on payment_items_employee = emp_id
-			where emp_id = {$emp_id}
+			where emp_id = '{$emp_id}'
 		");
 
 		
@@ -53,7 +53,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
             (
                 select 
                     1 as sortby,
-                    {$emp_id} as empl_id,
+                    '{$emp_id}' as empl_id,
                     '' as ledger_date,
                     'Opening/Previous Balance' as description,
                     0 as debit,
@@ -89,7 +89,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
                 from {$table_prefeix}payment_items
 				where is_trash = 0 and payment_items_type != 'Bill' and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payment_items_id
 			) as get_data
-			where empl_id = {$emp_id}
+			where empl_id = '{$emp_id}'
             order by ledger_date, sortby
 		");
 			
@@ -253,7 +253,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
                 WHERE is_trash = 0 and capital_received_date < '{$dateRange[0]}'
                 group by capital_accounts
             ) as capital on capital.capital_accounts = accounts.accounts_id
-			where accounts_id = {$account_id}
+			where accounts_id = '{$account_id}'
 		");
 
 		
@@ -261,7 +261,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 			SELECT account_id, ledger_date_time, sql_join_id, sql_join_id_two, description, debit, credit, @balance := ( @balance + debit ) - credit as balance from
 			(
 				SELECT 
-					{$account_id} as account_id,
+					'{$account_id}' as account_id,
 					'' as ledger_date_time,
 					'' as sql_join_id,
 					'' as sql_join_id_two,
@@ -429,7 +429,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 				from {$table_prefeix}capital as capital
 				where capital.is_trash = 0 and capital_received_date between '{$dateRange[0]}' and '{$dateRange[1]}'
 			) as getData
-			where account_id = {$account_id}
+			where account_id = '{$account_id}'
 			order by ledger_date_time ASC
 		");
 			
@@ -508,7 +508,7 @@ if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
 					sum(journal_records_payment_amount) as journal_records_incoming_payment_amount_before_filtered_date
 				from {$table_prefeix}journal_records where is_trash = 0 and journal_records_payments_type = 'Incoming' and date(journal_records_datetime) < '{$dateRange[0]}' group by journal_records_journal_id
 			) as journal_records_Incoming on journal_records_Incoming.journal_records_journal_id = journals_id
-			where journals_id  = {$journal_id}
+			where journals_id  = '{$journal_id}'
 		");
 
 		
@@ -517,7 +517,7 @@ if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
             (
                 select 
                     1 as sortby,
-                    {$journal_id} as journals_id,
+                    '{$journal_id}' as journals_id,
                     '' as ledger_date,
                     'Opening/Previous Balance' as description,
                     0 as debit,
@@ -543,7 +543,7 @@ if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
                 from {$table_prefeix}journal_records as journal_records_outgoing
                 where journal_records_outgoing.is_trash = 0 and journal_records_outgoing.journal_records_payments_type = 'Outgoing' and date(journal_records_outgoing.journal_records_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' group by journal_records_outgoing.journal_records_id
 			) as get_data
-			where journals_id = {$journal_id}
+			where journals_id = '{$journal_id}'
             order by ledger_date, sortby
 		");
 			
@@ -631,7 +631,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
                     sum(payments_return_amount) as total_payment_return_before_filtered_date
                 from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_customer_id
             ) as payment_return on payments_return_customer_id = customer_id
-			where customer_id = {$customer_id}
+			where customer_id = '{$customer_id}'
 		");
 		
 		$getData = easySelectD("
@@ -639,7 +639,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
             (
                 select 
                     1 as sortby,
-                    {$customer_id} as customer_id,
+                    '{$customer_id}' as customer_id,
                     '' as ledger_date,
                     'Opening/Previous Balance' as description,
                     0 as debit,
@@ -713,7 +713,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 					incomes_amount as credit
 				from {$table_prefeix}incomes where is_trash = 0 and incomes_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by incomes_id
 			) as get_data
-			where customer_id = {$customer_id}
+			where customer_id = '{$customer_id}'
             order by ledger_date, sortby
 		");
 			
@@ -803,7 +803,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
                     sum(payments_return_amount) as total_payment_return_before_filtered_date
                 from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Incoming' and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_company_id
             ) as payment_return on payments_return_company_id = company_id
-			where company_id = {$company_id}
+			where company_id = '{$company_id}'
 		");
 
 		//var_dump($previous_balance);
@@ -813,7 +813,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
             (
                 select 
                     1 as sortby,
-                    {$company_id} as company_id,
+                    '{$company_id}' as company_id,
                     '' as ledger_date,
                     'Opening/Previous Balance' as description,
                     0 as debit,
@@ -901,7 +901,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
                     payments_return_amount as credit
                 from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Incoming' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by company_id
             ) as get_data
-			where company_id = {$company_id}
+			where company_id = '{$company_id}'
             order by ledger_date, sortby
 		");
 			
@@ -982,7 +982,7 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
 					sum(payments_return_amount) as total_return_before_filtered_date
 				from {$table_prefeix}payments_return where is_trash = 0 and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_emp_id
 			) as payment_return on payments_return_emp_id = emp_id
-			where emp_id = {$emp_id}
+			where emp_id = '{$emp_id}'
 		");
 
 		
@@ -991,7 +991,7 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
             (
                 select 
                     1 as sortby,
-                    {$emp_id} as empl_id,
+                    '{$emp_id}' as empl_id,
                     '' as ledger_date,
                     'Opening/Previous Balance' as description,
                     0 as debit,
@@ -1036,7 +1036,7 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
                 from {$table_prefeix}payments_return
                 where is_trash = 0 and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_id
 			) as get_data
-			where empl_id = {$emp_id}
+			where empl_id = '{$emp_id}'
             order by ledger_date, sortby
 		");
 			

@@ -221,7 +221,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editCategory") {
         <select name="shopId" id="shopId" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=shopList" style="width: 100%;">
           <option value="<?php echo $productCategory["shop_id"]; ?>"><?php echo $productCategory["shop_name"]; ?></option>  
         </select>
-        <input type="hidden" name="category_id" value="<?php echo htmlentities($_GET['id']); ?>">
+        <input type="hidden" name="category_id" value="<?php echo safe_entities($_GET['id']); ?>">
       </div>
             
     </div>
@@ -1747,7 +1747,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editUnit") {
         <label for="unitDescription"><?= __("Unit Description"); ?></label>
         <textarea name="unitDescription" id="unitDescription" rows="3" class="form-control"><?php echo $itemUnit["unit_description"]; ?></textarea>
       </div>
-      <input type="hidden" name="unit_id" value="<?php echo htmlentities($_GET['id']); ?>">
+      <input type="hidden" name="unit_id" value="<?php echo safe_entities($_GET['id']); ?>">
     </div>
     <!-- /Box body-->
 
@@ -1992,7 +1992,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductEdition") {
           <label for="editionDescription"><?= __("Description:"); ?></label>
           <textarea name="editionDescription" id="editionDescription" rows="3" class="form-control"><?php echo $productEdition["edition_description"]; ?></textarea>
         </div>
-        <input type="hidden" name="edition_id" value="<?php echo htmlentities($_GET['id']); ?>">
+        <input type="hidden" name="edition_id" value="<?php echo safe_entities($_GET['id']); ?>">
               
       </div>
       <!-- /Box body-->
@@ -2214,7 +2214,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductBrand") {
         <label for="brandDescription"><?= __("Brand Description:"); ?></label>
         <textarea name="brandDescription" id="brandDescription" rows="3" class="form-control"><?php echo $ProductBrand["brand_description"]; ?></textarea>
       </div>
-      <input type="hidden" name="brand_id" value="<?php echo htmlentities($_GET['id']); ?>">
+      <input type="hidden" name="brand_id" value="<?php echo safe_entities($_GET['id']); ?>">
             
     </div>
     <!-- /Box body-->
@@ -2749,7 +2749,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductAttribute") {
           <label for="attributeDescription"><?= __("Attribute Description:"); ?></label>
           <textarea name="attributeDescription" id="attributeDescription" cols="30" rows="3" class="form-control"><?php echo $pa["pa_description"] ; ?></textarea>
         </div>
-        <input type="hidden" name="pa_id" value="<?php echo htmlentities($_GET["id"]); ?>">
+        <input type="hidden" name="pa_id" value="<?php echo safe_entities($_GET["id"]); ?>">
         
         
       </div>
@@ -3022,7 +3022,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductVariation") {
           <label for="variationDescription"><?= __("Description:"); ?></label>
           <textarea name="variationDescription" id="variationDescription" cols="30" rows="3" class="form-control"><?php echo $pv["pv_description"]; ?></textarea>
         </div>
-        <input type="hidden" name="pv_id" value="<?php echo htmlentities($_GET["id"]); ?>">
+        <input type="hidden" name="pv_id" value="<?php echo safe_entities($_GET["id"]); ?>">
         
         
       </div>
@@ -3275,7 +3275,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductGeneric") {
           <label for="genericDescription"><?= __("Description:"); ?></label>
           <textarea name="genericDescription" id="genericDescription" cols="30" rows="3" class="form-control"><?php echo $pg["generic_description"]; ?></textarea>
         </div>
-        <input type="hidden" name="generic_id" value="<?php echo htmlentities($_GET["id"]); ?>">
+        <input type="hidden" name="generic_id" value="<?php echo safe_entities($_GET["id"]); ?>">
         
       </div>
       <!-- /Box body-->

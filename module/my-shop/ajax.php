@@ -301,8 +301,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addPostSalesPayments") {
             <label for="addSalesPaymentsDescription"><?= __("Description:"); ?></label>
             <textarea name="addSalesPaymentsDescription" id="addSalesPaymentsDescription" rows="3" class="form-control"></textarea>
         </div>
-        <input type="hidden" name="addSalesPaymentsCustomerId" value="<?php echo htmlentities($_GET["cid"]); ?>">
-        <input type="hidden" name="addSalesPaymentsSalesId" value="<?php echo htmlentities($_GET["sales_id"]); ?>">
+        <input type="hidden" name="addSalesPaymentsCustomerId" value="<?php echo safe_entities($_GET["cid"]); ?>">
+        <input type="hidden" name="addSalesPaymentsSalesId" value="<?php echo safe_entities($_GET["sales_id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
 
@@ -1210,7 +1210,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editShopAdvanceCollection") {
                 <input type="text" name="advancePaymentReference" id="advancePaymentReference" value="<?php echo $ac["received_payments_reference"]; ?>" class="form-control">
             </div>
         </div>
-        <input type="hidden" name="shopAdvanceCollectionId" value ="<?php echo htmlentities($_GET["id"]); ?>">
+        <input type="hidden" name="shopAdvanceCollectionId" value ="<?php echo safe_entities($_GET["id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
         
@@ -2193,7 +2193,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editDiscount") {
             <label for="discountDescription"><?= __("Description:"); ?></label>
             <textarea name="discountDescription" id="discountDescription" rows="3" class="form-control"><?php echo $selectDiscount["received_payments_details"]; ?></textarea>
         </div>
-        <input type="hidden" name="discountId" value="<?php echo htmlentities($_GET["id"]); ?>">
+        <input type="hidden" name="discountId" value="<?php echo safe_entities($_GET["id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
 

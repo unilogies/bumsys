@@ -123,7 +123,7 @@
                                 <div class="text-center">
                                     <button data-toggle="modal" data-target="#browseProduct" type="button" class="btn btn-info"><i class="fa fa-folder-open"></i> <?php echo __("browse Product"); ?></button>
                                 </div>
-                                <input type="hidden" name="mainProduct" value="<?php echo htmlentities($_GET["pid"]); ?>">
+                                <input type="hidden" name="mainProduct" value="<?php echo safe_entities($_GET["pid"]); ?>">
                                 <br />
 
                                 <!-- Browse Product Modal -->

@@ -62,7 +62,7 @@
                                         ?>
                                   </select>
                                   <input type="hidden" name="warehouseId" id="warehouseId" value="<?php echo $sale["sales_warehouse_id"]; ?>">
-                                  <input type="hidden" id="editSalesId" name="salesId" value="<?php echo htmlentities($_GET["edit"]); ?>">
+                                  <input type="hidden" id="editSalesId" name="salesId" value="<?php echo safe_entities($_GET["edit"]); ?>">
                                   <input type="hidden" name="userShopId" value="<?php echo $sale["sales_shop_id"]; ?>">
                               </div>
                               <div class="form-group">

@@ -19,6 +19,16 @@ function safe_input($data, $encoding = true) {
 }
 
 /**
+ * Convert all applicable characters to HTML entities
+ * 
+ * From PHP 8.1.0 the default flag is ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
+ * So, we make this for all version
+ */
+function safe_entities($data) {
+    return htmlentities($data, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
+}
+
+/**
  * Determine the http or https and append with the domain.
  * 
  * @since 0.1
@@ -2374,10 +2384,11 @@ function get_title() {
 
         global $table_prefeix;
 
-	    $url = "http://example.com/api.php";
+        //$url = "http://66.45.237.70/maskingapi.php";
+	    $url = "http://66.45.237.70/api.php";
         $data= array(
-            'username'=>"username",
-            'password'=>"password",
+            'username'=>"Royal",
+            'password'=>"CZXAPHK8",
             //'senderid'=> "The Royal",
             'number'=>$number,
             'message'=>$msg
@@ -2777,40 +2788,48 @@ function near_unit_qty($product_id, $qty, $unit) {
         )
     ));
     
+
+    if($getData !== false) {
+
+        $totalBaseQty = $qty;
+        $remainQty = 0;
+        $finalUnitName = "";
+        $finalQtyBasedOnUnit = 0;
         
-    $totalBaseQty = $qty;
-    $remainQty = 0;
-    $finalUnitName = "";
-    $finalQtyBasedOnUnit = 0;
-    
-    // Generate the base qty based on unit
-    foreach($getData["data"] as $pKey => $pVal ) {
-    
-        if( $pVal["product_unit"] === $unit) {
-    
-            $totalBaseQty *= $pVal["base_qnt"];
-            break;
-    
+        // Generate the base qty based on unit
+        foreach($getData["data"] as $pKey => $pVal ) {
+        
+            if( $pVal["product_unit"] === $unit) {
+        
+                $totalBaseQty *= $pVal["base_qnt"];
+                break;
+        
+            }
+        
         }
-    
-    }
-    
-    // Now get the unit which base_qnt is grater then or equal to unitDevider
-    foreach($getData["data"] as $pKey => $pVal ) {
-    
-        if( $pVal["base_qnt"] <= $totalBaseQty) {
-    
-            $finalUnitName = $pVal["product_unit"];
-            $remainQty = ($totalBaseQty % $pVal["base_qnt"]);
-            $finalQtyBasedOnUnit = ($totalBaseQty - $remainQty) / $pVal["base_qnt"];
-            break;
-    
+        
+        // Now get the unit which base_qnt is grater then or equal to unitDevider
+        foreach($getData["data"] as $pKey => $pVal ) {
+        
+            if( $pVal["base_qnt"] <= $totalBaseQty) {
+        
+                $finalUnitName = $pVal["product_unit"];
+                $remainQty = ($totalBaseQty % $pVal["base_qnt"]);
+                $finalQtyBasedOnUnit = ($totalBaseQty - $remainQty) / $pVal["base_qnt"];
+                break;
+        
+            }
+        
         }
-    
-    }
 
 
-    return $finalQtyBasedOnUnit . " " . $finalUnitName . ( $remainQty > 0 ? ", " . near_unit_qty($product_id, $remainQty, $unit) : "");
+        return $finalQtyBasedOnUnit . " " . $finalUnitName . ( $remainQty > 0 ? ", " . near_unit_qty($product_id, $remainQty, $unit) : "");
+
+    } else {
+
+        return $qty . " " . $unit;
+
+    }
 
 
 }
