@@ -726,7 +726,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
             foreach($getData['data'] as $key => $value) {
                 $allNestedData = [];
 				$allNestedData[] = "";
-                $allNestedData[] = $value["ledger_date"];
+                $allNestedData[] = empty($value["ledger_date"]) ? "" : date("Y-m-d", strtotime($value["ledger_date"]) );
                 $allNestedData[] = $value["description"];
 				$allNestedData[] = number_format($value["debit"], get_options("decimalPlaces"), ".", "");
                 $allNestedData[] = number_format($value["credit"], get_options("decimalPlaces"), ".", "");
@@ -917,7 +917,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
             foreach($getData['data'] as $key => $value) {
                 $allNestedData = [];
 				$allNestedData[] = "";
-                $allNestedData[] = $value["ledger_date"];
+                $allNestedData[] = empty($value["ledger_date"]) ? "" : date("Y-m-d", strtotime($value["ledger_date"]) );
                 $allNestedData[] = $value["description"];
 				$allNestedData[] = number_format($value["debit"], get_options("decimalPlaces"), ".", "");
                 $allNestedData[] = number_format($value["credit"], get_options("decimalPlaces"), ".", "");

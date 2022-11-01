@@ -25,13 +25,19 @@ $production_menu["Production"]["New Order"] = array (
 $production_menu["Production"]["Order List"] = array (
     "t_link"    => full_website_address() . "/production/order-list/",
     "title"     => "Order List",
+    "t_icon"    => "fa fa-cubes",
+    "__?"       => current_user_can("production_order.View || production_order.Add || production_order.Edit || production_order.Delete")
+);
+$production_menu["Production"]["Raw Materials Attachment"] = array (
+    "t_link"    => full_website_address() . "/production/rma-product-list/",
+    "title"     => "Raw Materials Attachment",
     "t_icon"    => "fa fa-plus",
     "__?"       => current_user_can("production_order.View || production_order.Add || production_order.Edit || production_order.Delete")
 );
 $production_menu["Production"]["Product Requirments"] = array (
     "t_link"    => full_website_address() . "/production/product-requirements/",
     "title"     => "Product Requirments",
-    "t_icon"    => "fa fa-plus",
+    "t_icon"    => "fa fa-cubes",
     "__?"       => current_user_can("production_product_requrement.View")
 );
 

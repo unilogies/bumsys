@@ -22,6 +22,7 @@ if(!empty($_GET["pid"]) ) {
 
 ?>
 
+
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -126,7 +127,7 @@ if(!empty($_GET["pid"]) ) {
                         <div class="form-group col-md-6 required">
                             <label for="productName"><?php echo __("Product Name:"); ?></label>
                             <input type="text" name="productName" id="productName" value="<?php echo $product["product_name"]; ?>" class="form-control" required>
-                            <input type="hidden" name="product_id" value="<?php echo $_GET["pid"]; ?>">
+                            <input type="hidden" name="product_id" value="<?php echo htmlentities($_GET["pid"]); ?>">
                         </div>
                         <div class="form-group col-md-3 required">
                             <?php
@@ -318,7 +319,7 @@ if(!empty($_GET["pid"]) ) {
 
                             <div style="margin-bottom: 5px;" class="form-group col-md-3">
                                 <div style="height: 120px; text-align: center;" class="image_preview">
-                                    <img style="margin: auto;" class="previewing" width="auto" height="140px" src="<?php echo full_website_address(); ?>/images/?for=products&id=<?php echo $_GET["pid"] ?>" />
+                                    <img style="margin: auto;" class="previewing" width="auto" height="140px" src="<?php echo full_website_address(); ?>/images/?for=products&id=<?php echo htmlentities($_GET["pid"]); ?>" />
                                 </div>
                             </div>
 

@@ -232,7 +232,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editPaymentCategory") {
             <div class="form-group">
                 <label for="categoryName">Category Name</label>
                 <input type="text" name="categoryName" id="categoryName" value="<?php echo $selectPaymentCategory["payment_category_name"]; ?>" class="form-control">
-                <input type="hidden" name="categoryNameID" value="<?php echo $_GET["id"]; ?>">
+                <input type="hidden" name="categoryNameID" value="<?php echo htmlentities($_GET["id"]); ?>">
             </div>
             <div class="form-group">
                 <label for="categoryShopId"><?= __("Shop:"); ?> </label>
@@ -1867,7 +1867,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editMonthlySalary") {
             <label for="salaryDescription"><?= __("Description"); ?></label>
             <textarea name="salaryDescription" id="salaryDescription" rows="3" class="form-control"> <?php echo $selectSalary["salary_description"]; ?> </textarea>
         </div>
-        <input type="hidden" name="salaryId" value="<?php echo $_GET["id"]; ?>">
+        <input type="hidden" name="salaryId" value="<?php echo htmlentities($_GET["id"]); ?>">
         <input type="hidden" name="employeeId" value="<?php echo $selectSalary["salary_emp_id"]; ?>">
         <div id="ajaxSubmitMsg"></div>
 

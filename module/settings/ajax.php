@@ -279,7 +279,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editGroup") {
                     <label for="groupName">Group name</label>
                     <input type="text" name="groupName" class="form-control" id="groupName" value="<?php echo $group_name; ?>" placeholder="Enter group Name">
                 </div>
-                <input type="hidden" name="group_id" value="<?php echo $_GET['id']; ?>">
+                <input type="hidden" name="group_id" value="<?php echo htmlentities($_GET['id']); ?>">
 
                 <style>
                 
@@ -577,7 +577,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editDepartment") {
                 <input type="text" value = "<?php echo $department_name; ?>" name="departmentName" class="form-control" id="groupdepartmentNameName" placeholder="Enter department Name">
             </div>
 
-            <input type="hidden" name="department_id" value="<?php echo $_GET['id']; ?>">
+            <input type="hidden" name="department_id" value="<?php echo htmlentities($_GET['id']); ?>">
 
     <?php
 
@@ -949,7 +949,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editShop") {
                 <div id="message"></div>
             </div>
 
-            <input type="hidden" name="shop_id" value="<?php echo $_GET['id']; ?>">
+            <input type="hidden" name="shop_id" value="<?php echo htmlentities($_GET['id']); ?>">
         
         <script>
 
@@ -1561,7 +1561,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editFirwallRole") {
                 <label for="firewallComments"><?= __("Comments:"); ?></label>
                 <textarea name="firewallComments" id="firewallComments" cols="30" rows="3" class="form-control"><?php echo $fw["fw_comment"]; ?></textarea>
             </div>
-            <input type="hidden" name="fw_id" value="<?php echo $_GET["id"]; ?>">
+            <input type="hidden" name="fw_id" value="<?php echo htmlentities($_GET["id"]); ?>">
             
         </div>
             

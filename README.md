@@ -30,6 +30,9 @@ For see a demo please visit following address:
 - Username: bumsys
 - Password: 12345678
 
+## Our Future Plan
+-  
+
 
 ## Installation
 Create a MySQL database and import the following file:
@@ -38,7 +41,7 @@ Create a MySQL database and import the following file:
 Then, Edit the following file
 `/include/db/db.php`
 
-And put the correct correct database credentials. 
+And put the correct database credentials. 
 
 Now run following SQL command:
 

@@ -765,8 +765,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addPurchasePayments") {
             <label for="addPurchasePaymentsDescription"><?= __("Description:"); ?></label>
             <textarea name="addPurchasePaymentsDescription" id="addPurchasePaymentsDescription" rows="3" class="form-control"></textarea>
         </div>
-        <input type="hidden" name="addPurchasePaymentsCompanyId" value="<?php echo $_GET["cid"]; ?>">
-        <input type="hidden" name="addPurchasePaymentsPurchaseId" value="<?php echo $_GET["purchase_id"]; ?>">
+        <input type="hidden" name="addPurchasePaymentsCompanyId" value="<?php echo htmlentities($_GET["cid"]); ?>">
+        <input type="hidden" name="addPurchasePaymentsPurchaseId" value="<?php echo htmlentities($_GET["purchase_id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
 
@@ -2231,7 +2231,7 @@ if(isset($_GET['page']) and $_GET['page'] == "confirmRejectStockTransfer") {
             <label for="stockTransferStatusNote"><?= __("Note:"); ?></label>
             <textarea name="stockTransferStatusNote" id="stockTransferStatusNote" rows="3" class="form-control"></textarea>
         </div>
-        <input type="hidden" name="stockTransferId" value="<?php echo $_GET["id"]; ?>">
+        <input type="hidden" name="stockTransferId" value="<?php echo htmlentities($_GET["id"]); ?>">
               
       </div>
       <!-- /Box body-->
@@ -2545,7 +2545,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editWarehouse") {
             <label for="warehouseLocation"><?= __("Warehouse Location:"); ?></label>
             <textarea name="warehouseLocation" id="warehouseLocation" rows="3" class="form-control"> <?php echo $warehouse["warehouse_location"] ?> </textarea>
         </div>
-        <input type="hidden" name="warehouse_id" value="<?php echo $_GET['id']; ?>">
+        <input type="hidden" name="warehouse_id" value="<?php echo htmlentities($_GET['id']); ?>">
     </div>
     <!-- /Box body-->
 
@@ -2823,10 +2823,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newBatchForSelectedProduct") {
     ?>
       <div class="box-body">
         
-        <input type="hidden" name="batchProductId" value="<?php echo $_GET["pid"]; ?>">
+        <input type="hidden" name="batchProductId" value="<?php echo htmlentities($_GET["pid"]); ?>">
         <div class="form-group required">
           <label for="batchNumber"><?= __("Batch Number:"); ?></label>
-          <input type="text" name="batchNumber" id="batchNumber" value="<?php echo $_GET["val"]; ?>" placeholder="Enter batch number" class="form-control" required>
+          <input type="text" name="batchNumber" id="batchNumber" value="<?php echo htmlentities($_GET["val"]); ?>" placeholder="Enter batch number" class="form-control" required>
         </div>
         <div class="form-group">
           <label for="batchManufacturingDate"><?= __("Manufacturing Date:"); ?> <small><?= __("Optional"); ?></small> </label>

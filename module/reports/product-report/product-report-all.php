@@ -75,17 +75,17 @@
                       </select>
                     </th>
                     <th>
-                      <select style="width: 180px;" name="productBrand" id="productBrand" class="form-control select2Ajax no-print" select2-ajax-url="<?php echo full_website_address(); ?>/info/?module=select2&page=productBrandList" style="width: 100%;">
+                      <select style="width: 180px;" name="productReportBrand" id="productReportBrand" class="form-control select2Ajax no-print" select2-ajax-url="<?php echo full_website_address(); ?>/info/?module=select2&page=productBrandList" style="width: 100%;">
                         <option value=""><?php echo __("Brand"); ?>...</option>
                       </select>
                     </th>
                     <th>
-                      <select style="width: 180px;" name="productCategory" id="productCategory" class="form-control select2Ajax no-print" select2-ajax-url="<?php echo full_website_address(); ?>/info/?module=select2&page=productCategoryList" style="width: 100%;">
+                      <select style="width: 180px;" name="productReportCategory" id="productReportCategory" class="form-control select2Ajax no-print" select2-ajax-url="<?php echo full_website_address(); ?>/info/?module=select2&page=productCategoryList" style="width: 100%;">
                         <option value=""><?php echo __("Category"); ?>...</option>
                       </select>
                     </th>
                     <th>
-                      <select style="width: 160px;" name="productEdition" id="productEdition" class="form-control select2 no-print">
+                      <select style="width: 160px;" name="productReportEdition" id="productReportEdition" class="form-control select2 no-print">
                         <option value=""><?php echo __("All Editions"); ?></option>
                         <?php 
 

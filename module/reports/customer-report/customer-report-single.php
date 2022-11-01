@@ -146,7 +146,7 @@ $totalPaid = $getCustomerDetails["total_received_payments"] + $getCustomerDetail
         <div class="box box-info">
           <div class="box-header">
             <h3 class="box-title"><?= __("Top Products"); ?></h3>
-            <div class="printButtonPosition"><a class="" target="_blank" href='<?php echo full_website_address(); ?>/print/?page=allProductOfThisCustomer&cid=<?php echo $_GET["cid"]; ?>'>View All</a></div>
+            <div class="printButtonPosition"><a class="" target="_blank" href='<?php echo full_website_address(); ?>/print/?page=allProductOfThisCustomer&cid=<?php echo htmlentities($_GET["cid"]); ?>'>View All</a></div>
           </div>
           <div class="box-body">
             <table class="table table-bordered table-striped table-hover" style="width: 100%;">

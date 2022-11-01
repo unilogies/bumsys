@@ -62,6 +62,7 @@
                                                 ?>
                                         </select>
                                         <input type="hidden" name="warehouseId" id="warehouseId" value="">
+                                        <input type="hidden" name="userShopId" value="<?php echo $_SESSION["sid"]; ?>">
                                     </div>
                                 </div>
 

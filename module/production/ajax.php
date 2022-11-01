@@ -26,7 +26,7 @@ if(isset($_GET['page']) and $_GET['page'] == "orderList") {
         "table" => "sales",
         "fields" => "count(*) as totalRow",
         "where" => array(
-            "is_trash = 0 and sales_shop_id" => $_SESSION["sid"]
+            "is_trash = 0 and sales_order_date is not null and sales_shop_id" => $_SESSION["sid"]
         )
     ))["data"][0]["totalRow"];
 
@@ -203,10 +203,10 @@ if(isset($_GET['page']) and $_GET['page'] == "productRequirments") {
     
     // Count Total recrods
     $totalFilteredRecords = $totalRecords = easySelectA(array(
-        "table" => "sales",
+        "table" => "product_stock as product_stock",
         "fields" => "count(*) as totalRow",
         "where" => array(
-            "is_trash = 0 and sales_shop_id" => $_SESSION["sid"]
+            "is_trash = 0 and product_stock.is_trash = 0 and is_bundle_item = 0 and stock_type = 'sale-order'"
         )
     ))["data"][0]["totalRow"];
 
@@ -304,7 +304,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productRequirments") {
         foreach($product_calculat as $key => $value) {
             
             $orderedQty = $value["total_ordered_qty"] / $value["base_qty"];
-            $requireProduct = $orderedQty - $value["stock_qty"];
+            $requireProduct =  $value["stock_qty"] > $orderedQty ? 0 : $orderedQty - $value["stock_qty"];
 
             $allNestedData = [];
             $allNestedData[] = "";
@@ -349,11 +349,11 @@ if(isset($_GET['page']) and $_GET['page'] == "rawMaterialRequirments") {
     
     // Count Total recrods
     $totalFilteredRecords = $totalRecords = easySelectA(array(
-        "table" => "sales",
+        "table" => "product_stock as product_stock",
         "fields" => "count(*) as totalRow",
         "where" => array(
-            "is_trash = 0 and sales_shop_id" => $_SESSION["sid"]
-        )
+            "product_stock.is_trash = 0 and is_bundle_item = 1 and stock_type = 'sale-order'"
+        ),
     ))["data"][0]["totalRow"];
 
     if($requestData['length'] == -1) {
@@ -390,9 +390,14 @@ if(isset($_GET['page']) and $_GET['page'] == "rawMaterialRequirments") {
         
         $getData = easySelectA(array(
             "table"     => "product_stock as product_stock",
-            "fields"    => "stock_product_id, product_parent_id, product_name, product_unit, equal_unit_id, equal_unit_qnt, base_qty, sum(stock_item_qty*base_qty) as ordered_base_qty, if(stock_in is null, 0, stock_in) as stock_qty",
+            "fields"    => "bg_item_product_id, product_parent_id, product_name, product_unit, equal_unit_id, equal_unit_qnt, 
+                            bg_product_qnt,
+                            if(base_qty is null, 1, base_qty) as base_qty, 
+                            sum(if(base_qty is null, stock_item_qty * bg_product_qnt * 1, stock_item_qty * bg_product_qnt * base_qty)) as ordered_base_qty, 
+                            if(stock_in is null, 0, stock_in) as stock_qty",
             "join"      => array(
-                "left join {$table_prefeix}products on product_id = stock_product_id",
+                "left join {$table_prefeix}bg_product_items on bg_product_id = stock_product_id",
+                "left join {$table_prefeix}products on product_id = bg_item_product_id",
                 "left join {$table_prefeix}product_units on unit_name = product_unit",
                 "left join (select
                                 vp_id,
@@ -400,12 +405,12 @@ if(isset($_GET['page']) and $_GET['page'] == "rawMaterialRequirments") {
                                 sum(base_stock_in/base_qty) as stock_in
                             from product_base_stock
                             group by vp_id
-                ) as pbs on pbs.vp_id = stock_product_id",
+                ) as pbs on pbs.vp_id = bg_item_product_id",
             ),
             "where"     => array(
-                "product_stock.is_trash = 0 and is_bundle_item = 1 and stock_type = 'sale-order'"
+                "product_stock.is_trash = 0 and is_raw_materials = 1 and stock_type = 'sale-order'"
             ),
-            "groupby"   => "stock_product_id"
+            "groupby"   => "bg_item_product_id"
         ));
 
   
@@ -430,7 +435,7 @@ if(isset($_GET['page']) and $_GET['page'] == "rawMaterialRequirments") {
                     $product_calculat[$val["product_name"]]["base_qty"] = $val["base_qty"];
                     $product_calculat[$val["product_name"]]["product_unit"] = $val["product_unit"];
                     $product_calculat[$val["product_name"]]["stock_qty"] = $val["stock_qty"];
-                    $product_calculat[$val["product_name"]]["product_id"] = $val["stock_product_id"];
+                    $product_calculat[$val["product_name"]]["product_id"] = $val["bg_item_product_id"];
 
                 }
 
@@ -441,20 +446,21 @@ if(isset($_GET['page']) and $_GET['page'] == "rawMaterialRequirments") {
                 $product_calculat[$val["product_name"]]["base_qty"] = $val["base_qty"];
                 $product_calculat[$val["product_name"]]["product_unit"] = $val["product_unit"];
                 $product_calculat[$val["product_name"]]["stock_qty"] = $val["stock_qty"];
-                $product_calculat[$val["product_name"]]["product_id"] = $val["stock_product_id"];
+                $product_calculat[$val["product_name"]]["product_id"] = $val["bg_item_product_id"];
 
             }
             
         }
         
+        
         foreach($product_calculat as $key => $value) {
             
             $orderedQty = $value["total_ordered_qty"] / $value["base_qty"];
-            $needToBy = $orderedQty - $value["stock_qty"];
+            $needToBy =  $orderedQty < $value["stock_qty"] ? 0 : $orderedQty - $value["stock_qty"];
 
             $allNestedData = [];
             $allNestedData[] = "";
-            $allNestedData[] = $key;
+            $allNestedData[] = $value["product_id"] . $key;
             $allNestedData[] = near_unit_qty($value["product_id"], $orderedQty, $value["product_unit"]);
             $allNestedData[] = near_unit_qty($value["product_id"], $value["stock_qty"], $value["product_unit"]);
             $allNestedData[] = near_unit_qty($value["product_id"], $needToBy, $value["product_unit"]);
@@ -478,6 +484,254 @@ if(isset($_GET['page']) and $_GET['page'] == "rawMaterialRequirments") {
     echo json_encode($jsonData); 
   
 }
+
+
+
+/*************************** Product List ***********************/
+if(isset($_GET['page']) and $_GET['page'] == "rmaProductList") {
+    
+    $requestData = $_REQUEST;
+  
+    $getData = [];
+  
+    // List of all columns name
+    $columns = array(
+        "",
+        "product_id",
+        "product_name",
+        "product_group",
+        "product_generic",
+        "product_edition",
+        "category_name",
+        "product_weight",
+        "product_sale_price"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+          "table" => "products",
+          "fields" => "count(*) as totalRow",
+          "where" => array(
+              "is_trash = 0 and product_type != 'Child'"
+          )
+      ))["data"][0]["totalRow"];
+  
+    if($requestData['length'] == -1) {
+      $requestData['length'] = $totalRecords;
+    }
+  
+    if(!empty($requestData["search"]["value"]) or !empty($requestData["columns"][5]['search']['value']) or !empty($requestData["columns"][6]['search']['value'])) {  // get data with search
+  
+          // If there are any edition to filter, we do not need product_type != 'Child' filter
+          $productEditionFilter = !empty($requestData["columns"][5]['search']['value']) ? " AND product_edition = '{$requestData["columns"][5]['search']['value']}' " : "";
+        
+          $getData = easySelect(
+              "products as product",
+              "product_id, product_code, product_name, product_type, product_group, product_generic, product_description, round(product_purchase_price, 2) as product_purchase_price, 
+              round(product_sale_price, 2) as product_sale_price, category_name, product_edition, has_sub_product",
+              array (
+              "left join {$table_prefeix}product_category on product_category_id = category_id"
+              ),
+              array (
+                  "product.is_trash = 0 {$productEditionFilter} and (product_code LIKE '". safe_input($requestData['search']['value']) ."%' ",
+                  " OR product_name LIKE" => $requestData['search']['value'] . "%",
+                  " OR category_name LIKE" => $requestData['search']['value'] . "%",
+                  ")",
+                  " AND product_category_id" => $requestData["columns"][6]['search']['value'],
+              ),
+              array (
+                  $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+              ),
+              array (
+                  "start" => $requestData['start'],
+                  "length" => $requestData['length']
+              )
+          );
+  
+        $totalFilteredRecords = $getData ? $getData["count"] : 0;
+  
+    } else { // Get data withouth search
+  
+          $getData = easySelect(
+              "products as product",
+              "product_id, product_code, product_name, product_group, product_generic, product_type, product_description, round(product_purchase_price, 2) as product_purchase_price, 
+              round(product_sale_price, 2) as product_sale_price, category_name, product_edition, has_sub_product",
+              array (
+                  "left join {$table_prefeix}product_category on product_category_id = category_id"
+              ),
+              array("product.is_trash = 0"),
+              array (
+                  $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+              ),
+              array (
+                  "start" => $requestData['start'],
+                  "length" => $requestData['length']
+              )
+          );
+  
+    }
+  
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+  
+              $subProductAttachment = "";
+              if( $value["has_sub_product"] == 1 ) {
+                  $subProductAttachment = '<li></li>';
+              }
+  
+            $allNestedData = [];
+            $allNestedData[] = "";
+            $allNestedData[] = $value["product_code"];
+            $allNestedData[] = $value["product_name"];
+            $allNestedData[] = $value["product_group"];
+            $allNestedData[] = $value["product_generic"];
+            $allNestedData[] = $value["product_edition"];
+            $allNestedData[] = $value["category_name"];
+            $allNestedData[] = "";
+            $allNestedData[] = $value["product_purchase_price"] . " / " . $value["product_sale_price"];
+            // The action button
+            $allNestedData[] = '<a class="btn btn-default" href="'. full_website_address() .'/production/link-raw-materials/?pid='. $value["product_id"] .'"><i class="fa fa-plus"></i> Link Raw Materials</a>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
+  
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
+  
+}
+
+
+
+
+/******************** Raw materials attachment *******************/
+if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
+
+
+    $selectProduct = easySelectA(array(
+        "table"     => "products",
+        "fields"    => "product_id, product_type, product_name, has_sub_product, product_unit",
+        "where"     => array(
+            "product_id"    => $_POST["mainProduct"]
+        )
+    ));
+
+    if($selectProduct === false ) {
+
+        echo _e("Sorry! No product found to link raw materails.");
+        
+    } else {
+
+        // Check, are there any bundle product or product which have sub product
+        $allSubProductId = implode(",", $_POST["bgProductID"]);
+
+        $checkSubProduct = easySelectA(array(
+            "table"     => "products",
+            "fields"    => "product_name",
+            "where"     => array(
+                "product_id in($allSubProductId) and (has_sub_product = 1 or product_type = 'Bundle') "
+            )
+        ));
+
+        // If there are any sub product then return error
+        if($checkSubProduct !== false) {
+
+            _e("Sorry! <b>{$checkSubProduct['data'][0]['product_name']}</b> is a bundle or has sub product. The product, which is bundle or have sub product can not be attached or linked.");
+
+        } else {
+
+
+            // Start the mysql Transaction
+            runQuery("START TRANSACTION;");
+
+
+            $product = $selectProduct["data"][0];
+
+            // Delete Privous bg product
+            easyPermDelete(
+                "bg_product_items",
+                array(
+                    "bg_product_id" => $_POST["mainProduct"]
+                )
+            );
+
+
+            // Insert Bundle/ Sub product
+            $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
+                bg_product_id,
+                bg_item_product_id,
+                bg_product_price,
+                bg_product_qnt,
+                is_raw_materials
+            ) VALUES";
+
+             
+            foreach($_POST["bgProductID"] as $pkey => $bgProductId) {
+
+                // If there have any unit in this product
+                // Then multiply the bgProductQnt with unit base qty
+                if( !empty($product['product_unit']) ) {
+
+                    $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefeix}product_units where unit_name = '{$product['product_unit']}' )";
+
+                } else {
+                    
+                    $bgProductQty = safe_input($_POST["bgProductQnt"][$pkey]);
+
+                }
+
+                $insertSubProduct .= "(
+                    '{$product['product_id']}',
+                    '{$bgProductId}',
+                    '". safe_input($_POST["bgProductSalePrice"][$pkey]) ."',
+                    '{$bgProductQty}',
+                    '1'
+                ),";
+                
+
+            }
+
+
+            // Run query to insert sub products
+            runQuery(substr_replace($insertSubProduct, ";", -1, 1));
+
+
+            // Check if there is any error on inserting data
+            if( !empty($conn->get_all_error)  ) {
+    
+                _e( $conn->get_all_error[0]. " Please check the error log for more information.");
+    
+                // If there are any error then rollback/undo the data
+                runQuery("ROLLBACK;");
+            
+            } else {
+                
+                // If there have not any error then commit/save the data permanently
+                runQuery("COMMIT;");
+                _s("Successfully updatted");
+    
+            }
+            
+
+        }
+
+
+    }
+
+
+}
+
 
 
 ?>

@@ -127,7 +127,7 @@
 
                     <div class="row">
 
-                        <input type="hidden" name="purchase_id" value="<?php echo $_GET["id"] ?>">
+                        <input type="hidden" name="purchase_id" value="<?php echo htmlentities($_GET["id"]); ?>">
                         <div class="form-group col-sm-3 required">
                             <label for="purchaseDate"><?= __("Purchase Date:"); ?></label>
                             <div class="input-group data">

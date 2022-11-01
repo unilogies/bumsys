@@ -333,7 +333,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editAccount") {
             <label for="negativeValueIsAllowed"><?= __("Negative value is allowed"); ?></label>
         </div>
 
-        <input type="hidden" name="accounts_id" value="<?php echo $_GET['id']; ?>">
+        <input type="hidden" name="accounts_id" value="<?php echo htmlentities($_GET['id']); ?>">
               
       </div>
       <!-- /Box body-->
@@ -692,7 +692,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editTransferMoney") {
             <label for="transferDescription"><?= __("Description:");?></label>
             <textarea name="transferDescription" id="transferDescription" rows="3" class="form-control"><?php echo $selectTransfer["transfer_money_description"]; ?></textarea>
         </div>
-        <input type="hidden" name="transfer_money_id" value="<?php echo $_GET["id"] ?>">
+        <input type="hidden" name="transfer_money_id" value="<?php echo htmlentities($_GET["id"]); ?>">
 
       </div>
       <!-- /Box body-->
@@ -1242,7 +1242,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editClosings") {
             <label for="closingDate"><?= __("Closing Date:"); ?></label>
             <input type="text" name="closingDate" id="closingDate" value="<?php echo $closings["closings_date"]; ?>" class="form-control datePicker" required>
         </div>
-        <input type="hidden" name="closingsId" value="<?php echo $_GET["id"]; ?>">
+        <input type="hidden" name="closingsId" value="<?php echo htmlentities($_GET["id"]); ?>">
     
     </div>
     <!-- /Box body-->

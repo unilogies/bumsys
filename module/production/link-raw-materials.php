@@ -3,7 +3,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            <?php echo __("Sub Product Attachment"); ?>
+            <?php echo __("Raw Materials Attachment"); ?>
         </h1>
     </section>
 
@@ -73,6 +73,7 @@
             border-radius: 10px;
             -webkit-box-shadow: inset 0 0 6px #337ab7;
         }
+
     </style>
 
 
@@ -83,25 +84,25 @@
 
             $selectProduct = easySelectA(array(
                 "table"     => "products",
-                "fields"    => "product_name, has_sub_product",
+                "fields"    => "product_name, has_sub_product, product_type",
                 "where"     => array(
-                    "has_sub_product = 1 and product_id"    => isset($_GET["pid"]) ? $_GET["pid"] : ""
+                    "is_trash = 0 and product_id"    => isset($_GET["pid"]) ? $_GET["pid"] : ""
                 )
             ));
 
-            if($selectProduct === false or empty($_GET["pid"]) ) {
+            if($selectProduct === false ) {
 
-                echo "<div class='alert alert-danger'>Sorry! this product is not eligible to link sub product.</div>";
+                echo "<div class='alert alert-danger'>Sorry! No product found to link raw materials.</div>";
                 
             } else {
 
-                $productName = $selectProduct["data"][0]["product_name"];
+                $productName = $selectProduct["data"][0]["product_name"]
             
 
         ?>
 
             <!-- Form start -->
-            <form method="post" role="form" id="jqFormAdd" action="<?php echo full_website_address(); ?>/xhr/?module=products&page=attachSubProduct" enctype="multipart/form-data">
+            <form method="post" role="form" id="jqFormAdd" action="<?php echo full_website_address(); ?>/xhr/?module=production&page=linkRawMaterials" enctype="multipart/form-data">
 
                 <div id="bundleProductsContainer" class="box box-default">
                     <div class="box-header">
@@ -180,22 +181,22 @@
 
                                             <?php 
 
-                                                $selectSubProducts = easySelectA(array(
+                                                $selectRawMaterials = easySelectA(array(
                                                     "table"     => "bg_product_items",
                                                     "fields"    => "bg_item_product_id, product_name, product_unit, round(bg_product_price, 2) as bg_product_price, round(bg_product_qnt, 2) as bg_product_qnt",
                                                     "join"      => array(
                                                         "left join {$table_prefeix}products on bg_item_product_id = product_id"
                                                     ),
                                                     "where"     => array(
-                                                        "is_raw_materials = 0 and bg_product_id"     => $_GET["pid"]
+                                                        "is_raw_materials = 1 and bg_product_id"     => $_GET["pid"]
                                                     )
                                                 ));
 
 
                                                 // Display sub products
-                                                if($selectSubProducts !== false) {
+                                                if($selectRawMaterials !== false) {
 
-                                                    foreach($selectSubProducts["data"] as $subProducts) {
+                                                    foreach($selectRawMaterials["data"] as $subProducts) {
 
                                                         echo '<tr>
                                                                 <input type="hidden" name="bgProductID[]" class="productID" value="'. $subProducts["bg_item_product_id"] .'">

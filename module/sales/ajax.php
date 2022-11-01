@@ -398,8 +398,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addPostReturnPayments") {
             <label for="addSalesPaymentsDescription"><?= __("Description:"); ?></label>
             <textarea name="addSalesPaymentsDescription" id="addSalesPaymentsDescription" rows="3" class="form-control"></textarea>
         </div>
-        <input type="hidden" name="addSalesPaymentsCustomerId" value="<?php echo $_GET["cid"]; ?>">
-        <input type="hidden" name="addSalesPaymentsSalesId" value="<?php echo $_GET["sales_id"]; ?>">
+        <input type="hidden" name="addSalesPaymentsCustomerId" value="<?php echo htmlentities($_GET["cid"]); ?>">
+        <input type="hidden" name="addSalesPaymentsSalesId" value="<?php echo htmlentities($_GET["sales_id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
 

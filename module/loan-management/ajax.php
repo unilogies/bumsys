@@ -300,7 +300,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editLoan") {
             <label for="loanDetails"><?= __("Loan Details"); ?></label>
             <textarea name="loanDetails" id="loanDetails" rows="3" class="form-control"><?php echo $selectLoan["loan_details"]; ?></textarea>
         </div>
-        <input type="hidden" name="loan_id" value="<?php echo $_GET["id"]; ?>">
+        <input type="hidden" name="loan_id" value="<?php echo htmlentities($_GET["id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
 
