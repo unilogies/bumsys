@@ -2384,12 +2384,10 @@ function get_title() {
 
         global $table_prefeix;
 
-        //$url = "http://66.45.237.70/maskingapi.php";
-	    $url = "http://66.45.237.70/api.php";
+	    $url = "http://example.com/api.php";
         $data= array(
-            'username'=>"Royal",
-            'password'=>"CZXAPHK8",
-            //'senderid'=> "The Royal",
+            'username'=>"username",
+            'password'=>"password",
             'number'=>$number,
             'message'=>$msg
         );
