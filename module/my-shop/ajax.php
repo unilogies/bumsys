@@ -573,7 +573,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newShopExpense") {
     $paymentAttachment = NULL;
     if($_FILES["paymentAttachment"]["size"] > 0) {
  
-         $paymentAttachment = easyUpload($_FILES["paymentAttachment"], "attachments/payments/cheque/" . date("M, Y"), $_POST["paymentChequeNo"] );
+         $paymentAttachment = easyUpload($_FILES["paymentAttachment"], "attachments/payments/cheque/" . date("M, Y"), safe_entities($_POST["paymentChequeNo"]) );
  
          if(!isset($paymentAttachment["success"])) {
              return _e($paymentAttachment);
@@ -1278,7 +1278,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateShopAdvanceCollection") {
         // Update Accounts Balance
         updateAccountBalance($_POST["advanceCollectionAccounts"]);
 
-        $successMsg = sprintf(__("Advance collected successfully updated. <a %s>Click Here</a> to print the receipt."), " onClick='BMS.MAIN.printPage(this.href, event);' href='". full_website_address() ."/invoice-print/?invoiceType=moneyReceipt&id=". $_POST["shopAdvanceCollectionId"] ."'");
+        $successMsg = sprintf(__("Advance collected successfully updated. <a %s>Click Here</a> to print the receipt."), " onClick='BMS.MAIN.printPage(this.href, event);' href='". full_website_address() ."/invoice-print/?invoiceType=moneyReceipt&id=". safe_entities($_POST["shopAdvanceCollectionId"]) ."'");
 
         echo "<div class='alert alert-success'>{$successMsg}</div>";
 
@@ -1940,7 +1940,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editReceivedPayment") {
             </div>
         </div>
 
-        <input type="hidden" name="receivedPaymentId" value ="<?= $_GET["id"]; ?>">
+        <input type="hidden" name="receivedPaymentId" value ="<?php echo safe_entities($_GET["id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
 

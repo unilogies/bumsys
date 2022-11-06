@@ -10,6 +10,9 @@ $getData = $_POST;
 
 //exit();
 
+// Start the mysql Transaction
+runQuery("START TRANSACTION;");
+
 $salesDate = $getData["salesDate"];
 
 $customerId = $getData["customersId"];
@@ -36,7 +39,7 @@ if( isset($_POST["salesId"]) ) { // If there is a sales ID then update the sales
             "sales_status"                  => $sales_status, //"Delivered",
             "sales_delivery_date"           => $salesDate,
             "sales_customer_id"             => $customerId,
-            "sales_shop_id"                 => $getData["userShopId"],
+            "sales_shop_id"                 => $_SESSION["sid"],
             "sales_quantity"                => $salesQuantity,
             "sales_shipping"                => $salesShippingCharge,
             "sales_update_by"               => $_SESSION["uid"],
@@ -52,6 +55,15 @@ if( isset($_POST["salesId"]) ) { // If there is a sales ID then update the sales
             "sales_id"  => $sales_id
         )
     );
+
+    // Delete the previous sales items while updating
+    easyPermDelete(
+        "product_stock",
+        array(
+            "stock_sales_id"    => $sales_id
+        )
+    );
+
     
 
 } else { // If there is no sales id defined then insert new one
@@ -95,7 +107,7 @@ if( isset($_POST["salesId"]) ) { // If there is a sales ID then update the sales
             "sales_reference"               => $salesReferences,
             "sales_customer_id"             => $customerId,
             "sales_warehouse_id"            => $warehouseId,
-            "sales_shop_id"                 => $getData["userShopId"],
+            "sales_shop_id"                 => $_SESSION["sid"],
             "sales_quantity"                => $salesQuantity,
             "sales_shipping"                => $salesShippingCharge,
             "sales_created_by"              => $_SESSION["uid"],
@@ -124,7 +136,7 @@ if( isset($_POST["salesId"]) ) { // If there is a sales ID then update the sales
         return;
     }
 
-    $sales_id = $insertSales["last_insert_id"];
+    $sales_id = "LAST_INSERT_ID()"; //$insertSales["last_insert_id"];
 
 }
 
@@ -235,9 +247,9 @@ foreach($getData["productID"] as $key => $productId) {
             (
                 '{$stock_type}',
                 '". safe_input($salesDate) ."',
-                '". safe_input($sales_id) ."',
+                '{$sales_id}',
                 '". safe_input($warehouseId) ."',
-                '". safe_input($getData["userShopId"]) ."',
+                '". $_SESSION["sid"] ."',
                 '". safe_input($productId) ."',
                 '{$batchProduct["batch_id"]}',
                 '". safe_input($getData["productSalePirce"][$key]) ."',
@@ -286,9 +298,9 @@ foreach($getData["productID"] as $key => $productId) {
         (
             '{$stock_type}',
             '". safe_input($salesDate) ."',
-            '". safe_input($sales_id) ."',
+            '{$sales_id}',
             '". safe_input($warehouseId) ."',
-            '". safe_input($getData["userShopId"]) ."',
+            '". $_SESSION["sid"] ."',
             '". safe_input($productId) ."',
             ". ( empty($getData["productBatch"][$key]) ? "NULL" : "'". safe_input($getData["productBatch"][$key]) . "'" ) .",
             '". safe_input($getData["productSalePirce"][$key]) ."',
@@ -302,7 +314,7 @@ foreach($getData["productID"] as $key => $productId) {
 
     }
 
-    // Select bundle products or sub products 
+    // Select products, which have sub products and insert sub/bundle products
     $subProducts = easySelectA(array(
         "table"     => "products as product",
         "fields"    => "bg_item_product_id, 
@@ -310,10 +322,10 @@ foreach($getData["productID"] as $key => $productId) {
                         bg_product_qnt
                         ",
         "join"      => array(
-            "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id"
+            "inner join {$table_prefeix}bg_product_items on bg_product_id = product_id"
         ),
         "where"     => array(
-            "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
+            "product.has_sub_product = 1 and product.product_id = {$productId}"
         )
     ));
     
@@ -375,9 +387,9 @@ foreach($getData["productID"] as $key => $productId) {
             (
                 '{$stock_type}',
                 '". safe_input($salesDate) ."',
-                '". safe_input($sales_id) ."',
+                '{$sales_id}',
                 '". safe_input($warehouseId) ."',
-                '". safe_input($getData["userShopId"]) ."',
+                '". $_SESSION["sid"] ."',
                 '". $bp["bg_item_product_id"] ."',
                 NULL,
                 '". $bpItemSalePrice ."',
@@ -443,11 +455,11 @@ $salesGrandTotal = round($salesGrandTotal, get_options("decimalPlaces") );
 
 
 // Calculate Change amount
-$salesChanges = ( abs($salesGrandTotal) < abs($salesPaidAmount)) ? ($salesPaidAmount - $salesGrandTotal) : 0;
+$salesChanges = ($salesGrandTotal < $salesPaidAmount) ? ($salesPaidAmount - $salesGrandTotal) : 0;
 //echo "Change: $salesChanges \n";
 
 // Calculate Due amount
-$salesDue = (abs($salesGrandTotal) > abs($salesPaidAmount)) ? ($salesGrandTotal - $salesPaidAmount ) : 0;
+$salesDue = ($salesGrandTotal > $salesPaidAmount) ? ($salesGrandTotal - $salesPaidAmount) : 0;
 //echo "Due: $salesDue \n";
 
 
@@ -468,7 +480,7 @@ foreach( $_POST["posSalePaymentAmount"] as $paymentKey => $paymentAmount ) {
                 "received_payments_from"        => $customerId,
                 "received_payments_amount"      => $paymentAmount, //$salesGrandTotal - $salesDue
                                                     /** 
-                                                     * This now is deprected. Will be remove in near update.
+                                                     * This not is deprected. Will be remove in near update.
                                                      * *****************************************************
                                                      * Here we substract salesDue from salesGrandTotal, and do not use salesPaidAmount directly
                                                      * Becase salesPaidAmount can be grater then salesGrandTotal and there can have a change amount.
@@ -491,10 +503,9 @@ foreach( $_POST["posSalePaymentAmount"] as $paymentKey => $paymentAmount ) {
                 "payments_return_type"          => "Outgoing",
                 "payments_return_date"          => $salesDate . date(" H:i:s"),
                 "payments_return_accounts"      => empty($_POST["posSalePaymentBankAccount"][$paymentKey]) ? $_SESSION["aid"] : $_POST["posSalePaymentBankAccount"][$paymentKey],
-                "payments_return_sales_id"      => $sales_id,
                 "payments_return_customer_id"   => $customerId,
                 "payment_return_method"         => $_POST["posSalePaymentMethod"][$paymentKey],
-                "payments_return_amount"        => abs((int)$paymentAmount),
+                "payments_return_amount"        => abs($paymentAmount),
                 "payments_return_description"   => "Return payment made on product return",
                 "payments_return_by"            => $_SESSION["uid"]
             )
@@ -518,11 +529,11 @@ foreach( $_POST["posSalePaymentAmount"] as $paymentKey => $paymentAmount ) {
 
 // Generate the payment status
 $salesPaymentStatus = "due";
-if( abs($salesGrandTotal) <= abs($salesPaidAmount)) {
+if($salesGrandTotal <= $salesPaidAmount) {
 
     $salesPaymentStatus = "paid";
 
-} else if( abs($salesGrandTotal) > abs($salesPaidAmount) and abs($salesPaidAmount) > 0) {
+} else if($salesGrandTotal > $salesPaidAmount and $salesPaidAmount > 0) {
 
     $salesPaymentStatus = "partial";
 
@@ -532,16 +543,16 @@ if( abs($salesGrandTotal) <= abs($salesPaidAmount)) {
 $updateSale = easyUpdate(
     "sales",
     array (
-        "sales_total_amount"            => empty($salesTotalAmount) ? 0 : $salesTotalAmount,
-        "sales_product_discount"        => empty($salesTotalProductDiscount) ? 0 : $salesTotalProductDiscount,
-        "sales_discount"                => empty($salesOrderDiscount) ? 0 : $salesOrderDiscount,
-        "sales_tariff_charges"          => empty($tariffCharges) ? 0 : $tariffCharges,
+        "sales_total_amount"            => $salesTotalAmount,
+        "sales_product_discount"        => $salesTotalProductDiscount,
+        "sales_discount"                => $salesOrderDiscount,
+        "sales_tariff_charges"          => $tariffCharges,
         "sales_shipping"                => empty($getData["shippingCharge"]) ? 0 : $getData["shippingCharge"],
-        "sales_adjustment"              => empty($adjustAmount) ? 0 : $adjustAmount,
-        "sales_grand_total"             => empty($salesGrandTotal) ? 0 : $salesGrandTotal,
-        "sales_paid_amount"             => empty($salesPaidAmount) ? 0 : $salesPaidAmount,
-        "sales_change"                  => empty($salesChanges) ? 0 : $salesChanges,
-        "sales_due"                     => empty($salesDue) ? 0 : $salesDue,
+        "sales_adjustment"              => $adjustAmount,
+        "sales_grand_total"             => $salesGrandTotal,
+        "sales_paid_amount"             => $salesPaidAmount,
+        "sales_change"                  => $salesChanges,
+        "sales_due"                     => $salesDue,
         "sales_payment_status"          => $salesPaymentStatus
     ),
     array (
@@ -592,31 +603,17 @@ if( $salesChanges > 0 and $salesGrandTotal - $salesDue < 0 ) {
 // Return the Success msg
 if($updateSale === true) {
 
-    // Start the mysql Transaction
-    runQuery("START TRANSACTION;");
-
-    // Delete the previous sales items while updating
-    if( isset($_POST["salesId"]) ) {
-
-        easyPermDelete(
-            "product_stock",
-            array(
-                "stock_sales_id"    => $sales_id
-            )
-        );
-        
-    }
-
-
+    echo substr_replace($insertSaleItems, ";", -1, 1);
+    
     // Insert sale items
     runQuery(substr_replace($insertSaleItems, ";", -1, 1));
 
 
     if( !empty($conn->get_all_error)  ) {
-    
+
         echo json_encode(array (
             "saleStatus"   => "error",
-            "msg"  =>  __("Sorry! can not update the sales. Please check the error log for more information.")
+            "msg"  =>  __($conn->get_all_error[0]. ". Please check the error log for more information.")
         ));
 
         // If there have any error then rollback/undo the data
@@ -627,13 +624,15 @@ if($updateSale === true) {
         // If there have not any error then commit/save the data permanently
         runQuery("COMMIT;");
 
-        echo json_encode(array (
+        // Return success Msg with sales id
+        echo json_encode( array (
             "saleStatus"   => "success",
             "salesId"  =>  $sales_id
         ));
 
     }
-    
+
 }
+
 
 ?>

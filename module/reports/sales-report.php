@@ -9,7 +9,7 @@
 
 <?php 
 
-$date =  isset($_GET["salesDate"]) ? $_GET["salesDate"] : date("Y-m-d");
+$date =  isset($_GET["salesDate"]) ? safe_entities($_GET["salesDate"]) : date("Y-m-d");
 
 ?>
 

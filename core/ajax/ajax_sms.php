@@ -4,7 +4,7 @@
 if(isset($_GET['page']) and $_GET['page'] == "sendSMS") {
 
     // Include the modal header
-    modal_header("Send SMS to " . $_GET["name"], full_website_address() . "/info/?module=sms&page=sendSMSCommand");
+    modal_header("Send SMS to " . safe_entities($_GET["name"]) , full_website_address() . "/info/?module=sms&page=sendSMSCommand");
     
     ?>
 
@@ -29,7 +29,7 @@ if(isset($_GET['page']) and $_GET['page'] == "sendSMS") {
          
             </div> <!-- row -->
 
-            <input type="hidden" name="numbers" value="<?php echo $_GET['number']; ?>">
+            <input type="hidden" name="numbers" value="<?php echo safe_entities($_GET['number']); ?>">
 
     <?php
 
@@ -61,7 +61,7 @@ if(isset($_GET['page']) and $_GET['page'] == "sendBulkSMS") {
             <div class="form-group">
                 <label for="numbers">Numbers:</label>
                 <textarea name="numbers" id="numbers" cols="30" rows="3" class="form-control">
-<?php echo $_GET['numbers']; ?>
+<?php echo safe_entities($_GET['numbers']); ?>
                 </textarea>
               </div>
 
@@ -91,8 +91,8 @@ if(isset($_GET['page']) and $_GET['page'] == "sendBulkSMS") {
 if(isset($_GET['page']) and $_GET['page'] == "sendSMSCommand") {
 
       if(send_sms(
-        str_replace(";", ",", $_POST["numbers"]),
-        $_POST["message"]
+        str_replace(";", ",", safe_entities($_POST["numbers"]) ),
+        safe_entities($_POST["message"])
       )) {
 
         echo "<div class='alert alert-success'>SMS Sent Successfully.</div>";

@@ -445,7 +445,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editAdvanceCollection") {
                 <input type="text" name="advancePaymentReference" id="advancePaymentReference" value="<?= $ac["received_payments_reference"]; ?>" class="form-control">
             </div>
         </div>
-        <input type="hidden" name="advanceCollectionId" value ="<?= $_GET["id"]; ?>">
+        <input type="hidden" name="advanceCollectionId" value ="<?php echo safe_entities($_GET["id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
 
@@ -537,7 +537,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateAdvanceCollection") {
 
         }
 
-        $sucessMsg = sprintf(__("Successfully updated. Please <a %s>Click Here</a> to print the receipt."), " onClick='BMS.MAIN.printPage(this.href, event);' href='". full_website_address() ."/invoice-print/?invoiceType=moneyReceipt&id=". $_POST["advanceCollectionId"] ."'");
+        $sucessMsg = sprintf(__("Successfully updated. Please <a %s>Click Here</a> to print the receipt."), " onClick='BMS.MAIN.printPage(this.href, event);' href='". full_website_address() ."/invoice-print/?invoiceType=moneyReceipt&id=". safe_entities($_POST["advanceCollectionId"]) ."'");
 
         echo "<div class='alert alert-success'>{$sucessMsg}</div>";
 
@@ -1072,7 +1072,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editReceivedPayment") {
             </div>
         </div>
 
-        <input type="hidden" name="receivedPaymentId" value ="<?= $_GET["id"]; ?>">
+        <input type="hidden" name="receivedPaymentId" value ="<?php echo safe_entities($_GET["id"]); ?>">
 
         <div id="ajaxSubmitMsg"></div>
 
@@ -1163,7 +1163,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateReceivedPayments") {
 
         }
 
-        $sucessMsg = sprintf(__("Successfully updated. Please <a %s>Click Here</a> to print the receipt."), " onClick='BMS.MAIN.printPage(this.href, event);' href='". full_website_address() ."/invoice-print/?invoiceType=moneyReceipt&id=". $_POST["receivedPaymentId"] ."'");
+        $sucessMsg = sprintf(__("Successfully updated. Please <a %s>Click Here</a> to print the receipt."), " onClick='BMS.MAIN.printPage(this.href, event);' href='". full_website_address() ."/invoice-print/?invoiceType=moneyReceipt&id=". safe_entities($_POST["receivedPaymentId"]) ."'");
 
         echo "<div class='alert alert-success'>{$sucessMsg}</div>";
 

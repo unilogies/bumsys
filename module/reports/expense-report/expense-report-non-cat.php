@@ -11,7 +11,7 @@
 <section class="content container-fluid">
 
   <div style="display: none;" id="DtExportTopMessage">
-    <h3 style="font-weight: bold;" class="text-center"><?php echo __("%s Payments Reports", $_GET["paymentType"]); ?>  (<?=  isset($_GET["dateRange"]) ? $_GET["dateRange"] : "" ?>) </h3>
+    <h3 style="font-weight: bold;" class="text-center"><?php echo __("%s Payments Reports", safe_entities($_GET["paymentType"]) ); ?>  (<?=  isset($_GET["dateRange"]) ? safe_entities($_GET["dateRange"]) : "" ?>) </h3>
     <p class="text-center"><strong><?= __("Printed On:"); ?> <?php echo date("Y-m-d H:i:s");  ?> </strong> </p>
   </div>
 
@@ -19,7 +19,7 @@
     <div class="col-xs-12">
       <div class="box">
         <div class="box-header">
-          <h3 class="box-title"><?php echo __("%s Payments Reports", $_GET["paymentType"]); ?> (<?= isset($_GET["dateRange"]) ? $_GET["dateRange"] : "" ?>) </h3>
+          <h3 class="box-title"><?php echo __("%s Payments Reports",  safe_entities($_GET["paymentType"]) ); ?> (<?= isset($_GET["dateRange"]) ? safe_entities($_GET["dateRange"]) : "" ?>) </h3>
           <div class="printButtonPosition"></div>
         </div>
         <!-- Box header -->
@@ -61,6 +61,6 @@
 <!-- /.content-wrapper -->
 
 <script>
-  var DataTableAjaxPostUrl = "<?php echo full_website_address(); ?>/xhr/?module=reports&page=expenseReportsNonCat&paymentType=<?= $_GET["paymentType"]; ?>&dateRange=<?= $_GET["dateRange"]; ?>";
+  var DataTableAjaxPostUrl = "<?php echo full_website_address(); ?>/xhr/?module=reports&page=expenseReportsNonCat&paymentType=<?= safe_entities($_GET["paymentType"]) ; ?>&dateRange=<?= safe_entities($_GET["dateRange"]); ?>";
   var defaultiDisplayLength = -1;
 </script>

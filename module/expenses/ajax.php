@@ -509,7 +509,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newBillPay") {
     $paymentAttachment = NULL;
     if($_FILES["paymentAttachment"]["size"] > 0) {
  
-        $paymentAttachment = easyUpload($_FILES["paymentAttachment"], "attachments/payments/cheque/" . date("M, Y"), $_POST["paymentChequeNo"] );
+        $paymentAttachment = easyUpload($_FILES["paymentAttachment"], "attachments/payments/cheque/" . date("M, Y"), safe_entities($_POST["paymentChequeNo"]) );
 
         if(!isset($paymentAttachment["success"])) {
             return _e($paymentAttachment);
@@ -776,7 +776,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newSalaryPay") {
     $paymentAttachment = NULL;
     if($_FILES["paymentAttachment"]["size"] > 0) {
 
-        $paymentAttachment = easyUpload($_FILES["paymentAttachment"], "attachments/payments/cheque/" . date("M, Y"), $_POST["paymentChequeNo"] );
+        $paymentAttachment = easyUpload($_FILES["paymentAttachment"], "attachments/payments/cheque/" . date("M, Y"), safe_entities($_POST["paymentChequeNo"]) );
 
         if(!isset($paymentAttachment["success"])) {
             return _e($paymentAttachment);
@@ -1603,7 +1603,7 @@ if(isset($_GET['page']) and $_GET['page'] == "addMonthlySalary") {
       );
 
     if($insertSalary === true and $updatePayableSalary === true) {
-        _s("%s successfully added", $_POST['salaryTypes']);
+        _s("%s successfully added", safe_entities($_POST['salaryTypes']) );
     } else {
         _e($insertSalary . $updatePayableSalary);
     }
@@ -1927,7 +1927,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateMonthlySalary") {
       );
 
     if($UpdateSalary === true and $updatePayableSalary === true) {
-        _s("%s successfully updated", $_POST['salaryType']);
+        _s("%s successfully updated", safe_entities($_POST['salaryType']) );
     } else {
         _e($insertSalary . $updatePayableSalary);
     }
@@ -2725,7 +2725,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newDueBillPay") {
     $paymentAttachment = NULL;
     if($_FILES["dueBillPaymentAttachment"]["size"] > 0) {
 
-        $paymentAttachment = easyUpload($_FILES["dueBillPaymentAttachment"], "attachments/payments/cheque/" . date("M, Y"), $_POST["dueBillPaymentChequeNo"] );
+        $paymentAttachment = easyUpload($_FILES["dueBillPaymentAttachment"], "attachments/payments/cheque/" . date("M, Y"), safe_entities($_POST["dueBillPaymentChequeNo"]) );
 
         if(!isset($paymentAttachment["success"])) {
             return _e($paymentAttachment);
@@ -3312,7 +3312,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editAdvancePayment") {
             <label for="advancePaymentPaymentDescription">Description:</label>
             <textarea name="advancePaymentPaymentDescription" id="advancePaymentPaymentDescription" rows="3" class="form-control"><?= $AdvancePayment["advance_payment_description"]; ?></textarea>
         </div>
-        <input type="hidden" name="advancePaymentId" value="<?= $_GET["id"]; ?>">
+        <input type="hidden" name="advancePaymentId" value="<?php echo safe_entities($_GET["id"]) ; ?>">
     
         <div id="ajaxSubmitMsg"></div>
 
@@ -3653,7 +3653,7 @@ if(isset($_GET['page']) and $_GET['page'] == "adjustAdvancePaymentSubmit") {
         left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
         left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
         left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
-        where emp_id = {$_POST['advancePaymentAdjustEmployee']}"
+        where emp_id = " . safe_input($_POST['advancePaymentAdjustEmployee'])
     )["data"][0];
 
     $totalPaymentAmount = array_sum($_POST["paymentAmount"]);
@@ -4428,7 +4428,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editPaymentAdjustment") {
                 <label for="paymentAdjustmentDescription"><?= __("Description:"); ?></label>
                 <textarea name="paymentAdjustmentDescription" id="paymentAdjustmentDescription" rows="3" class="form-control"> <?= $pa["pa_description"]; ?> </textarea>
             </div>
-            <input type="hidden" name="paymentAdjustmentId" value="<?= $_GET["id"]; ?>">
+            <input type="hidden" name="paymentAdjustmentId" value="<?php echo safe_entities($_GET["id"]) ; ?>">
 
             <div id="ajaxSubmitMsg"></div>
 

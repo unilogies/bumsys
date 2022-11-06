@@ -171,8 +171,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productDetailsForPos") {
 
     $warehouse_id = isset($_GET["warehouse_id"]) ? (int)safe_input($_GET["warehouse_id"]) : "";
     $customer_id = isset($_GET["cid"]) ? (int)safe_input($_GET["cid"]) : "";
-    $product_qnt = (isset($_GET["pqnt"]) and !empty($_GET["pqnt"])) ? $_GET["pqnt"] : get_options("defaultSaleQnt");
-    $packet = ( isset($_GET["packet"]) and !empty($_GET["packet"]) ) ? $_GET["packet"] : 0;
+    $product_qnt = (isset($_GET["pqnt"]) and !empty($_GET["pqnt"])) ? safe_entities($_GET["pqnt"]) : get_options("defaultSaleQnt");
+    $packet = ( isset($_GET["packet"]) and !empty($_GET["packet"]) ) ? safe_entities($_GET["packet"]) : 0;
 
     $customerType = "consumer";
     $selectCustomerType = easySelectA(array(
@@ -1708,6 +1708,113 @@ if(isset($_GET['page']) and $_GET['page'] == "getChildProductData") {
         echo 0;
 
     }
+
+}
+
+
+
+
+if(isset($_GET['page']) and $_GET['page'] == "salesOverviewChartData") {
+
+    $type = isset($_GET["type"]) ? $_GET["type"] : "daily";
+
+    if( $type === "weekly" ) {
+
+        $weeklySalesData = easySelectD("
+            SELECT
+                concat(date_format(db_date, '%D %M')) AS label,
+                if(sales_quantity is null, 0, sum(sales_quantity)) as sales_quantity
+            FROM time_dimension
+            LEFT JOIN (
+                SELECT 
+                    sales_delivery_date, 
+                    sum(sales_quantity) as sales_quantity 
+                FROM {$table_prefeix}sales 
+                WHERE is_trash = 0
+                GROUP BY sales_delivery_date
+            ) AS sales on sales_delivery_date = db_date
+            WHERE db_date BETWEEN NOW() - INTERVAL 30 WEEK AND NOW()
+            group by week(db_date)
+		");
+
+        $weeklySalesOverviewLabel = array();
+		$weeklySalesOverviewData = array();
+        
+        if( $weeklySalesData !== false ) {
+
+            foreach($weeklySalesData["data"] as $sales ) {
+                array_push($weeklySalesOverviewLabel, $sales["label"] );
+                array_push($weeklySalesOverviewData, $sales["sales_quantity"] );
+            }
+
+        }
+
+
+        $weeklySalesData = array(
+            "labels" => $weeklySalesOverviewLabel,
+            "datasets" => array(
+                array(
+                    "label" => __("Weekly Sales"),
+                    "borderColor" => "green",
+                    "borderWidth"   => 2,
+                    "data"  => $weeklySalesOverviewData
+                )
+            )
+        );
+
+        echo json_encode($weeklySalesData);
+
+
+    } else {
+
+        
+        /** Daily Sales Calculatin */
+
+        $dailySalesData = easySelectD("
+            SELECT
+                db_date AS label,
+                if(sales_quantity is null, 0, sales_quantity) as sales_quantity
+            FROM time_dimension
+            LEFT JOIN (
+                SELECT 
+                    sales_delivery_date, 
+                    sum(sales_quantity) as sales_quantity 
+                FROM {$table_prefeix}sales 
+                WHERE is_trash = 0
+                GROUP BY sales_delivery_date
+            ) AS sales on sales_delivery_date = db_date
+            WHERE db_date BETWEEN NOW() - INTERVAL 30 DAY AND NOW()
+		");
+
+        $dailySalesOverviewLabel = array();
+		$dailySalesOverviewData = array();
+        
+        if( $dailySalesData !== false ) {
+
+            foreach($dailySalesData["data"] as $sales ) {
+                array_push($dailySalesOverviewLabel, $sales["label"] );
+                array_push($dailySalesOverviewData, $sales["sales_quantity"] );
+            }
+
+        }
+
+
+        $dailySalesData = array(
+            "labels" => $dailySalesOverviewLabel,
+            "datasets" => array(
+                array(
+                    "label" => __("Daily Sales"),
+                    "borderColor" => "green",
+                    "borderWidth"   => 2,
+                    "data"  => $dailySalesOverviewData
+                )
+            )
+        );
+
+        echo json_encode($dailySalesData);
+
+    }
+
 
 }
 

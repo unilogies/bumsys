@@ -80,10 +80,16 @@
 					<div class="box box-primary">
 						<div class="box-header with-border">
 							<h3 class="box-title"><?= __("Sales Overview"); ?></h3>
+
+                            <select style="width: 220px; display: inline; float: right;" id="salesOverviewType" class="form-control">
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                            </select>
+
 						</div>
 						<div class="box-body">
 							<div class="chart">
-								<canvas id="overviewChart" style="height: 380px"></canvas>
+								<canvas id="salesOverviewChart" style="height: 380px"></canvas>
 							</div>
 						</div>
 						
@@ -223,37 +229,9 @@
 
 	<?php 
 
-		$salesData = easySelectD("
-			select sales_delivery_date, sum(sales_quantity) as sales_quantity from {$table_prefeix}sales where is_trash = 0 and sales_delivery_date >= DATE_SUB(NOW(), INTERVAL 30 DAY) group by sales_delivery_date
-		");
+		
 
-		$dateStart = date('Y-m-d', strtotime('today - 30 days'));
-
-		$i = 0;
-		$newdate = array();
-		$newvalue = array();
-
-		while($dateStart <= date("Y-m-d")) {
-
-				$dateStart = date("Y-m-d", strtotime("$dateStart + 1 day"));
-
-				if(isset($salesData["data"][$i]) && $salesData["data"][$i]["sales_delivery_date"] == $dateStart){
-
-						array_push($newdate, $salesData["data"][$i]["sales_delivery_date"]);
-						array_push($newvalue, $salesData["data"][$i]["sales_quantity"]);
-						$i++;
-
-				}else{
-
-						array_push($newdate, $dateStart);
-						array_push($newvalue, 0);
-
-				}
-
-		}
-
-		$salesDate = __(json_encode($newdate));
-		$salesAmount = json_encode($newvalue);
+     
 
 	?>
 
@@ -261,20 +239,12 @@
 
 <script>
 
-var ctx = document.getElementById('overviewChart');
-var myLineChart = new Chart(ctx, {
+
+/** Weekly Sales */
+var ctx = document.getElementById('salesOverviewChart');
+var salesOverviewCharts = new Chart(ctx, {
 	type: 'line',
-	data: {
-		labels: <?php echo $salesDate; ?>,
-		datasets: [
-			{
-				label: "<?= __("Sales"); ?>",
-				borderColor: "green",
-				borderWidth: 2,
-				data: <?php echo $salesAmount; ?>
-			}
-		]
-	},
+	data: {},
 	options: {
 		responsive: true,
 		tooltips: {
@@ -282,6 +252,33 @@ var myLineChart = new Chart(ctx, {
 			intersect: false
 		}
 	}
+});
+
+
+/** When Document Ready Then load the chart */
+$(function() {
+
+    BMS.fn.get("salesOverviewChartData&type=weekly", function(data) {
+
+        salesOverviewCharts.data = data;
+
+        salesOverviewCharts.update();
+
+    });
+
+});
+
+/** Update Sales  */
+$(document).on("change", "#salesOverviewType", function() {
+
+    BMS.fn.get("salesOverviewChartData&type="+  $(this).val() , function(data) {
+
+        salesOverviewCharts.data = data;
+
+        salesOverviewCharts.update();
+
+    });
+
 });
 
 </script>

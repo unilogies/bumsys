@@ -1302,7 +1302,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProfile") {
   if($updateUser === true) {
         
       // Set language cookie
-      setcookie("lang", $_POST["userLanguage"], 0, "/");
+      setcookie("lang", safe_entities($_POST["userLanguage"]), 0, "/");
     
       _s("Profile has been successfully updated.");
 
@@ -1743,8 +1743,8 @@ if(isset($_GET['page']) and $_GET['page'] == "newCustomer") {
   // Include the modal header
   modal_header("New Customer", full_website_address() . "/xhr/?module=peoples&page=addNewCustomer");
 
-  $customerName = ( isset($_GET["val"]) and !is_numeric($_GET["val"]) ) ? $_GET["val"] : "";
-  $customerMobile = ( isset($_GET["val"]) and is_numeric($_GET["val"]) ) ? $_GET["val"] : "";
+  $customerName = ( isset($_GET["val"]) and !is_numeric($_GET["val"]) ) ? safe_entities($_GET["val"]) : "";
+  $customerMobile = ( isset($_GET["val"]) and is_numeric($_GET["val"]) ) ? safe_entities($_GET["val"]) : "";
   
   ?>
     <div class="box-body">

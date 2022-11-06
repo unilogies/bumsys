@@ -1389,8 +1389,8 @@ if(isset($_GET['page']) and $_GET['page'] == "receivableReport") {
         ) as payment_return on payments_return_customer_id = customer_id
 
         where customer.is_trash = 0 and customer_name like '{$search}%'
-        group by customer_id order by customer_name {$requestData['order'][0]['dir']}
-        LIMIT {$requestData['start']}, {$requestData['length']}
+        group by customer_id order by customer_name ". safe_input($requestData['order'][0]['dir']) ."
+        LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
         "
     );
 
@@ -1500,8 +1500,8 @@ if(isset($_GET['page']) and $_GET['page'] == "payableReport") {
         ) as payment_adjustment on pa_company = company_id
 
         where company.is_trash = 0 and company_name like '{$search}%'
-        group by company_id order by company_name {$requestData['order'][0]['dir']}
-        LIMIT {$requestData['start']}, {$requestData['length']}
+        group by company_id order by company_name ". safe_input($requestData['order'][0]['dir']) ."
+        LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
         "
     );
 

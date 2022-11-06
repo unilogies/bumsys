@@ -6,7 +6,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newCategory") {
   // Include the modal header
   modal_header("New Category", full_website_address() . "/xhr/?module=products&page=addNewCategory");
 
-  $categoryName = isset($_GET["val"]) ? $_GET["val"] : "";
+  $categoryName = isset($_GET["val"]) ? safe_entities($_GET["val"]) : "";
   
   ?>
     <div class="box-body">
@@ -317,7 +317,8 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
     $productPhoto = NULL;
     if($_FILES["productPhoto"]["size"] > 0) {
 
-        $productPhoto = easyUpload($_FILES["productPhoto"], "products/{$_POST["productCode"]}", "main__" . $_POST["productCode"]);
+        $product_code = safe_entities($_GET["packet"]);
+        $productPhoto = easyUpload($_FILES["productPhoto"], "products/{$product_code}", "main__" . $product_code);
 
         if(!isset($productPhoto["success"])) {
             return _e($productPhoto);
@@ -871,7 +872,8 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
     // update the product photo
     if($_FILES["productPhoto"]["size"] > 0) {
 
-        $productPhoto = easyUpload($_FILES["productPhoto"], "products/{$_POST["productCode"]}", "main__" . $_POST["productCode"]);
+        $product_code = safe_entities($_POST["productCode"]);
+        $productPhoto = easyUpload($_FILES["productPhoto"], "products/{$product_code}", "main__" . $product_code);
 
         if(!isset($productPhoto["success"])) {
             return _e($productPhoto);
@@ -1814,7 +1816,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductEdition") {
     // Include the modal header
     modal_header("New Product Edition", full_website_address() . "/xhr/?module=products&page=addNewProductEdition");
     
-    $edition_name = isset( $_GET["val"] ) ? $_GET["val"] : "";
+    $edition_name = isset( $_GET["val"] ) ? safe_entities($_GET["val"]) : "";
     
     ?>
       <div class="box-body">
@@ -2038,7 +2040,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductBrand") {
   // Include the modal header
   modal_header("New Product Brand", full_website_address() . "/xhr/?module=products&page=addNewProductBrand");
   
-  $brand_name = isset( $_GET["val"] ) ? $_GET["val"] : "";
+  $brand_name = isset( $_GET["val"] ) ? safe_entities($_GET["val"]) : "";
   
   ?>
     <div class="box-body">
@@ -2497,7 +2499,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editAuthor") {
         <label for="authorWebsite"><?= __("Website:"); ?></label>
         <input type="text" name="authorWebsite" id="authorWebsite" value="<?= $author["author_website"]; ?>" class="form-control">
       </div>
-      <input type="hidden" name="authorId" value="<?= $_GET["id"]; ?>">
+      <input type="hidden" name="authorId" value="<?php echo safe_entities($_GET["id"]); ?>">
       
     </div>
     <!-- /Box body-->
@@ -3097,7 +3099,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductGeneric") {
     // Include the modal header
     modal_header("New Generic", full_website_address() . "/xhr/?module=products&page=addNewProductGeneric");
 
-    $generic_name = isset( $_GET["val"] ) ? $_GET["val"] : "";
+    $generic_name = isset( $_GET["val"] ) ? safe_entities($_GET["val"])  : "";
     
     ?>
       <div class="box-body">

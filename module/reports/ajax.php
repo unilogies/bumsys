@@ -1150,7 +1150,7 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsAll") {
         where payments_categorie.is_trash = 0 and payment_category_name LIKE '{$search}%'
         having total_amount_in_this_category > 0
         order by payment_category_name ". safe_input($requestData['order'][0]['dir']) ."
-        LIMIT ". safe_input($requestData['start']) .", ". $requestData['length'] ."
+        LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
         "
     );
 
@@ -1337,7 +1337,9 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsNonCat") {
             salary_description
         from {$table_prefeix}salaries as salaries
         left join {$table_prefeix}employees on salary_emp_id = emp_id
-        where salaries.is_trash = 0 and salaries.salary_type = '{$paymentType}' and salaries.salary_month between '{$dateRange[0]}' and '{$dateRange[1]}' and concat( emp_firstname, ' ', emp_lastname ) like '%{$search}%'  order by salary_id DESC
+        where salaries.is_trash = 0 and salaries.salary_type = '{$paymentType}' and 
+        salaries.salary_month between '{$dateRange[0]}' and '{$dateRange[1]}' and concat( emp_firstname, ' ', emp_lastname ) like '%{$search}%' 
+        order by salary_id DESC
         "
     );
          
@@ -1479,8 +1481,8 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeReports") {
         ) as loan_installment on loan_installment_provider = emp_id
         where employee.is_trash = 0 $departmentFilter $empTypeFilter and ( emp_firstname like '{$search}%' or emp_PIN = '{$search}')
        
-        order by {$columns[$requestData['order'][0]['column']]} {$requestData['order'][0]['dir']}
-        LIMIT {$requestData['start']}, {$requestData['length']}
+        order by {$columns[$requestData['order'][0]['column']]} ". safe_input($requestData['order'][0]['dir']) ."
+        LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
         "
     );
 
@@ -1585,8 +1587,8 @@ if(isset($_GET['page']) and $_GET['page'] == "expiredProductList") {
                 product_name like '{$requestData["search"]["value"]}%'
                 or batch_number like '{$requestData["search"]["value"]}%'
             )
-            order by {$columns[$requestData['order'][0]['column']]} {$requestData['order'][0]['dir']}
-            limit {$requestData['start']},{$requestData['length']}
+            order by {$columns[$requestData['order'][0]['column']]} ". safe_input($requestData['order'][0]['dir']) ."
+            LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
         ");
 
 
@@ -1606,8 +1608,8 @@ if(isset($_GET['page']) and $_GET['page'] == "expiredProductList") {
             left join {$table_prefeix}product_batches as product_batches on product_batches.batch_id = pbs.batch_id
             left join {$table_prefeix}warehouses on warehouse_id = warehouse
             WHERE pbs.batch_expiry_date < curdate()
-            order by {$columns[$requestData['order'][0]['column']]} {$requestData['order'][0]['dir']}
-            limit {$requestData['start']},{$requestData['length']}
+            order by {$columns[$requestData['order'][0]['column']]} ". safe_input($requestData['order'][0]['dir']) ."
+            LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
         ");
 
     }

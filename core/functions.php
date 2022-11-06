@@ -12,7 +12,7 @@ function safe_input($data, $encoding = true) {
 	$data = trim($data);
     if($encoding === true) {
         $data = stripslashes($data);
-        $data = htmlspecialchars($data);
+        $data = htmlspecialchars($data, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401);
     }
 	$data = mysqli_real_escape_string($GLOBALS['conn'], $data);
 	return $data;

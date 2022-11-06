@@ -28,7 +28,7 @@ if(isset($_GET['page']) and $_GET['page'] == "callToPerson") {
         <label for="personFeedback">Feeback:</label>
         <textarea name="personFeedback" id="personFeedback" cols="30" rows="3" class="form-control" placeholder="Please enter feedback here"></textarea>
       </div>
-      <input type="hidden" name="personId" value="<?php echo $_GET["id"]; ?>">
+      <input type="hidden" name="personId" value="<?php echo safe_entities($_GET["id"]); ?>">
       
     </div>
     <!-- /Box body-->
