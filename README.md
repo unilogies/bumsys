@@ -65,4 +65,9 @@ Please feel free to open an issue if you found anything ugly.
 ## Contact
 Please feel free to mail us when you found any big security issue: talk@bumsys.org  
 
+## Thanks
+Thanks to all contributor and security researcher
+- @krizzsk  
+- @kmkalam24  
+
 Thank you.
