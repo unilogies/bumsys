@@ -22,7 +22,7 @@
 
 // Site Configuration
 define('ACTIVE_THEME', 'rui');
-define('TABLE_PREFIX', 'ro_');
+define('TABLE_PREFIX', 'bms_');
 define('AUTO_LOGOUT_TIME', 300); // in Second. Default is five minutes
 
 // Directory Configuration
