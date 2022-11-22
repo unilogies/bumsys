@@ -20,6 +20,7 @@
  */
 
 
+
 // Site Configuration
 define('ACTIVE_THEME', 'rui');
 define('TABLE_PREFIX', 'bms_');
