@@ -1530,9 +1530,7 @@ function save_deleted_date($table, $data) {
             $file_name = rand().$file["name"];
             if(!empty($newFileName)) {
 
-                $file_extension = explode(".", $file_name);
-                $file_extension = end($file_extension);
-                $file_name = $newFileName . "." . $file_extension;
+                $file_name = $newFileName . "." . $extension;
 
             }
 
