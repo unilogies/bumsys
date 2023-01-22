@@ -50,21 +50,44 @@ define('DB_CONN', DIR_INCLUDE . 'db/db.php');
 $_SETTINGS["MAX_UPLOAD_SIZE"] = 8;
 
 /**
- * Define allowed mime type.
+ * Define allowed extension and mime type.
  * 
  * Can be seen common mime type here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
  * or
  *  https://www.iana.org/assignments/media-types/media-types.xhtml
  * 
  */
+
 // Vaild image type for upload. must be in lower case
-$_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"] = array("jpeg", "jpg", "png");
+$_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"] = array(
+    "jpeg"  => array("image/jpeg"),
+    "jpg"   => array("image/jpeg"),
+    "png"   => array("image/png")
+);
 
 // Valid document type for upload. must be in lower case
-$_SETTINGS["VALID_DOCUMENT_TYPE_FOR_UPLOAD"] = array("pdf", "msword", "vnd.openxmlformats-officedocument.wordprocessingml.document", "vnd.ms-excel", "vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
+$_SETTINGS["VALID_DOCUMENT_TYPE_FOR_UPLOAD"] = array(
+    "pdf"   => array("application/pdf"),
+    "doc"   => array("application/msword"),
+    "docx"  => array("vnd.openxmlformats-officedocument.wordprocessingml.document"),
+    "xls"   => array("application/vnd.ms-excel"),
+    "xlsx"  => array("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+);
 // Valid audio type for upload
-$_SETTINGS["VALID_AUDIO_TYPE_FOR_UPLOAD"] = array("mpeg", "ogg", "opus", "aac", "wav", "webm");
+$_SETTINGS["VALID_AUDIO_TYPE_FOR_UPLOAD"] = array(
+    "oga"   => array("audio/ogg"),
+    "opus"  => array("audio/opus"),
+    "wav"   => array("audio/wav"),
+    "weba"  => array("audio/webm")
+);
+
+// Valid video type for upload
+$_SETTINGS["VALID_VIDEO_TYPE_FOR_UPLOAD"] = array(
+    "mpeg"  => array("video/mpeg"),
+    "ogv"   => array("video/ogg"),
+    "webm"  => array("video/webm"),
+    "mp4"   => array("video/mp4")
+);
 
 // Page title variable. All page title will be included here
 $_SETTINGS["PAGE_TITLE"] = array();

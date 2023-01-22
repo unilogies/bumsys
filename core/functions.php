@@ -1464,7 +1464,8 @@ function save_deleted_date($table, $data) {
  * @param string    $location       Optional. Where the uploaded file has stored. Default is db and return an blob string
  * 
  */
-function easyUpload( 
+
+ function easyUpload( 
     array $file, 
     string $location="db",
     string $newFileName="",
@@ -1480,8 +1481,9 @@ function easyUpload(
 
     global $_SETTINGS;
 
-    $type = strtolower($type);
-    $extensionName = strtolower(explode("/", $file["type"])[1]);
+    $mimeType = strtolower($file["type"]);
+    $extension = explode(".", $file["name"]);
+    $extension = end($extension);
     
     $maxUploadSize = $_SETTINGS["MAX_UPLOAD_SIZE"] * 1024 * 1024;
 
@@ -1489,100 +1491,77 @@ function easyUpload(
         return "The file is exceeded the max upload size ({$_SETTINGS["MAX_UPLOAD_SIZE"]} MB)";
     }
 
-    $validExtensionForUpload = [];
+    $validFileForUpload = [];
     switch($type) {
-        case "image":       $validExtensionForUpload = $_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"]; break;
-        case "document":    $validExtensionForUpload = $_SETTINGS["VALID_DOCUMENT_TYPE_FOR_UPLOAD"]; break;
-        case "video":       $validExtensionForUpload = $_SETTINGS["VALID_VIDEO_TYPE_FOR_UPLOAD"]; break;
-        case "audio":       $validExtensionForUpload = $_SETTINGS["VALID_AUDIO_TYPE_FOR_UPLOAD"]; break;
-        case "program":     $validExtensionForUpload = $_SETTINGS["VALID_PROGRAM_TYPE_FOR_UPLOAD"]; break;
-        case 'all':         $validExtensionForUpload = array_merge($_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"], $_SETTINGS["VALID_DOCUMENT_TYPE_FOR_UPLOAD"]); break;
-    }
-    
-    if(!in_array($extensionName, $validExtensionForUpload)) {
-
-        $validExtensionNameList = join(", ", $validExtensionForUpload);
-
-        return "Invalid {$type} type. Only {$validExtensionNameList} {$type} type are allowed to upload";
+        case "image":       $validFileForUpload = $_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"]; break;
+        case "document":    $validFileForUpload = $_SETTINGS["VALID_DOCUMENT_TYPE_FOR_UPLOAD"]; break;
+        case "video":       $validFileForUpload = $_SETTINGS["VALID_VIDEO_TYPE_FOR_UPLOAD"]; break;
+        case "audio":       $validFileForUpload = $_SETTINGS["VALID_AUDIO_TYPE_FOR_UPLOAD"]; break;
+        case "program":     $validFileForUpload = $_SETTINGS["VALID_PROGRAM_TYPE_FOR_UPLOAD"]; break;
+        case 'all':         $validFileForUpload = array_merge($_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"], $_SETTINGS["VALID_DOCUMENT_TYPE_FOR_UPLOAD"]); break;
     }
 
-    /**
-     * If location is set to db then return the image as blob string
-     * Otherwise save the image in the desired location
-     */
-    if($location == "db") {
-        
-        return array (
-            "success"       => true,
-            "imageType"     => $file["type"],
-            "blobString"    => file_get_contents($file["tmp_name"])
-        );
 
-    } else {
-        
-        $uploadDir = DIR_UPLOAD . $location;
-
-        if(!is_dir($uploadDir) && !mkdir($uploadDir, 0777, true)) {
-            return "Error creating directory";
-        }
-
-        // If newFileName is not empty then change the file name by given
-        $file_name = rand().$file["name"];
-        if(!empty($newFileName)) {
-
-            $file_extension = explode(".", $file_name);
-            $file_extension = end($file_extension);
-            $file_name = $newFileName . "." . $file_extension;
-
-        }
+    // Validate both file extension and mime type
+    if( isset( $validFileForUpload[$extension] ) AND in_array( $mimeType, $validFileForUpload[$extension] )  ) {
 
 
-        if(move_uploaded_file($file["tmp_name"], $uploadDir ."/" . $file_name )) {
-
+        /**
+         * If location is set to db then return the image as blob string
+         * Otherwise save the image in the desired location
+         */
+        if($location == "db") {
+            
             return array (
-                "success"      => true,
-                "fileName"     => $file_name
+                "success"       => true,
+                "imageType"     => $file["type"],
+                "blobString"    => file_get_contents($file["tmp_name"])
             );
 
         } else {
+            
+            $uploadDir = DIR_UPLOAD . $location;
 
-            return "Can not upload the file";
+            if(!is_dir($uploadDir) && !mkdir($uploadDir, 0777, true)) {
+                return "Error creating directory";
+            }
+
+            // If newFileName is not empty then change the file name by given
+            $file_name = rand().$file["name"];
+            if(!empty($newFileName)) {
+
+                $file_extension = explode(".", $file_name);
+                $file_extension = end($file_extension);
+                $file_name = $newFileName . "." . $file_extension;
+
+            }
+
+
+            if(move_uploaded_file($file["tmp_name"], $uploadDir ."/" . $file_name )) {
+
+                return array (
+                    "success"      => true,
+                    "fileName"     => $file_name
+                );
+
+            } else {
+
+                return "Can not upload the file";
+
+            }
 
         }
 
-        /*
-        //upload code here
-        $data=file_get_contents($_FILES[$fileInputName]["tmp_name"]);
 
-        //upload webp
-        imagewebp(imagecreatefromstring($data),$location.$uploadedFileName.".webp",75);
+    } else {
 
-        //upload orginal image
-
-        switch($type){
-
-            case "jpeg":  imagejpeg(imagecreatefromstring($data),$location.$uploadedFileName.".jpeg",75);
-                          imagejpeg(imagescale(imagecreatefromstring($data), 200, 200), $location.$uploadedFileName."_thumb.jpeg",80);
-                          
-                          break;
-            case "png":   imagepng(imagecreatefromstring($data),$location.$uploadedFileName.".png",75);
-                          imagepng(imagescale(imagecreatefromstring($data), 200, 200), $location.$uploadedFileName."_thumb.png",80);
-                          break;
-            default:      imagejpeg(imagecreatefromstring($data),$location.$uploadedFileName.".jpg",75);
-                          imagejpeg(imagescale(imagecreatefromstring($data), 200, 200), $location.$uploadedFileName."_thumb.jpg",80);
-                          break;
-
-        }
-
-        //upload webp thumb
-        imagewebp(imagescale(imagecreatefromstring($data), 200, 200), $location.$uploadedFileName."_thumb.webp",80);
-        
-
-        */
+        return "Invalid {$type} type."; // Only {$validExtensionNameList} {$type} type are allowed to upload";
 
     }
-
+    
 }
+
+
 function easyUpload_back(
     string $fileInputName, 
     string $type="image",
