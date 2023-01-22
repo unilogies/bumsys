@@ -5,7 +5,7 @@
  */
  
 // Set the php coockie id only visible over http
-//ini_set('session.cookie_httponly', true);
+ini_set('session.cookie_httponly', true);
 
 // Check if the PHP version is at leat 7.0
 if( version_compare(PHP_VERSION, '7.0.0') <= 0 ) {
