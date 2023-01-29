@@ -32,7 +32,7 @@
                     <th class="no-sort countTotal"><?php echo __("Purchased Return"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Stck.Trsfr.In"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Stck.Trsfr.Out"); ?></th>
-                    <th class="defaultOrder countTotal"><?php echo __("Total Sold"); ?></th>
+                    <th class="countTotal"><?php echo __("Total Sold"); ?></th>
                     <th class=""><?php echo __("Sold In"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Sales Return"); ?></th>
                     <th class="hideit no-sort countTotal"><?php echo __("Specimen"); ?></th>

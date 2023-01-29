@@ -184,7 +184,7 @@
                                                     "table"     => "bg_product_items",
                                                     "fields"    => "bg_item_product_id, product_name, product_unit, round(bg_product_price, 2) as bg_product_price, round(bg_product_qnt, 2) as bg_product_qnt",
                                                     "join"      => array(
-                                                        "left join {$table_prefix}products on bg_item_product_id = product_id"
+                                                        "left join {$table_prefeix}products on bg_item_product_id = product_id"
                                                     ),
                                                     "where"     => array(
                                                         "is_raw_materials = 0 and bg_product_id"     => $_GET["pid"]

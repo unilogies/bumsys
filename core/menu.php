@@ -53,13 +53,13 @@ $default_menu["Accounts"]["Receivable Report"] = array(
     "t_link"    => full_website_address() . "/accounts/total-receivable/",
     "title"     => "Receivable Amount",
     "t_icon"    => "fa fa-money",
-    "__?"       => current_user_can("amount_receivable_report.View")
+    "__?"       => current_user_can("transfer_money.View || transfer_money.Add || transfer_money.Edit || transfer_money.Delete")
 );
-$default_menu["Accounts"]["Payable Report"] = array(
+$default_menu["Accounts"]["Payble Report"] = array(
     "t_link"    => full_website_address() . "/accounts/total-payable/",
     "title"     => "Payable Amount",
     "t_icon"    => "fa fa-money",
-    "__?"       => current_user_can("amount_payable_report.View")
+    "__?"       => current_user_can("transfer_money.View || transfer_money.Add || transfer_money.Edit || transfer_money.Delete")
 );
 $default_menu["Accounts"]["Closings"] = array(
     "t_link"    => full_website_address() . "/accounts/closings/",
@@ -291,13 +291,6 @@ $default_menu["Sales"]["New Wastage Sale"] = array(
     "t_icon"    => "fa fa-plus",
     "__?"       => current_user_can("wastage_sales.Add")
 );
-$default_menu["Sales"]["Discounts"] = array(
-    "t_link"    => full_website_address() . "/sales/discounts/",
-    "title"     => "New Wastage Sale",
-    "t_icon"    => "fa fa-plus",
-    "__?"       => current_user_can("wastage_sales.Add")
-);
-
 
 // Product default_menu
 $default_menu["Products"] = array(
@@ -346,7 +339,7 @@ $default_menu["Products"]["Editions"] = array(
     "t_link"    => full_website_address() . "/products/product-editions/",
     "title"     => "Product Editions",
     "t_icon"    => "fa fa-filter",
-    "__?"       => current_user_can("product_variations.View || product_variations.Add || product_variations.Edit || product_variations.Delete")
+    "__?"       => current_user_can("product_units.View || product_units.Add || product_units.Edit || product_units.Delete")
 );
 $default_menu["Products"]["Brands"] = array(
     "t_link"    => full_website_address() . "/products/product-brands/",
@@ -398,7 +391,7 @@ $default_menu["Stock Management"]["Purchase List"] = array(
     "t_icon"    => "fa fa-shopping-bag",
     "__?"       => current_user_can("product_purchases.View || product_purchases.Add || product_purchases.Edit || product_purchases.Delete")
 );
-$default_menu["Stock Management"]["New Purchase"] = array(
+$default_menu["Stock Management"]["New Purchases"] = array(
     "t_link"    => full_website_address() . "/stock-management/new-purchase/",
     "title"     => "New Product Purchase",
     "t_icon"    => "fa fa-plus",
@@ -409,14 +402,14 @@ $default_menu["Stock Management"]["Purchase Return List"] = array(
     "t_link"    => full_website_address() . "/stock-management/purchase-return-list/",
     "title"     => "Purchase Return List",
     "t_icon"    => "fa fa-undo",
-    "__?"       => current_user_can("purchase_return.View || purchase_return.Add || purchase_return.Edit || purchase_return.Delete")
+    "__?"       => current_user_can("product_return.View || product_return.Add || product_return.Edit || product_return.Delete")
 );
 $default_menu["Stock Management"]["New Purchase Return"] = array(
     "t_link"    => full_website_address() . "/stock-management/new-purchase-return/",
     "title"     => "New Purchase Return",
     "t_icon"    => "fa fa-plus",
     "dload"     => true,
-    "__?"       => is_biller() and current_user_can("purchase_return.Add")
+    "__?"       => is_biller() and current_user_can("product_return.Add")
 );
 $default_menu["Stock Management"]["Stock Transfer List"] = array(
     "t_link"    => full_website_address() . "/stock-management/stock-transfer-list/",
@@ -435,14 +428,14 @@ $default_menu["Stock Management"]["Sales Return List"] = array(
     "t_link"    => full_website_address() . "/stock-management/sales-return-list/",
     "title"     => "Sale Return List",
     "t_icon"    => "fa fa-undo",
-    "__?"       => current_user_can("sale_return.View || sale_return.Add || sale_return.Edit || sale_return.Delete")
+    "__?"       => current_user_can("product_return.View || product_return.Add || product_return.Edit || product_return.Delete")
 );
 $default_menu["Stock Management"]["New Sales Return"] = array(
     "t_link"    => full_website_address() . "/stock-management/new-sales-return/",
     "title"     => "New Sale Return",
     "t_icon"    => "fa fa-plus",
     "dload"     => true, // This
-    "__?"       => is_biller() and current_user_can("sale_return.Add")
+    "__?"       => is_biller() and current_user_can("product_return.Add")
 );
 $default_menu["Stock Management"]["Batches"] = array(
     "t_link"    => full_website_address() . "/stock-management/batch-list/",
@@ -589,13 +582,13 @@ $default_menu["Settings"]["Backup"] = array(
     "t_link"    => full_website_address() . "/settings/backup/",
     "title"     => "Database and File Backup",
     "t_icon"    => "fa fa-database", // fa fa-download
-    "__?"       => current_user_can("settings_backup.View || settings_backup.Add")
+    "__?"       => current_user_can("module.View || module.Edit || module.Delete || module.Add")
 );
 $default_menu["Settings"]["Modules"] = array(
     "t_link"    => full_website_address() . "/settings/modules/",
     "title"     => "Modules",
     "t_icon"    => "fa fa-cube",
-    "__?"       => current_user_can("settings_module.View || settings_module.Edit || settings_module.Delete || settings_module.Add")
+    "__?"       => current_user_can("module.View || module.Edit || module.Delete || module.Add")
 );
 $default_menu["Settings"]["System Settings"] = array(
     "t_link"    => full_website_address() . "/settings/system-settings/",
@@ -670,12 +663,6 @@ $default_menu["Reports"]["Product Report"] = array(
     "title"     => "Product Report",
     "t_icon"    => "fa fa-cubes",
     "__?"       => current_user_can("reports_product.View")
-);
-$default_menu["Reports"]["Income Report"] = array(
-    "t_link"    => full_website_address() . "/reports/income-report/",
-    "title"     => "Income Report",
-    "t_icon"    => "fa fa-cubes",
-    "__?"       => current_user_can("reports_sales.View")
 );
 $default_menu["Reports"]["Product Visual Report"] = array(
     "t_link"    => full_website_address() . "/reports/product-visual-report/",
@@ -773,10 +760,4 @@ $default_menu["Hidden"]["Attach Sub Product"] = array(
     "t_icon"    => "fa fa-link",
     "dload"     => true,
     "__?"       => current_user_can("products.Add")
-);
-$default_menu["Hidden"]["Edit Specimen Copy"] = array (
-    "t_link"    => full_website_address() . "/marketing/edit-specimen-copy/",
-    "title"     => "Edit Specimen Copy",
-    "t_icon"    => "fa fa-university",
-    "__?"       => current_user_can("specimen_copy.Edit")
 );

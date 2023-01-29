@@ -115,10 +115,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewAccount") {
 
 /*************************** Accounts List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "accountList") {
-
-    if(current_user_can("accounts.View") !== true) {
-        return _e("Sorry! you do not have permission to view account list.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -267,17 +263,12 @@ if(isset($_GET['page']) and $_GET['page'] == "updateAccountBalance") {
     echo '{
         "title": "The account balance has been updated successfully."
     }';
-
 }
 
 
 
 /************************** Edit Accounts **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editAccount") {
-
-    if(current_user_can("accounts.Edit") !== true) {
-        return _e("Sorry! you do not have permission to edit account.");
-    }
 
     $selectAccount = easySelect(
         "accounts",
@@ -355,12 +346,11 @@ if(isset($_GET['page']) and $_GET['page'] == "editAccount") {
   }
   
   
-  //*******************************  Update Account ******************** */
+  //*******************************  Update User ******************** */
   if(isset($_GET['page']) and $_GET['page'] == "updateAccount") {
 
-
     if(current_user_can("accounts.Edit") !== true) {
-        return _e("Sorry! you do not have permission to edit account.");
+        return _e("Sorry! you do not have permission to add new Account.");
     }
   
     if(empty($_POST["accountName"])) {
@@ -397,7 +387,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editAccount") {
         _e($updateAccounts);
     }
   
-}
+  }
 
 
 /************************** Transfer Money **********************/
@@ -528,10 +518,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewTransfer") {
 
 /*************************** Transfer List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "transferList") {
-
-    if(current_user_can("transfer_money.View") !== true) {
-        return _e("Sorry! you do not have permission to view transfer money list.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -559,31 +545,19 @@ if(isset($_GET['page']) and $_GET['page'] == "transferList") {
         $requestData['length'] = $totalRecords;
     }
  
-    if( !empty($requestData["search"]["value"]) or 
-        !empty($requestData["columns"][1]['search']['value']) or
-        !empty($requestData["columns"][2]['search']['value']) or
-        !empty($requestData["columns"][3]['search']['value'])
-    
-    ) {  // get data with search
-
-        $dateRange[0] = "";
-        $dateRange[1] = "";
-        if(!empty($requestData["columns"][1]['search']['value'])) {
-            $dateRange = explode(" - ", safe_input($requestData["columns"][1]['search']['value']));
-        }
+    if(!empty($requestData["search"]["value"])) {  // get data with search
         
         $getData = easySelect(
             "transfer_money as transfer_money",
             "transfer_money_id, transfer_money_date, from_accounts.accounts_name as from_accounts_name, to_accounts.accounts_name as to_accounts_name, transfer_money_amount, transfer_money_description",
             array (
-                "inner join {$table_prefix}accounts as from_accounts on transfer_money_from = from_accounts.accounts_id",
-                "inner join {$table_prefix}accounts as to_accounts on transfer_money_to = to_accounts.accounts_id"
+                "inner join {$table_prefeix}accounts as from_accounts on transfer_money_from = from_accounts.accounts_id",
+                "inner join {$table_prefeix}accounts as to_accounts on transfer_money_to = to_accounts.accounts_id"
             ),
             array (
                 "transfer_money.is_trash"  => 0,
-                " AND transfer_money_from" =>  $requestData["columns"][2]['search']['value'],
-                " AND transfer_money_to" =>  $requestData["columns"][3]['search']['value'],
-                " AND transfer_money_date BETWEEN '{$dateRange[0]}' and '{$dateRange[1]}'"
+                " AND from_accounts.accounts_name LIKE" => $requestData['search']['value'] . "%",
+                " OR to_accounts.accounts_name LIKE" => $requestData['search']['value'] . "%"
             ),
             array (
                 $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
@@ -602,8 +576,8 @@ if(isset($_GET['page']) and $_GET['page'] == "transferList") {
             "transfer_money as transfer_money",
             "transfer_money_id, transfer_money_date, from_accounts.accounts_name as from_accounts_name, to_accounts.accounts_name as to_accounts_name, transfer_money_amount, transfer_money_description",
             array (
-                "inner join {$table_prefix}accounts as from_accounts on transfer_money_from = from_accounts.accounts_id",
-                "inner join {$table_prefix}accounts as to_accounts on transfer_money_to = to_accounts.accounts_id"
+                "inner join {$table_prefeix}accounts as from_accounts on transfer_money_from = from_accounts.accounts_id",
+                "inner join {$table_prefeix}accounts as to_accounts on transfer_money_to = to_accounts.accounts_id"
             ),
             array(
                 "transfer_money.is_trash"  => 0
@@ -661,10 +635,6 @@ if(isset($_GET['page']) and $_GET['page'] == "transferList") {
 
 /************************** Transfer Money **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editTransferMoney") {
-
-    if(current_user_can("transfer_money.Edit") !== true) {
-        return _e("Sorry! you do not have permission to edit transfer money.");
-    }
 
     // Include the modal header
     modal_header("Edit Transfer Money", full_website_address() . "/xhr/?module=accounts&page=updateTransferMoney");
@@ -740,7 +710,15 @@ if(isset($_GET['page']) and $_GET['page'] == "updateTransferMoney") {
 
 
     if(current_user_can("transfer_money.Edit") !== true) {
-        return _e("Sorry! you do not have permission to edit transfer money.");
+        echo '{
+            "title": "Sorry!",
+            "text": "'. __('you do not have permission to edit transfer money.') . '",
+            "showConfirmButton": true,
+            "showCloseButton": true,
+            "toast": false,
+            "icon": "error"
+        }';
+        return;
     }
 
     $transferedAmount = easySelect(
@@ -874,11 +852,6 @@ if(isset($_GET['page']) and $_GET['page'] == "newCapital") {
 /************************** Add New Capital **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewCapital") {
 
-
-    if(current_user_can("capital.Add") !== true) {
-        return _e("Sorry! you do not have permission to add capital.");
-    }
-
     if(empty($_POST["capitalReceivedDate"])) {
         return _e("Please select capital received date.");
     } elseif(empty($_POST["capitalAccounts"])) {
@@ -917,10 +890,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewCapital") {
 
 /*************************** Transfer List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "capitalList") {
-
-    if(current_user_can("capital.View") !== true) {
-        return _e("Sorry! you do not have permission to view capital list.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -952,7 +921,7 @@ if(isset($_GET['page']) and $_GET['page'] == "capitalList") {
             "capital as capital",
             "capital_received_date, accounts_name, capital_amounts, capital_description",
             array (
-                "inner join {$table_prefix}accounts on capital_accounts = accounts_id"
+                "inner join {$table_prefeix}accounts on capital_accounts = accounts_id"
             ),
             array (
                 "capital.is_trash"  => 0,
@@ -975,7 +944,7 @@ if(isset($_GET['page']) and $_GET['page'] == "capitalList") {
             "capital as capital",
             "capital_received_date, accounts_name, capital_amounts, capital_description",
             array (
-                "inner join {$table_prefix}accounts on capital_accounts = accounts_id"
+                "inner join {$table_prefeix}accounts on capital_accounts = accounts_id"
             ),
             array(
                 "capital.is_trash"  => 0
@@ -1060,10 +1029,6 @@ if(isset($_GET['page']) and $_GET['page'] == "newClosings") {
 /************************** Add New Capital **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewClosing") {
 
-    if(current_user_can("closings.Add") !== true) {
-        return _e("Sorry! you do not have permission to add closings.");
-    }
-
     if(empty($_POST["closingCustomer"])) {
         return _e("Please select the customer.");
     } elseif(empty($_POST["closingTitle"])) {
@@ -1103,11 +1068,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewClosing") {
 
 /*************************** Transfer List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "closingList") {
-
-
-    if(current_user_can("closings.View") !== true) {
-        return _e("Sorry! you do not have permission to view closing list.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1138,7 +1098,7 @@ if(isset($_GET['page']) and $_GET['page'] == "closingList") {
             "table"     => "closings as closings",
             "fields"    => "closings_id, closings_customer, customer_name, closings_title, closings_date",
             "join"      => array(
-                "left join {$table_prefix}customers on customer_id = closings_customer"
+                "left join {$table_prefeix}customers on customer_id = closings_customer"
             ),
             "where"     => array(
                 "closings.is_trash = 0",
@@ -1161,7 +1121,7 @@ if(isset($_GET['page']) and $_GET['page'] == "closingList") {
             "table"     => "closings as closings",
             "fields"    => "closings_id, closings_customer, customer_name, closings_title, closings_date",
             "join"      => array(
-                "left join {$table_prefix}customers on customer_id = closings_customer"
+                "left join {$table_prefeix}customers on customer_id = closings_customer"
             ),
             "where"     => array(
                 "closings.is_trash = 0"
@@ -1249,10 +1209,6 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteClosings") {
 /************************** Edit Closings **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editClosings") {
 
-    if(current_user_can("closings.Edit") !== true) {
-        return _e("Sorry! you do not have permission to edit closings.");
-    }
-
     // Include the modal header
     modal_header("Edit Closings", full_website_address() . "/xhr/?module=accounts&page=updateClosing");
     
@@ -1260,7 +1216,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editClosings") {
         "table"     => "closings as closings",
         "fields"    => "closings_id, closings_customer, customer_name, closings_title, closings_date",
         "join"      => array(
-            "left join {$table_prefix}customers on customer_id = closings_customer"
+            "left join {$table_prefeix}customers on customer_id = closings_customer"
         ),
         "where"     => array(
             "closings.is_trash = 0 and closings_id" => $_GET["id"]
@@ -1301,11 +1257,6 @@ if(isset($_GET['page']) and $_GET['page'] == "editClosings") {
 /************************** Add New Capital **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateClosing") {
 
-
-    if(current_user_can("closings.Edit") !== true) {
-        return _e("Sorry! you do not have permission to edit closings.");
-    }
-
     if(empty($_POST["closingCustomer"])) {
         return _e("Please select the customer.");
     } elseif(empty($_POST["closingTitle"])) {
@@ -1344,11 +1295,6 @@ if(isset($_GET['page']) and $_GET['page'] == "updateClosing") {
 
 /*************************** Amount receivable report ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "receivableReport") {
-
-
-    if(current_user_can("amount_receivable_report.View") !== true) {
-        return _e("Sorry! you do not have permission to view receivable report.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1402,9 +1348,9 @@ if(isset($_GET['page']) and $_GET['page'] == "receivableReport") {
                     if(payment_return_amount_before_filtered_date is null, 0, payment_return_amount_before_filtered_date)
             ), 2) as previous_balance,
             customer_phone, customer_address, upazila_name, district_name
-        from {$table_prefix}customers as customer
-        left join {$table_prefix}upazilas on customer_upazila = upazila_id
-        left join {$table_prefix}districts on customer_district = district_id
+        from {$table_prefeix}customers as customer
+        left join {$table_prefeix}upazilas on customer_upazila = upazila_id
+        left join {$table_prefeix}districts on customer_district = district_id
         left join (
             select
                 sales_customer_id,
@@ -1413,13 +1359,13 @@ if(isset($_GET['page']) and $_GET['page'] == "receivableReport") {
                 sum( case when is_return = 0 and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' then sales_shipping end ) as sales_shipping_in_filtered_date,
                 sum( case when is_return = 1 and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' then sales_grand_total end ) as product_returns_grand_total_in_filtered_date,
                 sum( case when is_return = 1 and sales_delivery_date < '{$dateRange[0]}' then sales_grand_total end ) as total_return_before_filtered_date
-            from {$table_prefix}sales where is_trash = 0 and sales_status = 'Delivered' group by sales_customer_id
+            from {$table_prefeix}sales where is_trash = 0 and sales_status = 'Delivered' group by sales_customer_id
         ) as sales on sales_customer_id = customer_id
         left join ( select
                 wastage_sale_customer,
                 sum( case when wastage_sale_date between '{$dateRange[0]}' and '{$dateRange[1]}' then wastage_sale_grand_total end ) as wastage_sale_grand_total_in_filtered_date,
                 sum( case when wastage_sale_date < '{$dateRange[0]}' then wastage_sale_grand_total end ) as wastage_sale_grand_total_before_filtered_date
-            from {$table_prefix}wastage_sale where is_trash = 0 group by wastage_sale_customer
+            from {$table_prefeix}wastage_sale where is_trash = 0 group by wastage_sale_customer
         ) as wastage_sale on wastage_sale_customer = customer_id
         left join ( select 
                 received_payments_from, 
@@ -1427,19 +1373,19 @@ if(isset($_GET['page']) and $_GET['page'] == "receivableReport") {
                 sum( case when date(received_payments_datetime) < '{$dateRange[0]}' then received_payments_amount end ) as received_payments_amount_before_filtered_date,
                 sum( case when date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' then received_payments_bonus end ) as received_payments_bonus_in_filtered_date,
                 sum( case when date(received_payments_datetime) < '{$dateRange[0]}' then received_payments_bonus end ) as received_payments_bonus_before_filtered_date
-            from {$table_prefix}received_payments where is_trash = 0 and received_payments_type != 'Discounts' group by received_payments_from
+            from {$table_prefeix}received_payments where is_trash = 0 and received_payments_type != 'Discounts' group by received_payments_from
         ) as received_payments on received_payments.received_payments_from = customer_id
         left join ( select 
                 received_payments_from,
                 sum( case when date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' then received_payments_amount end ) as discounts_amount_in_filtered_date,
                 sum( case when date(received_payments_datetime) < '{$dateRange[0]}' then received_payments_amount end ) as discounts_amount_before_filtered_date
-            from {$table_prefix}received_payments where is_trash = 0 and received_payments_type = 'Discounts' group by received_payments_from
+            from {$table_prefeix}received_payments where is_trash = 0 and received_payments_type = 'Discounts' group by received_payments_from
         ) as given_discounts on given_discounts.received_payments_from = customer_id
         left join (select
                 payments_return_customer_id,
                 sum( case when date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' then payments_return_amount end ) as payment_return_amount_in_filtered_date,
                 sum( case when date(payments_return_date) < '{$dateRange[0]}' then payments_return_amount end ) as payment_return_amount_before_filtered_date
-            from {$table_prefix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' group by payments_return_customer_id
+            from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' group by payments_return_customer_id
         ) as payment_return on payments_return_customer_id = customer_id
 
         where customer.is_trash = 0 and customer_name like '{$search}%'
@@ -1496,10 +1442,6 @@ if(isset($_GET['page']) and $_GET['page'] == "receivableReport") {
 
 /*************************** Amount payable report ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "payableReport") {
-
-    if(current_user_can("amount_payable_report.View") !== true) {
-        return _e("Sorry! you do not have permission to view payable report.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1538,23 +1480,23 @@ if(isset($_GET['page']) and $_GET['page'] == "payableReport") {
             if(totalBill is null, 0, totalBill) as totalBill,
             if(totalPaymentAmount is null, 0, totalPaymentAmount) as totalPaymentAmount,
             if(totalPaymentAdjustment is null, 0, totalPaymentAdjustment) as totalPaymentAdjustment
-        from {$table_prefix}companies as company
+        from {$table_prefeix}companies as company
         left join (select 
                 bills_company_id,
                 sum(bills_amount) as totalBill
-            from {$table_prefix}bills
+            from {$table_prefeix}bills
             where is_trash = 0 group by bills_company_id
         ) as bill on bills_company_id = company_id
         left join (select 
                 payment_to_company,
                 sum(payment_amount) as totalPaymentAmount
-            from {$table_prefix}payments
+            from {$table_prefeix}payments
             where is_trash = 0 and payment_type is not null group by payment_to_company
         ) as payment on payment_to_company = company_id
         left join (SELECT
                 pa_company,
                 sum(pa_amount) as totalPaymentAdjustment
-            from {$table_prefix}payment_adjustment where is_trash = 0 group by pa_company
+            from {$table_prefeix}payment_adjustment where is_trash = 0 group by pa_company
         ) as payment_adjustment on pa_company = company_id
 
         where company.is_trash = 0 and company_name like '{$search}%'

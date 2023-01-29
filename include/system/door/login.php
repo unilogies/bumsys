@@ -36,25 +36,19 @@ $errorMsgOnLogin = "";
 
 if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
 
-
     // Select the user
-    if(!empty($_POST["user-email"])) {
-
-        $selectUser = easySelectA(array(
-            "table"   => "users as user",
-            "fields"  => "user_id, user_emp_id, user_pass, user_language, user_email, user_name, user_status, user_homepage, 
-                        user_locked_reason, biller_shop_id, biller_accounts_id, biller_warehouse_id, biller_max_discount, allow_changing_price",
-            "join"    => array(
-                "left join {$table_prefix}billers on biller_user_id = user_id"
-            ),
-            "where"   => array(
-                "user.is_trash = 0 and ( user_email" => $_POST["user-email"],
-                " OR user_name" => $_POST["user-email"],
-                ")"
-            )
-        ));
-
-    }
+    $selectUser = easySelectA(array(
+        "table"   => "users as user",
+        "fields"  => "user_id, user_emp_id, user_pass, user_language, user_email, user_name, user_status, user_homepage, user_locked_reason, biller_shop_id, biller_accounts_id, biller_warehouse_id",
+        "join"    => array(
+            "left join {$table_prefeix}billers on biller_user_id = user_id"
+        ),
+        "where"   => array(
+            "user.is_trash = 0 and ( user_email" => $_POST["user-email"],
+            " OR user_name" => $_POST["user-email"],
+        ")"
+        )
+    ));
 
     // Validating the user and password
     if(empty($_POST["user-email"]) or empty($_POST["user-password"])) {
@@ -92,7 +86,7 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
             $failedAttemptInLastFiveMinuteForUser = easySelectD("
                 SELECT 
                     COUNT(*) AS totalAttempt 
-                FROM {$table_prefix}login_attempts
+                FROM {$table_prefeix}login_attempts
                 WHERE attempt_user_id = '{$selectUser["data"][0]["user_id"]}' and attempt_time >= NOW() - INTERVAL 5 MINUTE
             ")["data"][0]["totalAttempt"];
 
@@ -119,7 +113,7 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
          $failedAttemptInLastFiveMinuteForHost = easySelectD("
             SELECT 
                 COUNT(*) AS totalAttempt 
-            FROM {$table_prefix}login_attempts
+            FROM {$table_prefeix}login_attempts
             WHERE attempt_ipaddr = '{$get_user_ip}' and attempt_time >= NOW() - INTERVAL 5 MINUTE
         ")["data"][0]["totalAttempt"];
 
@@ -147,7 +141,7 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
         $users = $selectUser["data"][0];
 
         // Now set the employee id cookie. The cookie will be httponly
-        // The cookie destroy within 30 days. 
+        // The coockie destroy within 30 days. 
         setcookie("eid", $users["user_emp_id"], strtotime( '+30 days'), "/", "", "", true); // eid = employee id
 
         // Set language cookie
@@ -163,8 +157,8 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
         setcookie("currencySymbol", get_options("currencySymbol"), 0, "/");
         setcookie("currencySymbol", get_options("currencySymbol"), 0, "/");
 
-        // If keepAlive is set then add a keepAlive cookie. 
-        // This cookie can be retrived by javascript and destroy after browser is closed
+        // If keepAlive is set then add a keepAlive coockie. 
+        // This coockie can be retrived by javascript and destroy after browser is closed
         if(isset($_POST["keepAlive"])) {
             setcookie("keepAlive", true, -1, "/");
         } else {
@@ -185,8 +179,6 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
             $session_access_key = sha1($users["user_email"].$_SERVER["HTTP_USER_AGENT"].$_SERVER["REMOTE_ADDR"]);
 
         }
-
-        // $session_access_key = sha1($users["user_email"]);
 
 
         session_regenerate_id();
@@ -209,9 +201,6 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
             $_SESSION["sid"] = $users["biller_shop_id"];
             $_SESSION["aid"] = $users["biller_accounts_id"];
             $_SESSION["wid"] = $users["biller_warehouse_id"];
-            $_SESSION["allow_changing_price"] = $users["allow_changing_price"];
-            $_SESSION["maxDiscount"] = $users["biller_max_discount"];
-            set_local_storage("maxDiscount", $users["biller_max_discount"]);
         }
     
         // Last activity
@@ -290,7 +279,7 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
     
     <form action="<?php echo full_website_address(); ?>/login/" method="post">
       <div class="form-group has-feedback">
-        <input id="userEmail" type="text" name="user-email" class="form-control" value="<?php echo isset($_POST["user-email"]) ? safe_entities($_POST["user-email"]) : ""; ?>" placeholder="Username or Email" required>
+        <input id="userEmail" type="text" name="user-email" class="form-control" value="<?php echo isset($_POST["user-email"]) ? $_POST["user-email"] : ""; ?>" placeholder="Username or Email" required>
         <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
       </div>
       <div class="form-group has-feedback">

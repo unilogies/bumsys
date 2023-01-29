@@ -107,10 +107,6 @@ if(isset($_GET['page']) and $_GET['page'] == "newGroupPermission") {
 if(isset($_GET['page']) and $_GET['page'] == "addNewGroupPermission") {
 
 
-    if( !current_user_can("settings_group_permissions.Add") ) {
-        return _e("Sorry! you do not have permission to create group permission");
-    }
-
     if(empty($_POST["groupName"])) {
        return _e("Please Enter group Name");
     } else if (empty($_POST["groupPermission"])) {
@@ -139,10 +135,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewGroupPermission") {
 // Delete Group
 if(isset($_GET['page']) and $_GET['page'] == "deleteGroup") {
 
-    if( !current_user_can("settings_group_permissions.Delete") ) {
-        return _e("Sorry! you do not have permission to delete group permission");
-    }
-
     $deleteUserGroup = easyDelete(
         "user_group",
         array(
@@ -154,13 +146,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteGroup") {
         echo 1;
     } 
 
+    return;
 }
 
 if(isset($_GET['page']) and $_GET['page'] == "groupList") {
-
-    if( !current_user_can("settings_group_permissions.View") ) {
-        return _e("Sorry! you do not have permission to view group permission");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -269,10 +258,6 @@ if(isset($_GET['page']) and $_GET['page'] == "groupList") {
 //************************ Edit user permission ************************* */
 if(isset($_GET['page']) and $_GET['page'] == "editGroup") {
 
-    if( !current_user_can("settings_group_permissions.Edit") ) {
-        return _e("Sorry! you do not have permission to edit group permission");
-    }
-
     $selectGroup = easySelect(
         "user_group",
         "*",
@@ -286,7 +271,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editGroup") {
     $group_permission = unserialize( html_entity_decode($selectGroup["data"][0]["group_permission"]) ) ; // Permission Array
 
     // Include the modal header
-    modal_header("Edit Users Group", full_website_address() . "/xhr/?module=settings&page=updateGroup");
+    modal_header("Edit Users Group", full_website_address() . "/xhr/?module=settings&page=updategroup");
     
     ?>
             <div class="box-body">
@@ -380,11 +365,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editGroup") {
 
 
 //*********************************  Group Update ******************** */
-if(isset($_GET['page']) and $_GET['page'] == "updateGroup") {
-
-    if( !current_user_can("settings_group_permissions.Edit") ) {
-        return _e("Sorry! you do not have permission to edit group permission");
-    }
+if(isset($_GET['page']) and $_GET['page'] == "updategroup") {
 
     $updateGroup = easyUpdate(
         "user_group",
@@ -410,13 +391,13 @@ if(isset($_GET['page']) and $_GET['page'] == "updateGroup") {
 if(isset($_GET['page']) and $_GET['page'] == "newDepartment") {
 
     // Include the modal header
-    modal_header("Edit Users Group", full_website_address() . "/xhr/?module=settings&page=addNewDepartment");
+    modal_header("Edit Users Group", full_website_address() . "/xhr/?module=settings&page=addNewnewDepartment");
     
     ?>
 
         <div class="form-group">
             <label for="departmentName"><?= __("Department name:"); ?></label>
-            <input type="text" name="departmentName" class="form-control" id="departmentName" placeholder="Enter department Name">
+            <input type="text" name="departmentName" class="form-control" id="groupdepartmentNameName" placeholder="Enter department Name">
         </div>
 
     <?php
@@ -427,11 +408,8 @@ if(isset($_GET['page']) and $_GET['page'] == "newDepartment") {
 }
 
 /********************* Add new Department *******************/
-if(isset($_GET['page']) and $_GET['page'] == "addNewDepartment") {
+if(isset($_GET['page']) and $_GET['page'] == "addNewnewDepartment") {
     
-    if( !current_user_can("settings_department.Add") ) {
-        return _e("Sorry! you do not have permission to add department");
-    }
 
     if(empty($_POST["departmentName"])) {
        return _e("Please Enter department Name");
@@ -458,10 +436,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewDepartment") {
 
 /*************************** Department List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "departmentList") {
-
-    if( !current_user_can("settings_department.View") ) {
-        return _e("Sorry! you do not have permission to view department list");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -564,11 +538,8 @@ if(isset($_GET['page']) and $_GET['page'] == "departmentList") {
 
 
 /***************** Delete Department ****************/
+// Delete Group
 if(isset($_GET['page']) and $_GET['page'] == "deleteDepartment") {
-
-    if( !current_user_can("settings_department.Delete") ) {
-        return _e("Sorry! you do not have permission to delete department");
-    }
 
     $deleteData = easyDelete(
         "emp_department",
@@ -585,10 +556,6 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteDepartment") {
 /************************** Edit Department **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editDepartment") {
 
-    if( !current_user_can("settings_department.Edit") ) {
-        return _e("Sorry! you do not have permission to edit department");
-    }
-
     $selectGroup = easySelect(
         "emp_department",
         "*",
@@ -601,15 +568,16 @@ if(isset($_GET['page']) and $_GET['page'] == "editDepartment") {
     $department_name = $selectGroup["data"][0]["dep_name"];
 
     // Include the modal header
-    modal_header("Edit Department", full_website_address() . "/xhr/?module=settings&page=updateDepartment");
+    modal_header("Edit Users Group", full_website_address() . "/xhr/?module=settings&page=updateDepartment");
     
     ?>
-        <div class="form-group">
-            <label for="departmentName"><?= __("Department name:"); ?></label>
-            <input type="text" value = "<?php echo $department_name; ?>" name="departmentName" class="form-control" id="groupdepartmentNameName" placeholder="Enter department Name">
-        </div>
 
-        <input type="hidden" name="department_id" value="<?php echo safe_entities($_GET['id']); ?>">
+            <div class="form-group">
+                <label for="departmentName"><?= __("Department name:"); ?></label>
+                <input type="text" value = "<?php echo $department_name; ?>" name="departmentName" class="form-control" id="groupdepartmentNameName" placeholder="Enter department Name">
+            </div>
+
+            <input type="hidden" name="department_id" value="<?php echo safe_entities($_GET['id']); ?>">
 
     <?php
 
@@ -620,10 +588,6 @@ if(isset($_GET['page']) and $_GET['page'] == "editDepartment") {
 
 //*********************************  Update Department ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateDepartment") {
-
-    if( !current_user_can("settings_department.Edit") ) {
-        return _e("Sorry! you do not have permission to edit department");
-    }
 
     $updateDepartment = easyUpdate(
         "emp_department",
@@ -636,7 +600,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateDepartment") {
     );
 
     if($updateDepartment === true) {
-        _s("The department has been successfully updated.");
+        _s("User group successfully updated.");
     } else {
        _e($updateDepartment);
     }
@@ -685,14 +649,6 @@ if(isset($_GET['page']) and $_GET['page'] == "newShop") {
                 <input type="email" name="shopEmail" id="shopEmail" value = "" class="form-control">
             </div>
             <div class="form-group">
-                <label for="shopInvoiceType"><?= __("Shop Invoice Type:"); ?></label>
-                <select name="shopInvoiceType" id="shopInvoiceType" class="form-control">
-                    <option value="normal">Normal View</option>
-                    <option value="details">Details View</option>
-                    <option value="pos">For POS Printer</option>
-                </select>
-            </div>
-            <div class="form-group">
                 <label for="shopInvoiceFooter"><?= __("Shop Invoice Footer:"); ?></label>
                 <textarea name="shopInvoiceFooter" id="shopInvoiceFooter" rows="3" class="form-control"> </textarea>
             </div>
@@ -730,10 +686,6 @@ if(isset($_GET['page']) and $_GET['page'] == "newShop") {
 //*********************************  Add mew Shop ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "addNewShop") {
 
-    if( !current_user_can("settings_shops.Add") ) {
-        return _e("Sorry! you do not have permission to add shop");
-    }
-
     // Validate the Form
     if(empty($_POST["shopName"])) {
        return _e("Please enter shop name.");
@@ -769,7 +721,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewShop") {
             "shop_country"          => $_POST["shopCountry"],
             "shop_phone"            => $_POST["shopPhone"],
             "shop_email"            => $_POST["shopEmail"],
-            "shop_invoice_type"     => $_POST["shopInvoiceType"],
             "shop_invoice_footer"   => $_POST["shopInvoiceFooter"],
             "shop_logo"             => $shopLogo
         )
@@ -785,10 +736,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewShop") {
 
 /*************************** Department List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "shopList") {
-
-    if( !current_user_can("settings_shops.View") ) {
-        return _e("Sorry! you do not have permission to view shop list");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -915,10 +862,6 @@ if(isset($_GET['page']) and $_GET['page'] == "shopList") {
 /***************** Delete Shop ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteShop") {
 
-    if( !current_user_can("settings_shops.Delete") ) {
-        return _e("Sorry! you do not have permission to delete shop");
-    }
-
     $deleteData = easyDelete(
         "shops",
         array(
@@ -936,10 +879,6 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteShop") {
 
 /************************** Edit Department **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editShop") {
-
-    if( !current_user_can("settings_shops.Edit") ) {
-        return _e("Sorry! you do not have permission to edit shop");
-    }
 
     $selectShop = easySelect(
         "shops",
@@ -988,14 +927,6 @@ if(isset($_GET['page']) and $_GET['page'] == "editShop") {
             <div class="form-group">
                 <label for="shopEmail"><?= __("Shop Email:"); ?></label>
                 <input type="email" name="shopEmail" id="shopEmail" value = "<?php echo $shopData["shop_email"]; ?>" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="shopInvoiceType"><?= __("Shop Invoice Type:"); ?></label>
-                <select name="shopInvoiceType" id="shopInvoiceType" class="form-control select2">
-                    <option <?php echo $shopData["shop_invoice_type"] == "normal" ? "selected" : ""; ?> value="normal">Normal View</option>
-                    <option <?php echo $shopData["shop_invoice_type"] == "details" ? "selected" : ""; ?> value="details">Details View</option>
-                    <option <?php echo $shopData["shop_invoice_type"] == "pos" ? "selected" : ""; ?> value="pos">For POS Printer</option>
-                </select>
             </div>
             <div class="form-group">
                 <label for="shopInvoiceFooter"><?= __("Shop Invoice Footer:"); ?></label>
@@ -1067,12 +998,8 @@ if(isset($_GET['page']) and $_GET['page'] == "editShop") {
 
 }
 
-//*********************************  Update Shop ******************** */
+//*********************************  Update Department ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateShop") {
-
-    if( !current_user_can("settings_shops.Edit") ) {
-        return _e("Sorry! you do not have permission to edit shop");
-    }
 
     // Validate the Form
     if(empty($_POST["shopName"])) {
@@ -1120,7 +1047,6 @@ if(isset($_GET['page']) and $_GET['page'] == "updateShop") {
             "shop_country"          => $_POST["shopCountry"],
             "shop_phone"            => $_POST["shopPhone"],
             "shop_email"            => $_POST["shopEmail"],
-            "shop_invoice_type"     => $_POST["shopInvoiceType"],
             "shop_invoice_footer"   => $_POST["shopInvoiceFooter"]
         ),
         array(
@@ -1171,10 +1097,6 @@ if(isset($_GET['page']) and $_GET['page'] == "newTariffCharges") {
 
 // Add new Tariff
 if(isset($_GET['page']) and $_GET['page'] == "addNewTariffCharges") {
-
-    if( !current_user_can("settings_tariff_charges.Add") ) {
-        return _e("Sorry! you do not have permission to add tariff and charges");
-    }
   
     if(empty($_POST["tcName"])) {
         return _e("Please enter Tariff/Charges name.");
@@ -1207,10 +1129,6 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewTariffCharges") {
 
 /*************************** Tariff List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "tariffChargesList") {
-
-    if( !current_user_can("settings_tariff_charges.View") ) {
-        return _e("Sorry! you do not have permission to view tariff and charges");
-    }
       
     $requestData = $_REQUEST;
     $getData = [];
@@ -1222,7 +1140,7 @@ if(isset($_GET['page']) and $_GET['page'] == "tariffChargesList") {
         "tc_description"
     );
     
-    // Count Total records
+    // Count Total recrods
     $totalFilteredRecords = $totalRecords = easySelectA(array(
     "table" => "tariff_and_charges",
     "fields" => "count(*) as totalRow",
@@ -1296,10 +1214,6 @@ if(isset($_GET['page']) and $_GET['page'] == "tariffChargesList") {
 /***************** Delete Tariff ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteTariffCharges") {
 
-    if( !current_user_can("settings_tariff_charges.Delete") ) {
-        return _e("Sorry! you do not have permission to delete tariff and charges");
-    }
-
     $deleteData = easyDelete(
         "tariff_and_charges",
         array(
@@ -1318,10 +1232,6 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteTariffCharges") {
 
 /************************** Edit Tariff and Charges **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editTariffCharges") {
-
-    if( !current_user_can("settings_tariff_charges.Edit") ) {
-        return _e("Sorry! you do not have permission to edit tariff and charges");
-    }
 
     $tc = easySelect(
         "tariff_and_charges",
@@ -1361,12 +1271,8 @@ if(isset($_GET['page']) and $_GET['page'] == "editTariffCharges") {
   
 }
 
-// Update Tariff
+// Add new Tariff
 if(isset($_GET['page']) and $_GET['page'] == "updateTariffCharges") {
-
-    if( !current_user_can("settings_tariff_charges.Edit") ) {
-        return _e("Sorry! you do not have permission to edit tariff and charges");
-    }
   
     if(empty($_POST["tcName"])) {
         return _e("Please enter Tariff/Charges name.");
@@ -1374,7 +1280,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateTariffCharges") {
         return _e("Please enter Tariff/Charges value.");
       }
     
-    $updateTariff = easyUpdate(
+    $addTariff = easyUpdate(
         "tariff_and_charges",
         array(
             "tc_name"         => $_POST["tcName"],
@@ -1386,10 +1292,10 @@ if(isset($_GET['page']) and $_GET['page'] == "updateTariffCharges") {
         )
     );
   
-    if($updateTariff === true) {
+    if($addTariff === true) {
         _s("Successfully updated");
     } else {
-       _e($updateTariff);
+       _e($addTariff);
     }
   
 }
@@ -1399,13 +1305,9 @@ if(isset($_GET['page']) and $_GET['page'] == "updateTariffCharges") {
 // System Settings
 if(isset($_GET['page']) and $_GET['page'] == "saveSystemSettings") {
 
-    if( !current_user_can("settings_system.Edit") ) {
-        return _e("Sorry! you do not have permission to edit system settings");
-    }
-
     foreach($_POST as $option_name => $option_value) {
         
-        // If current option is not same with saved option value and isset the option, then update it
+        // If curent option is not same with saved option value and isset the option, then update it
         if( $option_value !== get_options($option_name)) {
 
             easyUpdate(
@@ -1489,9 +1391,6 @@ if(isset($_GET['page']) and $_GET['page'] == "newFirewallRole") {
 // Add new user group page
 if(isset($_GET['page']) and $_GET['page'] == "addNewFirewallRole") {
 
-    if( !current_user_can("settings_firewall_role.Add") ) {
-        return _e("Sorry! you do not have permission to add firewall role");
-    }
 
     if(empty($_POST["firewallStatus"])) {
        return _e("Please select status");
@@ -1524,12 +1423,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewFirewallRole") {
 }
 
 
-/*************************** Firewall role ***********************/
+/*************************** Tariff List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "firewallList") {
-
-    if( !current_user_can("settings_firewall_role.View") ) {
-        return _e("Sorry! you do not have permission to view firewall role");
-    }
       
     $requestData = $_REQUEST;
     $getData = [];
@@ -1586,7 +1481,7 @@ if(isset($_GET['page']) and $_GET['page'] == "firewallList") {
                                     <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=settings&page=editFirewallRole&id='. $value["fw_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=settings&page=editFirwallRole&id='. $value["fw_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
                                     <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=settings&page=deleteFirewallRole" data-to-be-deleted="'. $value["fw_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
                                     </ul>
                                 </div>';
@@ -1612,10 +1507,6 @@ if(isset($_GET['page']) and $_GET['page'] == "firewallList") {
 // Delete FireWall
 if(isset($_GET['page']) and $_GET['page'] == "deleteFirewallRole") {
 
-    if( !current_user_can("settings_firewall_role.Delete") ) {
-        return _e("Sorry! you do not have permission to delete firewall role");
-    }
-
     $deleteFirewall = easyPermDelete (
         "firewall",
         array(
@@ -1632,11 +1523,8 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteFirewallRole") {
 
 
 //************************ Create new group permission ************************* */
-if(isset($_GET['page']) and $_GET['page'] == "editFirewallRole") {
+if(isset($_GET['page']) and $_GET['page'] == "editFirwallRole") {
 
-    if( !current_user_can("settings_firewall_role.Edit") ) {
-        return _e("Sorry! you do not have permission to edit firewall role");
-    }
 
     $fw = easySelectA(array(
         "table"     => "firewall",
@@ -1689,9 +1577,6 @@ if(isset($_GET['page']) and $_GET['page'] == "editFirewallRole") {
 // Update firewall role
 if(isset($_GET['page']) and $_GET['page'] == "updateFirewallRole") {
 
-    if( !current_user_can("settings_firewall_role.Edit") ) {
-        return _e("Sorry! you do not have permission to edit firewall role");
-    }
 
     if(empty($_POST["firewallStatus"])) {
        return _e("Please select status");
@@ -1730,10 +1615,6 @@ if(isset($_GET['page']) and $_GET['page'] == "updateFirewallRole") {
 
 // Update firewall role
 if(isset($_GET['page']) and $_GET['page'] == "generateDatabaseBackup") {
-
-    if( !current_user_can("settings_backup.Add") ) {
-        return _e("Sorry! you do not have permission to take backup");
-    }
 
     if(empty($_POST["selectedTable"])) {
         return;

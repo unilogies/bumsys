@@ -1,7 +1,7 @@
 <?php
 // Database Configuration
 define('DB_HOST', 'localhost'); // Hostname
-define('DB_NAME', 'bumsys_db'); // Database Name
+define('DB_NAME', 'bumsys'); // Database Name
 define('DB_USER', 'root'); // Dtabase user name
 define('DB_PASSWORD', ''); // Database User Password
 
@@ -31,6 +31,6 @@ mysqli_report(MYSQLI_REPORT_OFF);
 $conn->get_all_error = array();
 
 // Table Prefix variable
-$table_prefix = TABLE_PREFIX;
+$table_prefeix = TABLE_PREFIX;
 
 ?>

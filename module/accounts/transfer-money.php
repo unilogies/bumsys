@@ -34,9 +34,9 @@
                 <thead>
                   <tr>
                     <th></th>
-                    <th style="width: 130px;"><?= __("Date"); ?></th>
-                    <th style="width: 180px;"><?= __("From Accounts"); ?></th>
-                    <th style="width: 180px;"><?= __("To Accounts"); ?></th>
+                    <th style="width: 50px;"><?= __("Date"); ?></th>
+                    <th style="width: 130px;"><?= __("From Accounts"); ?></th>
+                    <th style="width: 130px;"><?= __("To Accounts"); ?></th>
                     <th class="countTotal text-center"><?= __("Amount"); ?></th>
                     <th><?= __("Description"); ?></th>
                     <th><?= __("Action"); ?></th>
@@ -46,30 +46,9 @@
                 <tfoot>
                   <tr>
                     <th></th>
-                    <th class="no-print">
-                        <input style="width: 130px;" type="text" placeholder="<?= __("Select Date"); ?>" id="transferMoneyDate" class="form-control" autocomplete="off">
-                    </th>
-                    <th>
-                        <select style="width: 180px" id="transferMoneyFromAccounts" class="form-control select2" style="width: 100%">
-                            <option value="">All Accounts...</option>
-                            <?php
-                                $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), array("is_trash" => 0));
-                                foreach($selectAccounts["data"] as $accounts) {
-                                    echo "<option {$selected} value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
-                                }
-                            ?>
-                        </select>
-                    </th>
-                    <th>
-                        <select style="width: 180px" id="transferMoneyToAccounts" class="form-control select2" style="width: 100%">
-                            <option value="">All Accounts...</option>
-                            <?php
-                                foreach($selectAccounts["data"] as $accounts) {
-                                    echo "<option {$selected} value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
-                                }
-                            ?>
-                        </select>
-                    </th>
+                    <th><?= __("Date"); ?></th>
+                    <th><?= __("From Accounts"); ?></th>
+                    <th><?= __("To Accounts"); ?></th>
                     <th><?= __("Amount"); ?></th>
                     <th><?= __("Description"); ?></th>
                     <th><?= __("Action"); ?></th>
@@ -93,7 +72,4 @@
     
     var scrollY = "";
     var DataTableAjaxPostUrl = "<?php echo full_website_address(); ?>/xhr/?module=accounts&page=transferList";
-
-    BMS.FUNCTIONS.dateRangePickerPreDefined({selector: "#transferMoneyDate"});
-
   </script>

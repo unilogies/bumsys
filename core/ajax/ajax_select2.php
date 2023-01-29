@@ -417,11 +417,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productListForPos") {
 
     $selectProduct = easySelectA(array(
         "table"     => "products as product",
-        "fields"    => "product.product_id as product_id, brand_name, concat(product_name, ' ', if(product_group is null, '', product_group) ) as product_name, 
-                        round( COALESCE(purchase_price, product_purchase_price), 2) as product_purchase_price, 
-                        round( COALESCE(sale_price, product_sale_price), 2) as product_sale_price, 
-                        
-                        product_generic, concat( if(stock_in is null, 0, round(stock_in, 2)), ' ', if(product_unit is null, '', product_unit) ) as stock_in",
+        "fields"    => "product.product_id as product_id, brand_name, concat(product_name, ' ', if(product_group is null, '', product_group) ) as product_name, round(product_sale_price, 2) as product_sale_price, round(product_purchase_price, 2) as product_purchase_price, product_generic, concat( if(stock_in is null, 0, round(stock_in, 2)), ' ', if(product_unit is null, '', product_unit) ) as stock_in",
         "join"      => array(
             "left join (select -- make inner join to show only stock in product
                             vp_id,
@@ -430,15 +426,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productListForPos") {
                         {$warehouseFilter}
                         group by vp_id
             ) as pbs on pbs.vp_id = product.product_id",
-            // Because Of we have different price based on shop
-            "left join (SELECT
-                            product_id,
-                            purchase_price,
-                            sale_price
-                FROM {$table_prefix}product_price    
-                WHERE shop_id = '{$_SESSION['sid']}'
-            ) as product_price on  product_price.product_id = product.product_id ",
-            "left join {$table_prefix}product_brands on brand_id = product_brand_id"
+            "left join {$table_prefeix}product_brands on brand_id = product_brand_id"
         ),
         "where"     => array (
             "product.is_trash = 0 and is_disabled = 0 and product_parent_id is null {$searchQuery}"
@@ -490,12 +478,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productList") {
 
     $selectProduct = easySelectA(array(
         "table"     => "products as product",
-        "fields"    => "product.product_id as product_id, brand_name, concat(product_name, ' ', if(product_group is null, '', product_group) ) as product_name, 
-
-                        round( COALESCE(purchase_price, product_purchase_price), 2) as product_purchase_price, 
-                        round( COALESCE(sale_price, product_sale_price), 2) as product_sale_price, 
-                        
-                        product_generic, if(stock_in is null, 0, round(stock_in, 2)) as stock_in",
+        "fields"    => "product.product_id as product_id, brand_name, concat(product_name, ' ', if(product_group is null, '', product_group) ) as product_name, round(product_sale_price, 2) as product_sale_price, round(product_purchase_price, 2) as product_purchase_price, product_generic, if(stock_in is null, 0, round(stock_in, 2)) as stock_in",
         "join"      => array(
             "left join (select
                             vp_id,
@@ -503,21 +486,13 @@ if(isset($_GET['page']) and $_GET['page'] == "productList") {
                         from product_base_stock
                         group by vp_id
             ) as pbs on pbs.vp_id = product.product_id",
-            // Because Of we have different price based on shop
-            "left join (SELECT
-                            product_id,
-                            purchase_price,
-                            sale_price
-                FROM {$table_prefix}product_price    
-                WHERE shop_id = '{$_SESSION['sid']}'
-            ) as product_price on product_price.product_id = product.product_id ",
-            "left join {$table_prefix}product_brands on brand_id = product_brand_id"
+            "left join {$table_prefeix}product_brands on brand_id = product_brand_id"
         ),
         "where"     => array (
             "product.is_trash = 0 and is_disabled = 0 and product_parent_id is null {$searchQuery}"
         ),
         "orderby"   => array(
-            "product.product_id"    => "DESC"
+            "product_id"    => "DESC"
         ),
         "limit" => array(
             "start" => 0,
@@ -590,22 +565,20 @@ if(isset($_GET['page']) and $_GET['page'] == "productListAll") {
 // Select2 Customer List
 if(isset($_GET['page']) and $_GET['page'] == "customerList") {
     
-    $search = isset($_GET['q']) ? safe_input($_GET['q'])  : "";
+    $search = isset($_GET['q']) ? $_GET['q'] : "";
 
     $selectCustomer = easySelectA(array(
         "table"     => "customers as customer",
         "fields"    => "customer_id, customer_name, upazila_name, district_name",
         "join"      => array(
-            "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
-            "left join {$table_prefix}districts on customer_district = district_id"
+            "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
+            "left join {$table_prefeix}districts on customer_district = district_id"
         ),
         "where"     => array(
             "customer.is_trash = 0",
-            " and ( customer.customer_name LIKE '%{$search}%'",
+            " and customer.customer_name LIKE" =>  "%{$search}%",
             " or customer_phone LIKE" =>  "{$search}%",
-            " or district_name LIKE" =>  "{$search}%",
-            " or customer_id" =>  $search,
-            ")"
+            " or district_name LIKE" =>  "{$search}%"
         ),
         "limit"     => array(
             "start" => 0,
@@ -618,7 +591,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerList") {
     foreach($selectCustomer["data"] as $customers) {
         $select2Json[] = array(
             'id' => $customers['customer_id'],
-            'text' => "{$customers['customer_name']} ({$customers['customer_id']}), {$customers['upazila_name']}, {$customers['district_name']}"
+            'text' => "{$customers['customer_name']}, {$customers['upazila_name']}, {$customers['district_name']}"
         );
     }
 
@@ -713,7 +686,6 @@ if(isset($_GET['page']) and $_GET['page'] == "CompanyList") {
         array (
             "is_trash = 0 and (company_name LIKE '%". safe_input($search) ."%'",
             " OR company_phone LIKE" =>  "%{$search}%",
-            " OR company_id" =>  $search,
             ")",
             " AND company_type" => $companyType
         ),
@@ -729,7 +701,7 @@ if(isset($_GET['page']) and $_GET['page'] == "CompanyList") {
     foreach($selectCompany["data"] as $company) {
         $select2Json[] = array(
             'id' => $company['company_id'],
-            'text' => $company['company_name'] . " ({$company['company_id']})"
+            'text' => $company['company_name']
         );
     }
 
@@ -751,8 +723,8 @@ if(isset($_GET['page']) and $_GET['page'] == "instituteList") {
             " and institute_upazila"   => isset($_GET["upazila_id"]) ? $_GET["upazila_id"] : ""
         ),
         "join"  => array(
-            "left join {$table_prefix}upazilas on institute_upazila = upazila_id",
-            "left join {$table_prefix}districts on upazila_district_id = district_id"
+            "left join {$table_prefeix}upazilas on institute_upazila = upazila_id",
+            "left join {$table_prefeix}districts on upazila_district_id = district_id"
         )
     ));
 
@@ -911,7 +883,7 @@ if(isset($_GET['page']) and $_GET['page'] == "personList") {
         "table" => "persons as person",
         "fields"    => "person_id, person_full_name, institute_name",
         "join"  => array(
-            "left join {$table_prefix}institute on person_institute = institute_id"
+            "left join {$table_prefeix}institute on person_institute = institute_id"
         ),
         "where" => array(
             "person.is_trash = 0 and ( person_full_name LIKE '%". $personSearch ."%'",
@@ -1122,7 +1094,7 @@ if(isset($_GET['page']) and $_GET['page'] == "userList") {
         "table"   => "users as users",
         "fields"  => "user_id, emp_PIN, emp_firstname, emp_lastname, emp_positions",
         "join"    => array(
-            "left join {$table_prefix}employees on emp_id = user_emp_id"
+            "left join {$table_prefeix}employees on emp_id = user_emp_id"
         ),
         "where"   => array(
             "users.is_trash = 0 and emp_firstname LIKE '%". safe_input($search) ."%'",
@@ -1258,41 +1230,5 @@ if(isset($_GET['page']) and $_GET['page'] == "leadsDataSource") {
     echo html_entity_decode(json_encode($select2Json));
 
 }
-
-
-
-// Select2 Subject List
-if(isset($_GET['page']) and $_GET['page'] == "callReasonList") {
-    
-    $search = isset($_GET['q']) ? $_GET['q'] : "";
-
-    $selectPersonTag = easySelectA(array(
-        "table"   => "calls",
-        "fields"  => "call_reason",
-        "where"   => array(
-            "call_reason LIKE" =>  "%{$search}%"
-        ),
-        "groupby" => "call_reason",
-        "limit"   => array (
-            "start" => 0,
-            "length" => 25
-        )
-    ));
-
-    $select2Json = [];
-    
-    if($selectPersonTag) {
-        foreach($selectPersonTag["data"] as $subject) {
-            $select2Json[] = array(
-                'id' => $subject['call_reason'],
-                'text' => $subject['call_reason']
-            );
-        }
-    }
-
-    echo html_entity_decode(json_encode($select2Json));
-
-}
-
 
 ?>

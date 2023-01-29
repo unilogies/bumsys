@@ -5,8 +5,8 @@
     "payments",
     "*",
     array (
-      "left join {$table_prefix}employees on payment_to_employee = emp_id",
-      "left join {$table_prefix}companies on payment_to_company = company_id"
+      "left join {$table_prefeix}employees on payment_to_employee = emp_id",
+      "left join {$table_prefeix}companies on payment_to_company = company_id"
     ),
     array (
       "payment_id"  => $_GET["id"]
@@ -66,7 +66,7 @@
         "table" => "payment_items",
         "fields" => " combine_description(payment_items_type, payment_category_name) as payment_type, payment_items_amount, payment_items_description",
         "join"  => array(
-          "left join {$table_prefix}payments_categories on payment_items_category_id = payment_category_id"
+          "left join {$table_prefeix}payments_categories on payment_items_category_id = payment_category_id"
         ),
         "where" => array (
           "payment_items_payments_id" => $_GET["id"]

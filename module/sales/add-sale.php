@@ -157,12 +157,12 @@
                                   <div class="modal-body">
                                       <div class="form-group">
                                           <label for="productSaleItemPrice"><?php echo __("Price"); ?></label>
-                                          <input <?php echo $_SESSION["allow_changing_price"] ?: "disabled"; ?> type="text" id="productSaleItemPrice" class="form-control" value=""
+                                          <input type="text" id="productSaleItemPrice" class="form-control" value=""
                                               onclick="this.select()">
                                       </div>
                                       <div class="form-group">
                                           <label for="productSaleItemDiscount"><?php echo __("Discount"); ?></label>
-                                          <input <?php echo $_SESSION["allow_changing_price"] ?: "disabled"; ?> type="text" id="productSaleItemDiscount" class="form-control" value=""
+                                          <input type="text" id="productSaleItemDiscount" class="form-control" value=""
                                               onclick="this.select()">
                                       </div>
                                       <div class="form-group">
@@ -333,7 +333,7 @@
                                                     <select name="salesStatus" id="salesStatus" class="form-control select2" style="width: 100%;">
                                                         <option value="">Select Status...</option>
                                                         <?php 
-                                                            $saleStatus = array('Order Placed', 'In Production', 'Processing', 'Confirmed', 'Hold', 'Delivered', 'Cancelled');
+                                                            $saleStatus = array('Order Placed', 'In Production', 'Processing', 'Hold', 'Delivered', 'Cancelled');
                                                             foreach($saleStatus as $status) {
                                                                 $selected = $status === "Delivered" ? "selected" : "";
                                                                 echo "<option {$selected} value='{$status}'>{$status}</option>";
@@ -481,15 +481,10 @@
                                         </div>
 
                                         <div class="clearfix"></div>
-                                        <br/>
-                                        <div class="form-group col-md-6">
+
+                                        <div class="form-group">
                                             <label for="salesNote"><?php echo __("Sale note:"); ?></label>
                                             <textarea name="salesNote" id="salesNote" rows="4"
-                                                class="form-control"></textarea>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                            <label for="salesShipingAddress"><?php echo __("Shipping Address:"); ?></label>
-                                            <textarea name="salesShipingAddress" id="salesShipingAddress" rows="4"
                                                 class="form-control"></textarea>
                                         </div>
                                         <div id="posErrorMsg"></div>
@@ -501,7 +496,6 @@
                                         <button name="posAction" value="sale_is_hold" type="submit" class="posSubmit btn btn-warning"><i class="fa fa-pause-circle"></i> <?php echo __("Hold"); ?></button>
                                         <button name="posAction" value="sale_is_confirmed" type="submit" class="posSubmit btn btn-success"><i class="fa fa-check-circle"></i> <?php echo __("Confirm"); ?></button>
                                     </div>
-                                    
                               </div>
                               <!-- /.modal-content -->
                           </div>

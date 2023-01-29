@@ -38,7 +38,7 @@
                         "users",
                         "user_id, emp_PIN, emp_firstname, emp_lastname",
                         array (
-                          "left join {$table_prefix}employees on user_emp_id = emp_id"
+                          "left join {$table_prefeix}employees on user_emp_id = emp_id"
                         )
                       );
 

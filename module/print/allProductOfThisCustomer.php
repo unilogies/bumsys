@@ -20,17 +20,17 @@
                             if(purchased_qnt is null, 0, sum(purchased_qnt)) -
                             if(return_qnt is null, 0, sum(return_qnt)) 
                         ) as purchased_qnt
-                    from {$table_prefix}products
+                    from {$table_prefeix}products
                     left join( SELECT
                                 stock_product_id,
                                 stock_sales_id,
                                 sum(CASE WHEN stock_type = 'sale' then stock_item_qty end) as purchased_qnt,
                                 sum(CASE WHEN stock_type = 'sale-return' then stock_item_qty end) as return_qnt
-                            from {$table_prefix}product_stock
+                            from {$table_prefeix}product_stock
                             where is_trash = 0 and stock_type in ('sale', 'sale-return')
                             group by stock_sales_id, stock_product_id
                     ) as product_stock on stock_product_id = product_id
-                    left join {$table_prefix}sales as sales on stock_sales_id = sales_id
+                    left join {$table_prefeix}sales as sales on stock_sales_id = sales_id
                     where sales.is_trash = 0 and sales.is_wastage = 0 and sales.sales_customer_id = '{$cid}'
                     group by stock_product_id
                     order by purchased_qnt DESC

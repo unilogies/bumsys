@@ -2,6 +2,14 @@
 
 $getData = $_POST; 
 
+//var_dump(min($getData["productQnt"]) < 0);
+
+
+
+//print_r($getData);
+
+//exit();
+
 $salesDate = $getData["salesDate"];
 
 $customerId = $getData["customersId"];
@@ -10,6 +18,7 @@ $salesQuantity = array_sum($getData["productQnt"]);
 
 $salesShippingCharge = empty($getData["shippingCharge"]) ? 0 : $getData["shippingCharge"];
 $salesTotalItems = count($getData["productID"]);
+$salesNote = $getData["salesNote"];
 
 
 
@@ -35,8 +44,7 @@ if( isset($_POST["salesId"]) ) { // If there is a sales ID then update the sales
             "sales_total_packets"           => $getData["totalPackets"],
             "sales_tariff_charges_details"  => serialize( array("tariff" => $getData["tariffChargesName"], "value" => $getData["tariffChargesAmount"]) ),
             "sales_by_pos"                  => 1,
-            "sales_note"                    => $getData["salesNote"],
-            "sales_shipping_address"        => $getData["salesShipingAddress"],
+            "sales_note"                    => $salesNote,
             "is_wastage"                    => ( isset($getData["saleOptions"]) and $getData["saleOptions"] === "wastage" ) ? 1 : 0
             //"is_return"                     => ( isset($getData["saleOptions"]) and $getData["saleOptions"] === "return" ) ? 1 : 0,
         ),
@@ -95,8 +103,7 @@ if( isset($_POST["salesId"]) ) { // If there is a sales ID then update the sales
             "sales_total_packets"           => $getData["totalPackets"],
             "sales_tariff_charges_details"  => serialize( array("tariff" => $getData["tariffChargesName"], "value" => $getData["tariffChargesAmount"]) ),
             "sales_by_pos"                  => 1,
-            "sales_note"                    => $getData["salesNote"],
-            "sales_shipping_address"        => $getData["salesShipingAddress"],
+            "sales_note"                    => $salesNote,
             "is_wastage"                    => ( isset($getData["saleOptions"]) and $getData["saleOptions"] === "wastage" ) ? 1 : 0,
             //"is_return"                     => ( isset($getData["saleOptions"]) and $getData["saleOptions"] === "return" ) ? 1 : 0
             "is_exchange"                   => min($getData["productQnt"]) < 0 ? 1 : 0 // if there negative quantity then mark as exchange
@@ -110,7 +117,7 @@ if( isset($_POST["salesId"]) ) { // If there is a sales ID then update the sales
 
         $returnError = array (
             "saleStatus"   => "error",
-            "msg"  =>  __("An unknown error occurred. Please contact with the administrator.")
+            "msg"  =>  __("An unknown error occured. Please contact with the administrator.")
         );
 
         echo json_encode($returnError);
@@ -130,7 +137,7 @@ $salesGrandTotal = 0;
 $salesChanges = 0;
 
 
-$insertSaleItems = "INSERT INTO {$table_prefix}product_stock(
+$insertSaleItems = "INSERT INTO {$table_prefeix}product_stock(
     stock_type,
     stock_entry_date,
     stock_sales_id,
@@ -303,7 +310,7 @@ foreach($getData["productID"] as $key => $productId) {
                         bg_product_qnt
                         ",
         "join"      => array(
-            "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id"
+            "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id"
         ),
         "where"     => array(
             "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
