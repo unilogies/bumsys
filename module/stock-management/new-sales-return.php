@@ -117,7 +117,7 @@
                                                     round(sales_discount, 2) as sales_discount, sales_tariff_charges, sales_tariff_charges_details, round(sales_shipping, 2) as sales_shipping, 
                                                     round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, sales_change, sales_due",
                                     "join"      => array(
-                                        "left join {$table_prefeix}customers on customer_id = sales_customer_id"
+                                        "left join {$table_prefix}customers on customer_id = sales_customer_id"
                                     ),
                                     "where"     => array(
                                         "sales_id"  => $_GET["sale_id"]
@@ -227,8 +227,8 @@
                                                                 round(stock_item_qty, 2) as stock_item_qty, round(stock_item_discount, 2) as stock_item_discount, 
                                                                 round(stock_item_subtotal, 2) as stock_item_subtotal",  
                                                 "join"      => array(
-                                                    "left join {$table_prefeix}products on product_id = stock_product_id",
-                                                    "left join {$table_prefeix}product_batches on batch_id = stock_batch_id"
+                                                    "left join {$table_prefix}products on product_id = stock_product_id",
+                                                    "left join {$table_prefix}product_batches on batch_id = stock_batch_id"
                                                 ),
                                                 "where"     => array(
                                                     "stock_sales_id"    => $_GET["sale_id"]

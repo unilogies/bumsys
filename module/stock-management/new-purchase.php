@@ -85,6 +85,14 @@
             background: transparent;
         }
 
+        .stock_col > span {
+            display: inline-block;
+        }
+        .stock_col > span:not(:last-child) {
+            border-right: 1px solid;
+            padding-right: 6px;
+        }
+
     </style>
 
     <!-- Main content -->
@@ -123,6 +131,7 @@
                             <select name="purchaseStatus" id="purchaseStatus" class="form-control">
                                 <option value="Received">Received</option>
                                 <option value="Ordered">Ordered</option>
+                                <option value="Pending">Pending</option>
                             </select>
                         </div>
                         <div class="form-group col-sm-3">
@@ -194,10 +203,11 @@
                                     <tr class="bg-primary">
                                         <th class="col-md-4 text-center"><?= __("Product Name"); ?></th>
                                         <th class="col-md-2 text-center"><?= __("Batch No"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Quantity"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Unit"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Price"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Discount"); ?></th>
+                                        <th style="width: 165px;" class="text-center"><?= __("Alert | Sold | Stock Qty"); ?></th>
+                                        <th class="text-center"><?= __("Quantity"); ?></th>
+                                        <th class="text-center"><?= __("Unit"); ?></th>
+                                        <th class="text-center"><?= __("Price"); ?></th>
+                                        <th class="text-center"><?= __("Discount"); ?></th>
                                         <th class="text-center"><?= __("Subtotal"); ?></th>
                                         <th style="width: 30px !important;">
                                             <i class="fa fa-trash-o" style="opacity:0.5; filter:alpha(opacity=50);"></i>
@@ -233,6 +243,7 @@
                                     <p class="text-center">-- <?= __("OR"); ?> --</p>
                                     <div class="text-center">
                                         <button data-toggle="modal" data-target="#browseProduct" type="button" class="btn btn-info"><i class="fa fa-folder-open"></i> <?= __("browse Product"); ?></button>
+                                        <button data-toggle="modal" data-target="#selectProductByBrand" type="button" class="btn btn-info"><i class="fa fa-folder-open"></i> <?= __("Select Product"); ?></button>
                                     </div>
                                     <br/>
 
@@ -270,6 +281,48 @@
                                         <!-- /. Browse Product modal-dialog -->
                                     </div>
                                     <!-- /.Browse Product modal -->
+
+
+                                    <!-- Select Product -->
+                                    <div class="modal fade" id="selectProductByBrand">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span></button>
+                                                    <h4 class="modal-title"><?= __("Select Products by Brand"); ?> </h4>
+                                                </div>
+                                                <div class="modal-body">
+
+      
+                                                    <div class="row">
+                                                        <div class="form-group col-md-6">
+                                                            <label for="productBrandSelect"><?php echo __("Brand:"); ?></label>
+                                                            <select name="productBrandSelect" id="productBrandSelect" class="form-control select2Ajax" select2-create-new-url="<?php echo full_website_address(); ?>/xhr/?tooltip=true&module=products&page=newProductBrand" select2-ajax-url="<?php echo full_website_address(); ?>/info/?module=select2&page=productBrandList">
+                                                                <option value=""><?php echo __("Select Brand"); ?>....</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label for="filterReorderQty"><?php echo __("Filter reorder quantity :"); ?></label>
+                                                            <select name="filterReorderQty" id="filterReorderQty" class="form-control">
+                                                                <option value="Yes">Yes</option>
+                                                                <option value="No">No</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </div>
+
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><?= __("Close"); ?></button>
+                                                    <input type="button" id="loadBrandProducts" value="Load Products" class="btn btn-primary">
+                                                </div>
+                                            </div>
+                                            <!-- /. Select Product-content -->
+                                        </div>
+                                        <!-- /. Select Product-dialog -->
+                                    </div>
+                                    <!-- /.Select Product -->
 
                                 </div>
 
@@ -524,6 +577,70 @@
             $("#hiddenItem").css("display", "none");
 
         }
+    });
+
+    $(document).on("click", "#loadBrandProducts", function() {
+
+        var brand_id = $("#productBrandSelect").val();
+        var filter_reorder_qty = $("#filterReorderQty").val();
+
+        if(brand_id === "") {
+
+            alert("Please select the brand");
+
+        } else {
+
+            $.ajax({
+                url: full_website_address + `/info/?module=data&page=productListByBrand&brand_id=${brand_id}&frq=${filter_reorder_qty}`,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (products, status) {
+
+
+                    var productList = "";
+                    products.forEach(product => {
+
+                        var productBatchHtml = "<input type='hidden' name='productBatch[]' value=''>";
+                        /** check if the product has expiry date */
+                        if( product.hed !== undefined && product.hed === "1" && $("#purchaseStatus").val() !== "Ordered" ) {
+
+                            productBatchHtml = `<select name="productBatch[]" id="productBatchFor${product.pid}" class="form-control select2Ajax" select2-create-new-url="<?php echo full_website_address(); ?>/xhr/?tooltip=true&module=stock-management&page=newBatchForSelectedProduct&pid=${product.pid}" select2-ajax-url="<?php echo full_website_address(); ?>/info/?module=select2&page=batchList&pid=${product.pid}" required>
+                                                    <option value=""><?= __("Select Batch"); ?>....</option>
+                                                </select>`;
+                        }
+
+                        var itemQnt = product.iq ? parseFloat(product.iq).toFixed(0) : 1;
+
+                        productList += `<tr>
+                            <input type="hidden" name="productID[]" class="productID" value="${product.pid}">
+                            <td class="col-md-4">${product.pn}</td>
+                            <td class="col-md-2">${productBatchHtml}</td>
+                            <td class="stock_col" style="width: 155px;"><span>${product.alertq}</span> <span>${product.soldq}</span> <span>${product.stockq}</span></td>
+                            <td><input onclick = "this.select()" type="text" name="productQnt[]" value="0" class="productQnt form-control text-center"></td>
+                            <td>${product.pu}</td>
+                            <td class="text-right"><input onclick = "this.select()" type="text" name="productPurchasePrice[]" value="${product.pp}" class="productPurchasePrice form-control text-center" step="any"></td>
+                            <input type="hidden" name="productMainPurchasePrice[]" class="productMainPurchasePrice" value="${product.pp}" step="any">
+                            <td class="text-right"><input onclick = "this.select()" type="text" name="productPurchaseDiscount[]" value="0" placeholder="10% or 10" class="productPurchaseDiscount form-control text-center"></td>
+                            <td class="text-right subTotal">0.00</td>
+                            <td style="width: 30px; !important">
+                                <i style="cursor: pointer;" class="fa fa-trash-o removeThisProduct"></i>
+                            </td>
+                        </tr>`;
+
+                    });
+
+
+                    $("#productTable > tbody").html(productList);
+                    $("#totalItems").html( products.length + "(0)" );
+
+                }
+
+
+            });
+
+        }
+
+
     });
 
 </script>

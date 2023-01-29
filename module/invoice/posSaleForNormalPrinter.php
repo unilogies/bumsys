@@ -5,7 +5,7 @@ $selectSale = easySelect(
     "sales",
     "*",
     array(
-        "left join {$table_prefeix}customers on sales_customer_id = customer_id"
+        "left join {$table_prefix}customers on sales_customer_id = customer_id"
     ),
     array(
         "sales_id"  => $_GET["id"]
@@ -26,8 +26,8 @@ $selectSalesItems = easySelectA(array(
     "table"   => "product_stock",
     "fields"  => "stock_item_price, stock_item_qty, stock_item_discount, stock_item_subtotal, product_name, if(batch_number is null, '', concat('(', batch_number, ')') ) as batch_number",
     "join"    => array(
-        "left join {$table_prefeix}products on stock_product_id = product_id",
-        "left join {$table_prefeix}product_batches as product_batches on stock_product_id = product_batches.product_id and stock_batch_id = batch_id"
+        "left join {$table_prefix}products on stock_product_id = product_id",
+        "left join {$table_prefix}product_batches as product_batches on stock_product_id = product_batches.product_id and stock_batch_id = batch_id"
     ),
     "where" => array(
         "is_bundle_item = 0 and stock_sales_id"  => $_GET["id"],
@@ -48,17 +48,9 @@ $sales = $selectSale["data"][0];
 <div class="shopLogo text-center">
 
     <?php
-    $selectShop = easySelect(
-        "shops",
-        "shop_name, shop_invoice_footer",
-        array(),
-        array(
-            "shop_id" => $_SESSION["sid"]
-        )
-    );
 
     if (get_options("invoiceShowShopLogo")) {
-        echo '<img style="width: 486px;" src="'. full_website_address() .'/images/?for=shopLogo&id='. $_SESSION["sid"] .'" alt="' . $selectShop['data'][0]['shop_name'] . '">';
+        echo '<img style="width: 486px;" src="'. full_website_address() .'/images/?for=shopLogo&id='. $_SESSION["sid"] .'" alt="' . $selectShop['shop_name'] . '">';
     }
 
     ?>
@@ -200,7 +192,7 @@ $sales = $selectSale["data"][0];
 
 <div style="padding: 9px; border: 1px solid #ddd; border-radius: 3px; background-color: #ddd;">
     <p>
-        <?php echo $selectShop['data'][0]["shop_invoice_footer"]; ?>
+        <?php echo $selectShop["shop_invoice_footer"]; ?>
     </p>
 </div>
 

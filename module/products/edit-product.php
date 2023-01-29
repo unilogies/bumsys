@@ -7,11 +7,23 @@ if(!empty($_GET["pid"]) ) {
         "fields"    => "product_name, product_type, product_code, product_group, product_variations, has_sub_product, product_packet_qnt, category_name, product_category_id, 
                         product_edition, product_distributor_discount, product_wholesaler_discount, product_retailer_discount, product_consumer_discount,
                         brand_name, product_brand_id, product_generic, product_pages, product_isbn, product_published_date, 
-                        round(product_purchase_price, 2) as product_purchase_price, round(product_sale_price, 2) as product_sale_price, product_initial_stock, has_expiry_date, 
+
+                        round( COALESCE(purchase_price, product_purchase_price)  , 2) as product_purchase_price, 
+                        round( COALESCE(sale_price, product_sale_price) , 2) as product_sale_price, 
+                        
+                        product_initial_stock, has_expiry_date, 
                         product_weight, product_width, product_height, product_alert_qnt, product_description, maintain_stock, is_disabled",
         "join"      => array(
-            "left join {$table_prefeix}product_category on product_category_id = category_id",
-            "left join {$table_prefeix}product_brands on brand_id = product_brand_id"
+            "left join {$table_prefix}product_category on product_category_id = category_id",
+            "left join {$table_prefix}product_brands on brand_id = product_brand_id",
+            // Because Of we have different price based on shop
+            "left join (SELECT
+                            product_id,
+                            purchase_price,
+                            sale_price
+                FROM {$table_prefix}product_price    
+                WHERE shop_id = '{$_SESSION['sid']}'
+            ) as product_price using(product_id) "
         ),
         "where"     => array(
             "product_id"    => $_GET["pid"]
@@ -129,7 +141,7 @@ if(!empty($_GET["pid"]) ) {
                             <input type="text" name="productName" id="productName" value="<?php echo $product["product_name"]; ?>" class="form-control" required>
                             <input type="hidden" name="product_id" value="<?php echo safe_entities($_GET["pid"]); ?>">
                         </div>
-                        <div class="form-group col-md-3 required">
+                        <div class="form-group col-lg-2 col-md-3 required">
                             <?php
                                 if( $product["product_type"] === "Child" ) {
                                     echo "<div style='margin: 0' class='alert alert-warning'>Product type can not be changed for this product.</div>";
@@ -147,9 +159,33 @@ if(!empty($_GET["pid"]) ) {
                             </select>
                             <?php } ?>
                         </div>
-                        <div class="form-group required col-md-3">
+                        <div class="form-group required col-lg-2 col-md-3">
                             <label for="productCode"><?php echo __("Product Code:"); ?></label>
                             <input type="text" name="productCode" id="productCode" value="<?php echo $product["product_code"]; ?>" onclick="select()" class="form-control" required>
+                        </div>
+                        <div class="form-group col-lg-2 col-md-3">
+                            <label for="productEdition"><?php echo __("Product Edition:"); ?></label>
+                            <select name="productEdition" id="productEdition" class="form-control">
+                                <option value=""><?= __("Select Editions..."); ?></option>
+                                <?php 
+
+                                    $productEdition = easySelectA(array(
+                                        "table"   => "product_editions",
+                                        "fields"  => "edition_name",
+                                        "where"    => array(
+                                            "is_trash = 0"
+                                        )
+                                    ));
+                                    
+                                    if($productEdition) {
+                                        foreach($productEdition["data"] as $key => $value) {
+                                            $selected = $product["product_edition"] === $value["edition_name"] ? "selected" : "";
+                                            echo "<option {$selected} value='{$value['edition_name']}'>{$value['edition_name']}</option>";
+                                        }
+                                    }
+                                
+                                ?>
+                            </select>
                         </div>
                         <div class="form-group required col-lg-4 col-md-6">
                             <label for="productCategory"><?php echo __("Product Category:"); ?></label>
@@ -234,7 +270,6 @@ if(!empty($_GET["pid"]) ) {
                     </div>
 
 
-
                     <div class="row">
 
                         <div class="form-group col-md-2 required">
@@ -244,7 +279,14 @@ if(!empty($_GET["pid"]) ) {
                         </div>
                         <div class="form-group col-md-2 required">
                             <label for="productSalePrice"><?php echo __("Sale Price"); ?></label>
-                            <input type="number" name="productSalePrice" id="productSalePrice" value="<?php echo $product["product_sale_price"]; ?>" class="form-control" step="any" required>
+
+                            <div class="input-group">
+                                <input type="number" name="productSalePrice" id="productSalePrice" value="<?php echo $product["product_sale_price"]; ?>" class="form-control" step="any" required>
+                                <div data-toggle="tooltip" data-placement="top" title="Tick to update price on all shops" class="input-group-addon">
+                                    <input type="checkbox" name="updatePriceOnAllShop">
+                                </div>
+                            </div>
+                            
                         </div>
                         <div class="form-group col-md-2">
                             <label for="productDistributorDiscount"><?php echo __("Distributor Discount:"); ?></label>
@@ -285,7 +327,7 @@ if(!empty($_GET["pid"]) ) {
                             <input type="text" name="productHeight" id="productHeight" value="<?php echo $product["product_height"]; ?>" class="form-control">
                         </div>
                         <div class="form-group col-md-2">
-                            <label for="alertQuantity"><?php echo __("Alert Quantity"); ?></label>
+                            <label for="alertQuantity"><?php echo __("Alert/ Reorder Quantity"); ?></label>
                             <input type="number" name="alertQuantity" id="alertQuantity" value="<?php echo $product["product_alert_qnt"]; ?>" class="form-control" step="any">
                         </div>
                         <div class="form-group col-md-2">
@@ -413,7 +455,7 @@ if(!empty($_GET["pid"]) ) {
                                             "table"     => "bg_product_items",
                                             "fields"    => "bg_item_product_id, product_name, product_unit, round(bg_product_price, 2) as bg_product_price, round(bg_product_qnt, 2) as bg_product_qnt",
                                             "join"      => array(
-                                                "left join {$table_prefeix}products on product_id = bg_item_product_id"
+                                                "left join {$table_prefix}products on product_id = bg_item_product_id"
                                             ),
                                             "where"     => array(
                                                 "is_raw_materials = 0 and bg_product_id"     => $_GET["pid"]
@@ -564,7 +606,7 @@ if(!empty($_GET["pid"]) ) {
                                             ],
                                             "groupby"   => "product_attributes.pa_name",
                                             "join"  => [
-                                                "inner join {$table_prefeix}product_variations as product_variations on product_variations.pa_name = product_attributes.pa_name"
+                                                "inner join {$table_prefix}product_variations as product_variations on product_variations.pa_name = product_attributes.pa_name"
                                             ]
                                         ]);
 

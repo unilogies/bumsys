@@ -97,7 +97,7 @@
                             <label for="productName"><?php echo __("Product Name:"); ?></label>
                             <input type="text" name="productName" id="productName" class="form-control" required>
                         </div>
-                        <div class="form-group col-md-3 required">
+                        <div class="form-group col-lg-2 col-md-3 required">
                             <label for="productType"><?php echo __("Product Type:"); ?></label>
                             <select name="productType" id="productType" class="form-control" required>
                                 <option value="Normal">Normal</option>
@@ -106,9 +106,32 @@
                                 <option value="Variable">Variable</option>
                             </select>
                         </div>
-                        <div class="form-group required col-md-3">
+                        <div class="form-group required col-lg-2 col-md-3">
                             <label for="productCode"><?php echo __("Product Code:"); ?></label>
                             <input type="text" name="productCode" id="productCode" value="<?php echo round(microtime(true) * 1000); ?>" onclick="select()" class="form-control" required>
+                        </div>
+                        <div class="form-group col-lg-2 col-md-3">
+                            <label for="productEdition"><?php echo __("Product Edition:"); ?></label>
+                            <select name="productEdition" id="productEdition" class="form-control">
+                                <option value=""><?= __("Select Editions..."); ?></option>
+                                <?php 
+
+                                    $productEdition = easySelectA(array(
+                                        "table"   => "product_editions",
+                                        "fields"  => "edition_name",
+                                        "where"    => array(
+                                            "is_trash = 0"
+                                        )
+                                    ));
+                                    
+                                    if($productEdition) {
+                                        foreach($productEdition["data"] as $key => $value) {
+                                            echo "<option value='{$value['edition_name']}'>{$value['edition_name']}</option>";
+                                        }
+                                    }
+                                
+                                ?>
+                            </select>
                         </div>
                         <div class="form-group required col-lg-4 col-md-6">
                             <label for="productCategory"><?php echo __("Product Category:"); ?></label>
@@ -200,58 +223,58 @@
 
                     <div class="row">
 
-                        <div class="form-group col-md-2 required">
+                        <div class="form-group col-lg-2 col-md-3 required">
                             <label for="productPurchasePrice"><?php echo __("Purchase Price"); ?></label>
                             <i data-toggle="tooltip" data-placement="right" title="Costing or Purchase Price" class="fa fa-question-circle"></i>
                             <input type="number" name="productPurchasePrice" id="productPurchasePrice" class="form-control" step="any" required>
                         </div>
-                        <div class="form-group col-md-2 required">
+                        <div class="form-group col-lg-2 col-md-3 required">
                             <label for="productSalePrice"><?php echo __("Sale Price"); ?></label>
                             <input type="number" name="productSalePrice" id="productSalePrice" class="form-control" step="any" required>
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="productDistributorDiscount"><?php echo __("Distributor Discount:"); ?></label>
                             <i data-toggle="tooltip" data-placement="bottom" title="<?php echo __("Percentage or Fixed amount."); ?>" class="fa fa-question-circle"></i>
                             <input type="text" name="productDistributorDiscount" id="productDistributorDiscount" placeholder="Eg: 10 or 20%" class="form-control">
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="productWholesalerDiscount"><?php echo __("Wholesaler Discount:"); ?></label>
                             <i data-toggle="tooltip" data-placement="bottom" title="<?php echo __("Percentage or Fixed amount."); ?>" class="fa fa-question-circle"></i>
                             <input type="text" name="productWholesalerDiscount" id="productWholesalerDiscount" placeholder="Eg: 10 or 20%"  class="form-control">
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="productRetailerDiscount"><?php echo __("Retailer Discount:"); ?></label>
                             <i data-toggle="tooltip" data-placement="bottom" title="<?php echo __("Percentage or Fixed amount."); ?>" class="fa fa-question-circle"></i>
                             <input type="text" name="productRetailerDiscount" id="productRetailerDiscount" placeholder="Eg: 10 or 20%"  class="form-control">
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="productConsumerDiscount"><?php echo __("Consumer Discount:"); ?></label>
                             <i data-toggle="tooltip" data-placement="bottom" title="<?php echo __("Percentage or Fixed amount."); ?>" class="fa fa-question-circle"></i>
                             <input type="text" name="productConsumerDiscount" id="productConsumerDiscount" placeholder="Eg: 10 or 20%"  class="form-control">
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="productIntitalStock"><?php echo __("Initial Stock"); ?></label>
                             <i data-toggle="tooltip" data-placement="right" title="Opening or Initial stock of this product" class="fa fa-question-circle"></i>
                             <input type="number" name="productIntitalStock" id="productIntitalStock" class="form-control productIntitalStock" step="any">
                         </div>
                         
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="productWeight"><?php echo __("Weight:"); ?></label>
                             <input type="text" name="productWeight" id="productWeight" class="form-control">
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="productWidth"><?php echo __("Width:"); ?></label>
                             <input type="text" name="productWidth" id="productWidth" class="form-control">
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="productHeight"><?php echo __("Height:"); ?></label>
                             <input type="text" name="productHeight" id="productHeight" class="form-control">
                         </div>
-                        <div class="form-group col-md-2">
-                            <label for="alertQuantity"><?php echo __("Alert Quantity"); ?></label>
+                        <div class="form-group col-lg-2 col-md-3">
+                            <label for="alertQuantity"><?php echo __("Alert/ Reorder Quantity"); ?></label>
                             <input type="number" name="alertQuantity" id="alertQuantity" class="form-control" step="any">
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-lg-2 col-md-3">
                             <label for="packetQuantity">Packet Quantity</label>
                             <i data-toggle="tooltip" data-placement="right" title="Quantity for per packet" class="fa fa-question-circle"></i>
                             <input type="number" name="packetQuantity" id="packetQuantity" class="form-control" step="any">
@@ -467,7 +490,7 @@
                                     ],
                                     "groupby"   => "product_attributes.pa_name",
                                     "join"  => [
-                                        "inner join {$table_prefeix}product_variations as product_variations on product_variations.pa_name = product_attributes.pa_name"
+                                        "inner join {$table_prefix}product_variations as product_variations on product_variations.pa_name = product_attributes.pa_name"
                                     ]
                                 ]);
 

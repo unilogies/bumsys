@@ -34,7 +34,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
         "table" => "products",
         "fields" => "count(*) as totalRow",
         "where" => array(
-            "is_trash = 0"
+            "is_trash = 0 AND product_type != 'Child'"
         )
     ))["data"][0]["totalRow"];
 
@@ -101,7 +101,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(case when stock_type = 'transfer-out' then stock_item_qty end) as transfer_out_qty,
                         sum(case when stock_type = 'specimen-copy' then stock_item_qty end) as specimen_copy_qty,
                         sum(case when stock_type = 'specimen-copy-return' then stock_item_qty end) as specimen_copy_return_qty
-                    from {$table_prefeix}product_stock
+                    from {$table_prefix}product_stock
                     where is_trash = 0 and stock_warehouse_id $warehouse_filter
                     group by stock_product_id
                 ) as product_stock on stock_product_id = product.product_id",
@@ -137,7 +137,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(specimen_copy_return_qty) as variable_specimen_copy_return_qty,
                         sum(expired_qty) as variable_expired_qty,
                         sum(stock_qty) as variable_stock_qty
-                    FROM {$table_prefeix}products as childProduct 
+                    FROM {$table_prefix}products as childProduct 
 
                     left join (
                         select
@@ -157,7 +157,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                             sum(case when stock_type = 'transfer-out' then stock_item_qty end) as transfer_out_qty,
                             sum(case when stock_type = 'specimen-copy' then stock_item_qty end) as specimen_copy_qty,
                             sum(case when stock_type = 'specimen-copy-return' then stock_item_qty end) as specimen_copy_return_qty
-                        from {$table_prefeix}product_stock
+                        from {$table_prefix}product_stock
                         where is_trash = 0 and stock_warehouse_id $warehouse_filter
                         group by stock_product_id
                     ) as product_stock on stock_product_id = childProduct.product_id
@@ -178,8 +178,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                 ) as child_product on child_product.product_parent_id = product.product_id",
 
 
-                "left join {$table_prefeix}product_category on product_category_id = category_id",
-                "left join {$table_prefeix}product_brands on product_brand_id = brand_id",
+                "left join {$table_prefix}product_category on product_category_id = category_id",
+                "left join {$table_prefix}product_brands on product_brand_id = brand_id",
             ),
             "where"     => array(
                 "product.is_trash = 0 {$edition_filter}",
@@ -245,7 +245,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(case when stock_type = 'transfer-out' then stock_item_qty end) as transfer_out_qty,
                         sum(case when stock_type = 'specimen-copy' then stock_item_qty end) as specimen_copy_qty,
                         sum(case when stock_type = 'specimen-copy-return' then stock_item_qty end) as specimen_copy_return_qty
-                    from {$table_prefeix}product_stock
+                    from {$table_prefix}product_stock
                     where is_trash = 0
                     group by stock_product_id
                 ) as product_stock on stock_product_id = product_id",
@@ -279,7 +279,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(specimen_copy_return_qty) as variable_specimen_copy_return_qty,
                         sum(expired_qty) as variable_expired_qty,
                         sum(stock_qty) as variable_stock_qty
-                    FROM {$table_prefeix}products as childProduct 
+                    FROM {$table_prefix}products as childProduct 
 
                     left join (
                         select
@@ -299,7 +299,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                             sum(case when stock_type = 'transfer-out' then stock_item_qty end) as transfer_out_qty,
                             sum(case when stock_type = 'specimen-copy' then stock_item_qty end) as specimen_copy_qty,
                             sum(case when stock_type = 'specimen-copy-return' then stock_item_qty end) as specimen_copy_return_qty
-                        from {$table_prefeix}product_stock
+                        from {$table_prefix}product_stock
                         where is_trash = 0
                         group by stock_product_id
                     ) as product_stock on stock_product_id = childProduct.product_id
@@ -318,8 +318,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
 
                 ) as child_product on child_product.product_parent_id = product.product_id",
 
-                "left join {$table_prefeix}product_category on product_category_id = category_id",
-                "left join {$table_prefeix}product_brands on product_brand_id = brand_id",
+                "left join {$table_prefix}product_category on product_category_id = category_id",
+                "left join {$table_prefix}product_brands on product_brand_id = brand_id",
             ),
             "where"     => array(
                 "product.is_trash = 0 and product.product_type != 'Child' "
@@ -351,7 +351,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
 
             if($value["hasChildProduct"] === "1") {
 
-                $allNestedData[] = "<a data-parent-product-id='{$value['pid']}' title='Show More Details' class='has-child-row'>{$value['product_name']}</a>";
+                $allNestedData[] = "<a data-parent-product-id='{$value['pid']}' title='Show More Details' class='has-child-row'>{$value['product_name']}</a>
+                <a target='_blank' title='View Comparison' style='padding-left: 5px; color: #a1a1a1;' href='". full_website_address() . "/reports/product-comparison/?pid=". $value["pid"] ."'><i class='fa fa-area-chart'></i></a>";
 
             } else {
                 
@@ -525,9 +526,9 @@ if(isset($_GET['page']) and $_GET['page'] == "customerReports") {
                     if(wastage_sale_grand_total_before_filtered_date is null, 0, wastage_sale_grand_total_before_filtered_date)
             ), 2) as previous_balance,
             upazila_name, district_name
-        from {$table_prefeix}customers as customer
-        left join {$table_prefeix}upazilas on customer_upazila = upazila_id
-        left join {$table_prefeix}districts on customer_district = district_id
+        from {$table_prefix}customers as customer
+        left join {$table_prefix}upazilas on customer_upazila = upazila_id
+        left join {$table_prefix}districts on customer_district = district_id
         left join (
             select
                 sales_customer_id,
@@ -536,13 +537,13 @@ if(isset($_GET['page']) and $_GET['page'] == "customerReports") {
                 sum( case when is_return = 0 and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' then sales_shipping end ) as sales_shipping_in_filtered_date,
                 sum( case when is_return = 1 and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' then sales_grand_total end ) as product_returns_grand_total_in_filtered_date,
                 sum( case when is_return = 1 and sales_delivery_date < '{$dateRange[0]}' then sales_grand_total end ) as total_return_before_filtered_date
-            from {$table_prefeix}sales where is_trash = 0 group by sales_customer_id
+            from {$table_prefix}sales where is_trash = 0 group by sales_customer_id
         ) as sales on customer_id = sales_customer_id
         left join ( select
                 wastage_sale_customer,
                 sum( case when wastage_sale_date between '{$dateRange[0]}' and '{$dateRange[1]}' then wastage_sale_grand_total end ) as wastage_sale_grand_total_in_filtered_date,
                 sum( case when wastage_sale_date < '{$dateRange[0]}' then wastage_sale_grand_total end ) as wastage_sale_grand_total_before_filtered_date
-            from {$table_prefeix}wastage_sale where is_trash = 0 group by wastage_sale_customer
+            from {$table_prefix}wastage_sale where is_trash = 0 group by wastage_sale_customer
         ) as wastage_sale on wastage_sale_customer = sales_customer_id
         left join ( select 
                 received_payments_from, 
@@ -550,13 +551,13 @@ if(isset($_GET['page']) and $_GET['page'] == "customerReports") {
                 sum( case when date(received_payments_datetime) < '{$dateRange[0]}' then received_payments_amount end ) as received_payments_amount_before_filtered_date,
                 sum( case when date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' then received_payments_bonus end ) as received_payments_bonus_in_filtered_date,
                 sum( case when date(received_payments_datetime) < '{$dateRange[0]}' then received_payments_bonus end ) as received_payments_bonus_before_filtered_date
-            from {$table_prefeix}received_payments where is_trash = 0 and received_payments_type != 'Discounts' group by received_payments_from
+            from {$table_prefix}received_payments where is_trash = 0 and received_payments_type != 'Discounts' group by received_payments_from
         ) as received_payments on customer_id = received_payments.received_payments_from
         left join ( select 
                 received_payments_from, 
                 sum( case when date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' then received_payments_amount end ) as discounts_amount_in_filtered_date,
                 sum( case when date(received_payments_datetime) < '{$dateRange[0]}' then received_payments_amount end ) as discounts_amount_before_filtered_date
-            from {$table_prefeix}received_payments where is_trash = 0 and received_payments_type = 'Discounts' group by received_payments_from
+            from {$table_prefix}received_payments where is_trash = 0 and received_payments_type = 'Discounts' group by received_payments_from
         ) as given_discounts on customer_id = given_discounts.received_payments_from
         where customer.is_trash = 0 and customer_name like '{$search}%'
         group by customer_id order by customer_name {$orderBy}
@@ -634,27 +635,27 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                         if(total_wastage_purched_before_filtered_date is null, 0, total_wastage_purched_before_filtered_date) +
                         if(total_payment_return_before_filtered_date is null, 0, total_payment_return_before_filtered_date)
 				)
-			FROM {$table_prefeix}customers as customers
+			FROM {$table_prefix}customers as customers
 			left join ( select
 					sales_customer_id,
 					sum(case when is_return = 0 then sales_grand_total end) as total_purchased_before_filtered_date,
                     sum(case when is_return = 1 then sales_due end) as total_returned_before_filtered_date
-				from {$table_prefeix}sales where is_trash = 0 and sales_delivery_date < '{$dateRange[0]}' group by sales_customer_id
+				from {$table_prefix}sales where is_trash = 0 and sales_delivery_date < '{$dateRange[0]}' group by sales_customer_id
 			) as sales on sales_customer_id = customer_id
             left join ( select
                     wastage_sale_customer,
                     sum(wastage_sale_grand_total) as total_wastage_purched_before_filtered_date
-                from {$table_prefeix}wastage_sale where is_trash = 0 and wastage_sale_date < '{$dateRange[0]}' group by wastage_sale_customer
+                from {$table_prefix}wastage_sale where is_trash = 0 and wastage_sale_date < '{$dateRange[0]}' group by wastage_sale_customer
             ) as wastage_sale on wastage_sale_customer = customer_id
 			left join ( select 
 					received_payments_from,
 					sum(received_payments_amount) + sum(received_payments_bonus) as total_payment_before_filtered_date
-				from {$table_prefeix}received_payments where is_trash = 0 and date(received_payments_datetime) < '{$dateRange[0]}' group by received_payments_from
+				from {$table_prefix}received_payments where is_trash = 0 and date(received_payments_datetime) < '{$dateRange[0]}' group by received_payments_from
 			) as payments on received_payments_from = customer_id
             left join (select
                     payments_return_customer_id,
                     sum(payments_return_amount) as total_payment_return_before_filtered_date
-                from {$table_prefeix}payments_return
+                from {$table_prefix}payments_return
                 where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) < '{$dateRange[0]}'
                 group by payments_return_customer_id
             ) as payment_return on customer_id = payments_return_customer_id
@@ -678,7 +679,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                     sales_shipping as shipping, 
                     if(sales_grand_total > 0, sales_grand_total, 0) as debit,
                     if(sales_grand_total < 0, abs(sales_grand_total), 0) as credit
-                from {$table_prefeix}sales
+                from {$table_prefix}sales
                 where is_trash = 0 and is_return = 0 and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by sales_id
                 UNION ALL
                 select 
@@ -694,7 +695,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                     '',
                     0 as debit,
                     sales_grand_total as credit
-                from {$table_prefeix}sales
+                from {$table_prefix}sales
                 where is_trash = 0 and is_return = 1 and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by sales_id
                 UNION ALL
                 select
@@ -710,7 +711,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                     '',
                     0 as debit,
 					received_payments_amount as credit
-                from {$table_prefeix}received_payments where is_trash = 0 and date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' group by received_payments_id
+                from {$table_prefix}received_payments where is_trash = 0 and date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' group by received_payments_id
                 UNION ALL
                 select
                     4 as sortby,
@@ -725,7 +726,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                     '',
                     0 as debit,
                     received_payments_bonus as credit
-                from {$table_prefeix}received_payments where is_trash = 0 and 
+                from {$table_prefix}received_payments where is_trash = 0 and 
                 received_payments_bonus > 0 and 
                 date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' 
                 group by received_payments_id
@@ -743,7 +744,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                     '',
                     wastage_sale_grand_total as debit,
 					0 as credit
-                from {$table_prefeix}wastage_sale where is_trash = 0 and wastage_sale_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by wastage_sale_id
+                from {$table_prefix}wastage_sale where is_trash = 0 and wastage_sale_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by wastage_sale_id
                 UNION ALL
                 select
                     6 as sortby,
@@ -758,7 +759,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                     '',
                     payments_return_amount as debit,
                     0 as credit
-                from {$table_prefeix}payments_return where is_trash = 0 and payments_return_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_id
+                from {$table_prefix}payments_return where is_trash = 0 and payments_return_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_id
                 UNION ALL
                 select
                     7 as sortby,
@@ -773,7 +774,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerStatement") {
                     '',
                     0 as debit,
 					incomes_amount as credit
-                from {$table_prefeix}incomes where is_trash = 0 and incomes_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by incomes_id
+                from {$table_prefix}incomes where is_trash = 0 and incomes_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by incomes_id
 
             ) as get_data
             where customers = '{$customer_id}' and date(dates) between '{$dateRange[0]}' and '{$dateRange[1]}'
@@ -827,7 +828,7 @@ if(isset($_GET['page']) and $_GET['page'] == "showInvoiceProducts") {
         "sales",
         "*",
         array (
-            "left join {$table_prefeix}customers on sales_customer_id = customer_id"
+            "left join {$table_prefix}customers on sales_customer_id = customer_id"
         ),
         array (
             "sales_id"  => $_GET["id"]
@@ -839,7 +840,7 @@ if(isset($_GET['page']) and $_GET['page'] == "showInvoiceProducts") {
         "table"     => "product_stock",
         "fields"    => "product_name, stock_item_price, stock_item_qty, stock_item_subtotal",
         "join"      => array(
-            "left join {$table_prefeix}products on product_id =  stock_product_id"
+            "left join {$table_prefix}products on product_id =  stock_product_id"
         ),
         "where" => array(
             "is_bundle_item = 0 and stock_sales_id" => $_GET["id"]
@@ -928,7 +929,7 @@ if(isset($_GET['page']) and $_GET['page'] == "showReturnProducts") {
         "product_returns",
         "*",
         array (
-            "left join {$table_prefeix}customers on product_returns_customer_id = customer_id"
+            "left join {$table_prefix}customers on product_returns_customer_id = customer_id"
         ),
         array (
             "product_returns_id"  => $_GET["id"]
@@ -1044,10 +1045,10 @@ if(isset($_GET['page']) and $_GET['page'] == "totalPurchasedQuantityOfThisCustom
                 stock_entry_date as sales_delivery_date, 
                 product_name, customer_name,
                 sum(stock_item_qty) as stock_item_qty
-            from {$table_prefeix}product_stock as product_stock 
-            left join {$table_prefeix}products on stock_product_id = product_id
-            left join {$table_prefeix}sales on sales_id = stock_sales_id
-            left join {$table_prefeix}customers on sales_customer_id = customer_id
+            from {$table_prefix}product_stock as product_stock 
+            left join {$table_prefix}products on stock_product_id = product_id
+            left join {$table_prefix}sales on sales_id = stock_sales_id
+            left join {$table_prefix}customers on sales_customer_id = customer_id
             where product_stock.is_trash = 0 and product_stock.stock_type = 'sale' and sales_customer_id = '{$cid}' and stock_product_id = '{$pid}'
             group by stock_entry_date
         ");
@@ -1136,16 +1137,16 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsAll") {
         "SELECT 
             payment_category_id, payment_category_name,
             if(payment_items_amount_sum is null, 0, payment_items_amount_sum) + if(bill_items_amount_sum is null, 0, bill_items_amount_sum) as total_amount_in_this_category
-        from {$table_prefeix}payments_categories as payments_categorie
+        from {$table_prefix}payments_categories as payments_categorie
         left join ( SELECT 
                 payment_items_category_id, 
                 sum(payment_items_amount) as payment_items_amount_sum 
-            from {$table_prefeix}payment_items where is_trash = 0 and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payment_items_category_id 
+            from {$table_prefix}payment_items where is_trash = 0 and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payment_items_category_id 
         ) as payments_items on payment_items_category_id = payment_category_id
         left join ( SELECT 
                 bill_items_category, 
                 sum(bill_items_amount) as bill_items_amount_sum 
-            from {$table_prefeix}bill_items where is_trash = 0 and date(bill_items_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}' group by bill_items_category 
+            from {$table_prefix}bill_items where is_trash = 0 and date(bill_items_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}' group by bill_items_category 
         ) as bill_items on bill_items_category = payment_category_id
         where payments_categorie.is_trash = 0 and payment_category_name LIKE '{$search}%'
         having total_amount_in_this_category > 0
@@ -1159,7 +1160,7 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsAll") {
         "SELECT
             salary_type,
             sum(salary_amount) as total_salary_amount_by_type
-        from {$table_prefeix}salaries where is_trash = 0 and salary_type LIKE '{$search}%' and salary_month between '{$dateRange[0]}' and '{$dateRange[1]}' group by salary_type
+        from {$table_prefix}salaries where is_trash = 0 and salary_type LIKE '{$search}%' and salary_month between '{$dateRange[0]}' and '{$dateRange[1]}' group by salary_type
         "
     );
     
@@ -1233,11 +1234,11 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsSignle") {
         (
             (select 
                 payment_items_category_id as category_id
-            from {$table_prefeix}payment_items where is_trash = 0 and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' order by payment_items_id DESC)
+            from {$table_prefix}payment_items where is_trash = 0 and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' order by payment_items_id DESC)
             UNION ALL
             (select 
                 bill_items_category as category_id
-            from {$table_prefeix}bill_items where is_trash = 0 and date(bill_items_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}')
+            from {$table_prefix}bill_items where is_trash = 0 and date(bill_items_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}')
         ) as getData
         where category_id = '{$cat_id}'
         "
@@ -1256,7 +1257,7 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsSignle") {
                 payment_items_date as item_date,
                 payment_items_amount as item_amount,
                 payment_items_description as item_description
-            from {$table_prefeix}payment_items where is_trash = 0 and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' order by payment_items_id DESC)
+            from {$table_prefix}payment_items where is_trash = 0 and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' order by payment_items_id DESC)
             UNION ALL
             (select 
                 2 as sortby,
@@ -1264,7 +1265,7 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsSignle") {
                 bill_items_date as item_date,
                 bill_items_amount as item_amount,
                 bill_items_note as item_description
-            from {$table_prefeix}bill_items where is_trash = 0 and date(bill_items_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}')
+            from {$table_prefix}bill_items where is_trash = 0 and date(bill_items_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}')
         ) as getData
         where category_id = '{$cat_id}'
         order by item_date ". safe_input($requestData['order'][0]['dir']) .", sortby ASC, item_description DESC
@@ -1320,7 +1321,7 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsNonCat") {
     $totalFilteredRecords = $totalRecords = easySelectD(
         "SELECT
             count(*) as totalRow
-        from {$table_prefeix}salaries as salaries
+        from {$table_prefix}salaries as salaries
         where salaries.is_trash = 0 and salaries.salary_type = '{$paymentType}' and salaries.salary_month between '{$dateRange[0]}' and '{$dateRange[1]}'
         "
     )["data"][0]["totalRow"];
@@ -1335,8 +1336,8 @@ if(isset($_GET['page']) and $_GET['page'] == "expenseReportsNonCat") {
             concat( emp_firstname, ' ', emp_lastname ) as payee_name,
             salary_amount,
             salary_description
-        from {$table_prefeix}salaries as salaries
-        left join {$table_prefeix}employees on salary_emp_id = emp_id
+        from {$table_prefix}salaries as salaries
+        left join {$table_prefix}employees on salary_emp_id = emp_id
         where salaries.is_trash = 0 and salaries.salary_type = '{$paymentType}' and 
         salaries.salary_month between '{$dateRange[0]}' and '{$dateRange[1]}' and concat( emp_firstname, ' ', emp_lastname ) like '%{$search}%' 
         order by salary_id DESC
@@ -1446,8 +1447,8 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeReports") {
                 if(total_overtime_paid_in_range is null, 0, round(total_overtime_paid_in_range, 2)) as total_overtime_paid_in_range,
                 if(total_bonus_paid_in_range is null, 0, round(total_bonus_paid_in_range, 2)) as total_bonus_paid_in_range,
                 if(total_loan_adjustment is null, 0, round(total_loan_adjustment, 2)) as total_loan_adjustment
-        from {$table_prefeix}employees as employee
-        left join {$table_prefeix}emp_department on emp_department_id = dep_id
+        from {$table_prefix}employees as employee
+        left join {$table_prefix}emp_department on emp_department_id = dep_id
         left join ( select
                 salary_emp_id,
                 sum( case when salary_type = 'Salary' then salary_amount end ) as total_salary_added,
@@ -1457,7 +1458,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeReports") {
                 sum( case when salary_type = 'Overtime' and date(salary_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}' then salary_amount end ) as total_overtime_added_in_range,
                 sum( case when salary_type = 'Bonus' and date(salary_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}' then salary_amount end ) as total_bonus_added_in_range
 
-            from {$table_prefeix}salaries
+            from {$table_prefix}salaries
             where is_trash = 0
             group by salary_emp_id
         ) as salaries on salary_emp_id = emp_id
@@ -1469,14 +1470,14 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeReports") {
                 sum( case when payment_items_type = 'Salary' and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' then payment_items_amount end ) as total_salary_paid_in_range,
                 sum( case when payment_items_type = 'Overtime' and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' then payment_items_amount end ) as total_overtime_paid_in_range,
                 sum( case when payment_items_type = 'Bonus' and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' then payment_items_amount end ) as total_bonus_paid_in_range
-            from {$table_prefeix}payment_items
+            from {$table_prefix}payment_items
             where is_trash = 0 
             group by payment_items_employee
         ) as payments on payment_items_employee = emp_id
         left join( select
                 loan_installment_provider,
                 sum(loan_installment_paying_amount) as total_loan_adjustment
-            from {$table_prefeix}loan_installment where is_trash = 0
+            from {$table_prefix}loan_installment where is_trash = 0
             group by loan_installment_provider
         ) as loan_installment on loan_installment_provider = emp_id
         where employee.is_trash = 0 $departmentFilter $empTypeFilter and ( emp_firstname like '{$search}%' or emp_PIN = '{$search}')
@@ -1581,8 +1582,8 @@ if(isset($_GET['page']) and $_GET['page'] == "expiredProductList") {
                 batch_number,
                 pbs.batch_expiry_date as expiry_date
             FROM product_base_stock as pbs
-            left join {$table_prefeix}products as product on product.product_id = pbs.product_id
-            left join {$table_prefeix}product_batches as product_batches on product_batches.batch_id = pbs.batch_id
+            left join {$table_prefix}products as product on product.product_id = pbs.product_id
+            left join {$table_prefix}product_batches as product_batches on product_batches.batch_id = pbs.batch_id
             WHERE pbs.batch_expiry_date < curdate() and base_stock_in > 0 and ( 
                 product_name like '{$requestData["search"]["value"]}%'
                 or batch_number like '{$requestData["search"]["value"]}%'
@@ -1604,9 +1605,9 @@ if(isset($_GET['page']) and $_GET['page'] == "expiredProductList") {
                 warehouse_name,
                 pbs.batch_expiry_date as expiry_date
             FROM product_base_stock as pbs
-            left join {$table_prefeix}products as product on product.product_id = pbs.product_id
-            left join {$table_prefeix}product_batches as product_batches on product_batches.batch_id = pbs.batch_id
-            left join {$table_prefeix}warehouses on warehouse_id = warehouse
+            left join {$table_prefix}products as product on product.product_id = pbs.product_id
+            left join {$table_prefix}product_batches as product_batches on product_batches.batch_id = pbs.batch_id
+            left join {$table_prefix}warehouses on warehouse_id = warehouse
             WHERE pbs.batch_expiry_date < curdate()
             order by {$columns[$requestData['order'][0]['column']]} ". safe_input($requestData['order'][0]['dir']) ."
             LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
@@ -1665,9 +1666,9 @@ if(isset($_GET['page']) and $_GET['page'] == "locationWiseSalesReport") {
             "table"     => "product_stock as product_stock",
             "fields"    => "customer_name, sum(stock_item_qty) as total_item_qty, district_name",
             "join"      => array(
-                "left join {$table_prefeix}sales on sales_id = stock_sales_id",
-                "left join {$table_prefeix}customers on customer_id = sales_customer_id",
-                "left join {$table_prefeix}districts on district_id = customer_district"
+                "left join {$table_prefix}sales on sales_id = stock_sales_id",
+                "left join {$table_prefix}customers on customer_id = sales_customer_id",
+                "left join {$table_prefix}districts on district_id = customer_district"
             ),
             "where"     => array(
                 "product_stock.stock_type = 'sale' and product_stock.is_trash = 0 and customer_district" => $_GET["location"],
@@ -1746,8 +1747,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     combine_description('Initial Stock Entry', se_note) as description,
                     stock_item_qty as stock_in,
                     0 as stock_out
-                FROM {$table_prefeix}product_stock as initial
-                LEFT JOIN {$table_prefeix}stock_entries on se_id = stock_se_id
+                FROM {$table_prefix}product_stock as initial
+                LEFT JOIN {$table_prefix}stock_entries on se_id = stock_se_id
                     WHERE initial.is_trash = 0 
                     AND initial.stock_type = 'initial'
                     AND initial.stock_product_id = '{$pid}'
@@ -1764,8 +1765,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     combine_description('Purchase', purchase_note) as description,
                     stock_item_qty as stock_in,
                     0 as stock_out
-                FROM {$table_prefeix}product_stock as purchase
-                LEFT JOIN {$table_prefeix}purchases on purchase_id = stock_purchase_id
+                FROM {$table_prefix}product_stock as purchase
+                LEFT JOIN {$table_prefix}purchases on purchase_id = stock_purchase_id
                     WHERE purchase.is_trash = 0 
                     AND purchase.stock_type = 'purchase'
                     AND purchase.stock_product_id = '{$pid}'
@@ -1782,8 +1783,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     combine_description('Purchase Return', purchase_note) as description,
                     0 as stock_in,
                     stock_item_qty as stock_out
-                FROM {$table_prefeix}product_stock as purchase_return
-                LEFT JOIN {$table_prefeix}purchases on purchase_id = stock_purchase_id
+                FROM {$table_prefix}product_stock as purchase_return
+                LEFT JOIN {$table_prefix}purchases on purchase_id = stock_purchase_id
                     WHERE purchase_return.is_trash = 0 
                     AND purchase_return.stock_type = 'purchase-return'
                     AND purchase_return.stock_product_id = '{$pid}'
@@ -1800,8 +1801,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     combine_description('Sale', sales_note) as description,
                     0 as stock_in,
                     stock_item_qty as stock_out
-                FROM {$table_prefeix}product_stock as sales
-                LEFT JOIN {$table_prefeix}sales on sales_id = stock_sales_id
+                FROM {$table_prefix}product_stock as sales
+                LEFT JOIN {$table_prefix}sales on sales_id = stock_sales_id
                     WHERE sales.is_trash = 0 
                     AND sales.stock_type = 'sale'
                     AND sales.stock_product_id = '{$pid}'
@@ -1818,8 +1819,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     combine_description('Wastage Product Sale', sales_note) as description,
                     0 as stock_in,
                     stock_item_qty as stock_out
-                FROM {$table_prefeix}product_stock as wastage_sale
-                LEFT JOIN {$table_prefeix}sales on sales_id = stock_sales_id
+                FROM {$table_prefix}product_stock as wastage_sale
+                LEFT JOIN {$table_prefix}sales on sales_id = stock_sales_id
                     WHERE wastage_sale.is_trash = 0 
                     AND wastage_sale.stock_type = 'wastage-sale'
                     AND wastage_sale.stock_product_id = '{$pid}'
@@ -1836,8 +1837,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     combine_description('Sale Return', sales_note) as description,
                     stock_item_qty as stock_in,
                     0 as stock_out
-                FROM {$table_prefeix}product_stock as sale_return
-                LEFT JOIN {$table_prefeix}sales on sales_id = stock_sales_id
+                FROM {$table_prefix}product_stock as sale_return
+                LEFT JOIN {$table_prefix}sales on sales_id = stock_sales_id
                     WHERE sale_return.is_trash = 0 
                     AND sale_return.stock_type = 'sale-return'
                     AND sale_return.stock_product_id = '{$pid}'
@@ -1854,9 +1855,9 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     concat('Stock Transfer in from ', warehouse_name) as description,
                     stock_item_qty as stock_in,
                     0 as stock_out
-                FROM {$table_prefeix}product_stock as stock_transfer_in
-                LEFT JOIN {$table_prefeix}stock_transfer as stock_transfer on stock_transfer.stock_transfer_id = stock_transfer_in.stock_transfer_id
-                LEFT JOIN {$table_prefeix}warehouses on warehouse_id = stock_transfer_from_warehouse
+                FROM {$table_prefix}product_stock as stock_transfer_in
+                LEFT JOIN {$table_prefix}stock_transfer as stock_transfer on stock_transfer.stock_transfer_id = stock_transfer_in.stock_transfer_id
+                LEFT JOIN {$table_prefix}warehouses on warehouse_id = stock_transfer_from_warehouse
                     WHERE stock_transfer_in.is_trash = 0 
                     AND stock_transfer_in.stock_type = 'transfer-in'
                     AND stock_transfer_in.stock_product_id = '{$pid}'
@@ -1873,9 +1874,9 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     concat('Stock Transfer out to ', warehouse_name) as description,
                     0 as stock_in,
                     stock_item_qty as stock_out
-                FROM {$table_prefeix}product_stock as stock_transfer_out
-                LEFT JOIN {$table_prefeix}stock_transfer as stock_transfer on stock_transfer.stock_transfer_id = stock_transfer_out.stock_transfer_id
-                LEFT JOIN {$table_prefeix}warehouses on warehouse_id = stock_transfer_to_warehouse
+                FROM {$table_prefix}product_stock as stock_transfer_out
+                LEFT JOIN {$table_prefix}stock_transfer as stock_transfer on stock_transfer.stock_transfer_id = stock_transfer_out.stock_transfer_id
+                LEFT JOIN {$table_prefix}warehouses on warehouse_id = stock_transfer_to_warehouse
                     WHERE stock_transfer_out.is_trash = 0 
                     AND stock_transfer_out.stock_type = 'transfer-out'
                     AND stock_transfer_out.stock_product_id = '{$pid}'
@@ -1892,8 +1893,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     'Spcimen Copy' as description,
                     0 as stock_in,
                     stock_item_qty as stock_out
-                FROM {$table_prefeix}product_stock as spcimen_copy
-                LEFT JOIN {$table_prefeix}specimen_copies on sc_id = stock_sc_id
+                FROM {$table_prefix}product_stock as spcimen_copy
+                LEFT JOIN {$table_prefix}specimen_copies on sc_id = stock_sc_id
                     WHERE spcimen_copy.is_trash = 0 
                     AND spcimen_copy.stock_type = 'specimen-copy'
                     AND spcimen_copy.stock_product_id = '{$pid}'
@@ -1910,8 +1911,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     'Spcimen Copy' as description,
                     0 as stock_in,
                     stock_item_qty as stock_out
-                FROM {$table_prefeix}product_stock as spcimen_copy_return
-                LEFT JOIN {$table_prefeix}specimen_copies on sc_id = stock_sc_id
+                FROM {$table_prefix}product_stock as spcimen_copy_return
+                LEFT JOIN {$table_prefix}specimen_copies on sc_id = stock_sc_id
                     WHERE spcimen_copy_return.is_trash = 0 
                     AND spcimen_copy_return.stock_type = 'specimen-copy-return'
                     AND spcimen_copy_return.stock_product_id = '{$pid}'
@@ -1928,8 +1929,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     combine_description('Adjustment', se_note) as description,
                     if(stock_item_qty < 0, 0, stock_item_qty) as stock_in,
                     if(stock_item_qty < 0, abs(stock_item_qty), 0) as stock_out
-                FROM {$table_prefeix}product_stock as initial
-                LEFT JOIN {$table_prefeix}stock_entries on se_id = stock_se_id
+                FROM {$table_prefix}product_stock as initial
+                LEFT JOIN {$table_prefix}stock_entries on se_id = stock_se_id
                     WHERE initial.is_trash = 0 
                     AND initial.stock_type = 'adjustment'
                     AND initial.stock_product_id = '{$pid}'
@@ -1937,8 +1938,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productLedger") {
                     GROUP BY stock_id
                 
             ) as get_data
-            LEFT JOIN {$table_prefeix}users as user on user.user_id = get_data.record_user_id
-            LEFT JOIN {$table_prefeix}employees on emp_id = user_emp_id
+            LEFT JOIN {$table_prefix}users as user on user.user_id = get_data.record_user_id
+            LEFT JOIN {$table_prefix}employees on emp_id = user_emp_id
             order by entry_date, sortby ASC
         ");
 

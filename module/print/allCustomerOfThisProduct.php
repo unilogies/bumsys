@@ -16,9 +16,9 @@
                     customer_id,
                     customer_name, 
                     sum(stock_item_qty) as purchased_qnt 
-                  from {$table_prefeix}customers
-                  left join {$table_prefeix}sales on sales_customer_id = customer_id
-                  left join {$table_prefeix}product_stock as product_stock on stock_sales_id = sales_id
+                  from {$table_prefix}customers
+                  left join {$table_prefix}sales on sales_customer_id = customer_id
+                  left join {$table_prefix}product_stock as product_stock on stock_sales_id = sales_id
                   where product_stock.is_trash = 0 and product_stock.stock_product_id = '{$pid}' group by sales_customer_id order by purchased_qnt DESC
     ");
 

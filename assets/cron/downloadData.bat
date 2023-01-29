@@ -1,0 +1,1 @@
+E:\xampp\htdocs\royal\assets\curl\bin\curl.exe http://192.168.0.133/royal/api/v1/?action=downloadData

@@ -97,10 +97,10 @@
                                 <label class="col-sm-3" for="defaultProductEdition"><?= __("Default Edition:"); ?></label>
                                 <div class="col-sm-6">
                                     <select name="defaultProductEdition" id="defaultProductEdition" class="form-control">
-                                        <option value=""><?= __("All Year"); ?></option>
+                                        <option value=""><?= __("All Edition"); ?></option>
                                         <?php
 
-                                        $selectProductYear = easySelectA(array(
+                                        $selectProductEdition = easySelectA(array(
                                             "table"   => "products",
                                             "fields"  => "product_edition",
                                             "where"   => array(
@@ -109,7 +109,7 @@
                                             "groupby" => "product_edition"
                                         ))["data"];
 
-                                        foreach ($selectProductYear as $key => $value) {
+                                        foreach ($selectProductEdition as $key => $value) {
                                             $selected = get_options("defaultProductEdition") == $value['product_edition'] ? "selected" : "";
                                             echo "<option $selected value='{$value['product_edition']}'>{$value['product_edition']}</option>";
                                         }
@@ -181,15 +181,6 @@
                                     <select name="posSaleAutoMarkAsPaid" id="posSaleAutoMarkAsPaid" class="form-control select2">
                                         <option <?php echo get_options("posSaleAutoMarkAsPaid") == "1" ? "selected" : ""; ?> value="1">Yes</option>
                                         <option <?php echo get_options("posSaleAutoMarkAsPaid") == "0" ? "selected" : ""; ?> value="0">No</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-sm-3" for="printerType"><?= __("Printer Type:"); ?></label>
-                                <div class="col-sm-6">
-                                    <select name="printerType" id="printerType" class="form-control select2">
-                                        <option <?php echo get_options("printerType") == "normal" ? "selected" : ""; ?> value="normal">Normal Printer</option>
-                                        <option <?php echo get_options("printerType") == "pos" ? "selected" : ""; ?> value="pos">POS Printer</option>
                                     </select>
                                 </div>
                             </div>

@@ -5,6 +5,10 @@ $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), 
 
 /*************************** Pos Sale List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
+
+    if( !current_user_can("sale_pos_sale.View") ) {
+        return _e("Sorry! you do not have permission to view sale list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -45,7 +49,8 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
         !empty($requestData["columns"][2]['search']['value']) or 
         !empty($requestData["columns"][3]['search']['value']) or 
         !empty($requestData["columns"][4]['search']['value']) or 
-        !empty($requestData["columns"][13]['search']['value'])
+        !empty($requestData["columns"][13]['search']['value']) or
+        !empty($requestData["columns"][14]['search']['value'])
     ) { // Get data with search by column
         
         $dateRange[0] = "";
@@ -57,14 +62,18 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
         $getData = easySelect(
             "sales as sale",
             "sales_id, sales_delivery_date, sales_note, sales_reference, shop_name, sales_customer_id, customer_name, round(sales_surcharge, 2) as sales_surcharge, 
-            round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount,
+             round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount,
              round(sales_shipping, 2) as sales_shipping, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, 
-             round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
+             round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name, 
+             concat(emp_firstname, ' ', emp_lastname) as sold_by
+            ",
             array (
-                "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-                "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-                "left join {$table_prefeix}districts on customer_district = district_id",
-                "left join {$table_prefeix}shops on shop_id = sales_shop_id"
+                "left join {$table_prefix}customers on sales_customer_id = customer_id",
+                "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+                "left join {$table_prefix}districts on customer_district = district_id",
+                "left join {$table_prefix}shops on shop_id = sales_shop_id",
+                "left join {$table_prefix}users on user_id = sales_created_by",
+                "left join {$table_prefix}employees on emp_id = user_emp_id"
             ),
             array (
               "sale.is_trash = 0 and sale.is_return = 0",
@@ -72,7 +81,8 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
               " AND customer_name LIKE" => $requestData["columns"][4]['search']['value'] . "%",
               " AND sales_payment_status" => $requestData["columns"][13]['search']['value'],
               " AND (sales_delivery_date BETWEEN '{$dateRange[0]}' and '{$dateRange[1]}')",
-              " AND sales_shop_id" => $requestData["columns"][2]['search']['value']
+              " AND sales_shop_id" => $requestData["columns"][2]['search']['value'],
+              " AND sales_created_by" => $requestData["columns"][14]['search']['value']
             ),
             array (
                 $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
@@ -89,12 +99,19 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
   
       $getData = easySelect(
           "sales as sale",
-          "sales_id, sales_delivery_date, sales_note, sales_reference, shop_name, sales_customer_id, customer_name, round(sales_surcharge, 2) as sales_surcharge, round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, round(sales_shipping, 2) as sales_shipping, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
+          "sales_id, sales_delivery_date, sales_note, sales_reference, shop_name, sales_customer_id, customer_name, round(sales_surcharge, 2) as sales_surcharge, 
+          round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, 
+          round(sales_shipping, 2) as sales_shipping, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, 
+          round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name,
+          concat(emp_firstname, ' ', emp_lastname) as sold_by
+          ",
           array (
-            "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-            "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-            "left join {$table_prefeix}districts on customer_district = district_id",
-            "left join {$table_prefeix}shops on shop_id = sales_shop_id"
+            "left join {$table_prefix}customers on sales_customer_id = customer_id",
+            "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+            "left join {$table_prefix}districts on customer_district = district_id",
+            "left join {$table_prefix}shops on shop_id = sales_shop_id",
+            "left join {$table_prefix}users on user_id = sales_created_by",
+            "left join {$table_prefix}employees on emp_id = user_emp_id"
           ),
           array("sale.is_trash = 0 and sale.is_return = 0"),
           array (
@@ -139,6 +156,7 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
             $allNestedData[] = $value["sales_grand_total"] - $value["sales_due"];
             $allNestedData[] = $value["sales_note"];
             $allNestedData[] = $getSalesPaymentStatus;
+            $allNestedData[] = $value["sold_by"];
             // The action button
             $allNestedData[] = '<div class="btn-group">
                                     <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
@@ -171,8 +189,12 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
   }
 
 
-  /*************************** Pos Sale List ***********************/
+/*************************** Pos Sale List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "salesProductReturnList") {
+
+    if( !current_user_can("sale_return.View") ) {
+        return _e("Sorry! you do not have permission to view sale return list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -212,9 +234,9 @@ if(isset($_GET['page']) and $_GET['page'] == "salesProductReturnList") {
             "sales as sale",
             "sales_id, sales_delivery_date, sales_note, sales_reference, sales_customer_id, customer_name, round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, round(sales_shipping, 2) as sales_shipping, sales_surcharge, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
             array (
-              "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-              "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-              "left join {$table_prefeix}districts on customer_district = district_id"
+              "left join {$table_prefix}customers on sales_customer_id = customer_id",
+              "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+              "left join {$table_prefix}districts on customer_district = district_id"
             ),
             array (
                 "sale.is_trash = 0 and sale.is_return = 1",
@@ -249,9 +271,9 @@ if(isset($_GET['page']) and $_GET['page'] == "salesProductReturnList") {
             "sales as sale",
             "sales_id, sales_delivery_date, sales_note, sales_reference, sales_customer_id, customer_name, round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, round(sales_shipping, 2) as sales_shipping, sales_surcharge, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-                "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-                "left join {$table_prefeix}districts on customer_district = district_id"
+                "left join {$table_prefix}customers on sales_customer_id = customer_id",
+                "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+                "left join {$table_prefix}districts on customer_district = district_id"
             ),
             array (
               "sale.is_trash = 0 and sale.is_return = 1",
@@ -277,9 +299,9 @@ if(isset($_GET['page']) and $_GET['page'] == "salesProductReturnList") {
           "sales as sale",
           "sales_id, sales_delivery_date, sales_note, sales_reference, sales_customer_id, customer_name, round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, round(sales_shipping, 2) as sales_shipping, sales_surcharge, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
           array (
-            "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-            "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-            "left join {$table_prefeix}districts on customer_district = district_id"
+            "left join {$table_prefix}customers on sales_customer_id = customer_id",
+            "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+            "left join {$table_prefix}districts on customer_district = district_id"
           ),
           array("sale.is_trash = 0 and sale.is_return = 1"),
           array (
@@ -360,6 +382,10 @@ if(isset($_GET['page']) and $_GET['page'] == "salesProductReturnList") {
 /************************** Shop POS Sales Add Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addPostReturnPayments") {
   
+    if( !current_user_can("sale_return.Add") ) {
+        return _e("Sorry! you do not have permission to return payment");
+    }
+
     // Include the modal header
     modal_header("Return Payments", full_website_address() . "/xhr/?module=sales&page=submitPostReturnPayments");
 
@@ -416,6 +442,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addPostReturnPayments") {
 
 /************************** Shop POS Return Add Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "submitPostReturnPayments") {
+
+    if( !current_user_can("sale_return.Add") ) {
+        return _e("Sorry! you do not have permission to return payment");
+    }
     
     if(empty($_POST["addSalesPaymentsAmount"])) {
         return _e("Please enter payment amount");
@@ -536,7 +566,7 @@ if(isset($_GET['page']) and $_GET['page'] == "submitPostReturnPayments") {
             "product_returns as product_return",
             "product_returns_id, product_returns_date, product_returns_reference, customer_name, product_returns_total_amount, product_returns_items_discount, product_returns_total_discount, product_returns_surcharge, product_returns_grand_total",
             array (
-                "inner join {$table_prefeix}customers on product_returns_customer_id = customer_id"
+                "inner join {$table_prefix}customers on product_returns_customer_id = customer_id"
             ),
             array (
                 "product_return.is_trash = 0 and customer_name LIKE" => $requestData["search"]["value"]."%"
@@ -558,7 +588,7 @@ if(isset($_GET['page']) and $_GET['page'] == "submitPostReturnPayments") {
           "product_returns as product_return",
           "product_returns_id, product_returns_date, product_returns_reference, customer_name, product_returns_total_amount, product_returns_items_discount, product_returns_total_discount, product_returns_surcharge, product_returns_grand_total",
           array (
-            "inner join {$table_prefeix}customers on product_returns_customer_id = customer_id"
+            "inner join {$table_prefix}customers on product_returns_customer_id = customer_id"
           ),
           array("product_return.is_trash = 0"),
           array (
@@ -620,6 +650,10 @@ if(isset($_GET['page']) and $_GET['page'] == "submitPostReturnPayments") {
 
 /*************************** wastageSaleList ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "wastageSaleList") {
+
+    if( !current_user_can("wastage_sales.View") ) {
+        return _e("Sorry! you do not have permission to view wastage sale");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -654,7 +688,7 @@ if(isset($_GET['page']) and $_GET['page'] == "wastageSaleList") {
             "wastage_sale as wastage_sale",
             "wastage_sale_id, wastage_sale_date, wastage_sale_reference, customer_name, wastage_sale_grand_total, wastage_sale_paid_amount, wastage_sale_due_amount, wastage_sale_note",
             array (
-              "inner join {$table_prefeix}customers on wastage_sale_customer = customer_id"
+              "inner join {$table_prefix}customers on wastage_sale_customer = customer_id"
             ),
             array (
                 "wastage_sale.is_trash = 0 and customer_name LIKE" => $requestData["search"]["value"]."%"
@@ -672,23 +706,23 @@ if(isset($_GET['page']) and $_GET['page'] == "wastageSaleList") {
   
     } else { // Get data withouth search
 
-      $getData = easySelect(
-          "wastage_sale as wastage_sale",
-          "wastage_sale_id, wastage_sale_date, wastage_sale_reference, customer_name, wastage_sale_grand_total, wastage_sale_paid_amount, wastage_sale_due_amount, wastage_sale_note",
-          array (
-            "inner join {$table_prefeix}customers on wastage_sale_customer = customer_id"
-          ),
-          array("wastage_sale.is_trash = 0"),
-          array (
-            $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
-  
-  } 
+        $getData = easySelect(
+            "wastage_sale as wastage_sale",
+            "wastage_sale_id, wastage_sale_date, wastage_sale_reference, customer_name, wastage_sale_grand_total, wastage_sale_paid_amount, wastage_sale_due_amount, wastage_sale_note",
+            array (
+                "inner join {$table_prefix}customers on wastage_sale_customer = customer_id"
+            ),
+            array("wastage_sale.is_trash = 0"),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
+    
+    }
 
 
     $allData = [];
@@ -768,13 +802,17 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteWastageSale") {
 
 /************************** View Wastage Sale **********************/
 if(isset($_GET['page']) and $_GET['page'] == "viewWastageSale") {
+
+    if( !current_user_can("wastage_sales.View") ) {
+        return _e("Sorry! you do not have permission to view wastage sale");
+    }
   
     // Select Wastage sales
     $selectWastageSale = easySelect(
         "wastage_sale",
         "*",
         array (
-            "left join {$table_prefeix}customers on wastage_sale_customer = customer_id"
+            "left join {$table_prefix}customers on wastage_sale_customer = customer_id"
         ),
         array (
             "wastage_sale_id"  => $_GET["id"]
@@ -857,5 +895,130 @@ if(isset($_GET['page']) and $_GET['page'] == "viewWastageSale") {
     <?php
   
 }
+
+
+/*************************** Sales Discounts List ***********************/
+if(isset($_GET['page']) and $_GET['page'] == "discountsList") {
+
+    if( !current_user_can("sales_discount.View") ) {
+        return _e("Sorry! you do not have permission to view discount list");
+    }
+    
+    $requestData = $_REQUEST;
+    $getData = [];
+
+    // List of all columns name
+    $columns = array(
+        "",
+        "received_payments_datetime",
+        "customer_name",
+        "received_payments_amount",
+        "received_payments_details"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+        "table" => "received_payments",
+        "fields" => "count(*) as totalRow",
+        "where" => array(
+            "is_trash = 0 and received_payments_shop" => $_SESSION["sid"], 
+            " AND received_payments_type" => "Discounts"
+        )
+    ))["data"][0]["totalRow"];
+
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
+ 
+    if(!empty($requestData["search"]["value"]) OR
+        !empty($requestData["columns"][2]['search']['value']) or 
+        !empty($requestData["columns"][3]['search']['value']) 
+    
+    ) {  // get data with search
+      
+        $getData = easySelect(
+            "received_payments as received_payment",
+            "received_payments_id, customer_name, received_payments_shop, received_payments_from, round(received_payments_amount, 2) as received_payments_amount, received_payments_details, received_payments_datetime, shop_name",
+            array (
+                "left join {$table_prefix}customers on customer_id = received_payments_from",
+                "left join {$table_prefix}shops on shop_id = received_payments_shop"
+            ),
+            array (
+                "received_payment.is_trash = 0 and received_payments_type" => "Discounts",
+                " AND received_payments_shop " => $requestData["columns"][2]['search']['value'],
+                " AND customer_name LIKE " => "%{$requestData["columns"][3]['search']['value']}%"
+            ),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
+    
+        $totalFilteredRecords = $getData ? $getData["count"] : 0;
+  
+    } else { // Get data withouth search
+    
+      $getData = easySelect(
+            "received_payments as received_payment",
+            "received_payments_id, customer_name, received_payments_shop, received_payments_from, round(received_payments_amount, 2) as received_payments_amount, received_payments_details, received_payments_datetime, shop_name",
+            array (
+                "left join {$table_prefix}customers on customer_id = received_payments_from",
+                "left join {$table_prefix}shops on shop_id = received_payments_shop"
+            ),
+            array (
+                "received_payment.is_trash = 0 and received_payments_type" => "Discounts",
+            ),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+      );
+  
+  } 
+
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $allNestedData[] = "";
+            $allNestedData[] = date("d M, Y h:i A", strtotime($value["received_payments_datetime"]));
+            $allNestedData[] = $value["shop_name"];
+            $allNestedData[] = $value["customer_name"];
+            $allNestedData[] = $value["received_payments_amount"];
+            $allNestedData[] = $value['received_payments_details'];
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a data-toggle="modal" data-target="#modalDefault" href="'. full_website_address() .'/xhr/?module=my-shop&page=editDiscount&id='. $value["received_payments_id"] .'"><i class="fa fa-edit"></i> Edit Discount</a></li>
+                                    <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=my-shop&page=deleteDiscount" data-to-be-deleted="'. $value["received_payments_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                    </ul>
+                                </div>';
+
+            $allData[] = $allNestedData;
+        }
+    }
+    
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
+}
+
 
 ?>

@@ -77,6 +77,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addPaymentCategory") {
 
 /*************************** Payment Category List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "paymentCategoryList") {
+
+    if( !current_user_can("payment_categories.View") ) {
+        return _e("Sorry! you do not have permission to view payment category list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -105,7 +109,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentCategoryList") {
             "payments_categories as payments_category",
             "payment_category_id, payment_category_name, payment_category_shop_id, shop_name",
             array (
-                "left join {$table_prefeix}shops on payment_category_shop_id = shop_id"
+                "left join {$table_prefix}shops on payment_category_shop_id = shop_id"
             ),
             array (
                 "payments_category.is_trash = 0 and payment_category_name LIKE" => "%".$requestData['search']['value'] . "%"
@@ -127,7 +131,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentCategoryList") {
             "payments_categories as payments_category",
             "payment_category_id, payment_category_name, payment_category_shop_id, shop_name",
             array (
-                "left join {$table_prefeix}shops on payment_category_shop_id = shop_id"
+                "left join {$table_prefix}shops on payment_category_shop_id = shop_id"
             ),
             array("payments_category.is_trash = 0"),
             array (
@@ -175,6 +179,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentCategoryList") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
+
 }
 
 
@@ -211,6 +216,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePaymentCategory") {
 
 /************************** Update payments category **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editPaymentCategory") {
+
+    if( !current_user_can("payment_categories.Edit") ) {
+        return _e("Sorry! you do not have permission to edit payment category");
+    }
   
     // Include the modal header
     modal_header("Edit Payment Category", full_website_address() . "/xhr/?module=expenses&page=updatePaymentCategory");
@@ -219,7 +228,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editPaymentCategory") {
         "table"     => "payments_categories",
         "fields"    => "payment_category_name, payment_category_shop_id, shop_name",
         "join"      => array(
-            "left join {$table_prefeix}shops on shop_id = payment_category_shop_id"
+            "left join {$table_prefix}shops on shop_id = payment_category_shop_id"
         ),
         "where"     => array(
             "payment_category_id"   => $_GET["id"],
@@ -255,6 +264,14 @@ if(isset($_GET['page']) and $_GET['page'] == "editPaymentCategory") {
   
 
 if(isset($_GET['page']) and $_GET['page'] == "updatePaymentCategory") {
+
+    if( !current_user_can("payment_categories.Edit") ) {
+        return _e("Sorry! you do not have permission to edit payment category");
+    }
+
+    if( empty($_POST["categoryName"]) ) {
+        return _e("Please enter category name");
+    }
 
     $updatePaymentCategory = easyUpdate(
         "payments_categories",
@@ -488,6 +505,10 @@ if(isset($_GET['page']) and $_GET['page'] == "billPay") {
 
 /************************** Bill Payment **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newBillPay") {
+
+    if( !current_user_can("payments.Add") ) {
+        return _e("Sorry! you do not have permission to pay bill");
+    }
 
     $accounts_balance = accounts_balance($_POST["paymentFromAccount"]);
     $totalPaymentAmount = array_sum($_POST["paymentAmount"]);
@@ -762,6 +783,10 @@ if(isset($_GET['page']) and $_GET['page'] == "salaryPay") {
 /*************************** New Salary Pay ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "newSalaryPay") {
 
+    if( !current_user_can("payments.Add") ) {
+        return _e("Sorry! you do not have permission to pay salary");
+    }
+
     $emp_id = safe_input($_POST["paymentEmployee"]);
     $totalPaymentAmount = array_sum($_POST["paymentAmount"]);
     $accounts_balance = accounts_balance($_POST["paymentFromAccount"]);
@@ -865,6 +890,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newSalaryPay") {
 
 /*************************** Expenses List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "expensesList") {
+
+    if( !current_user_can("payments.View") ) {
+        return _e("Sorry! you do not have permission to view expense list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -901,10 +930,10 @@ if(isset($_GET['page']) and $_GET['page'] == "expensesList") {
             "payments as payment",
             "payment_id, payment_reference, payment_status, if(item_description is not null AND item_description != '', item_description, combine_description(payment_description, item_description)) as payment_description, company_name, emp_firstname, emp_lastname, emp_PIN, accounts_name, payment_date, payment_amount, payment_from, payment_method",
             array (
-                "left join {$table_prefeix}accounts on payment_from = accounts_id",
-                "left join {$table_prefeix}companies on payment_to_company = company_id",
-                "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+                "left join {$table_prefix}accounts on payment_from = accounts_id",
+                "left join {$table_prefix}companies on payment_to_company = company_id",
+                "left join {$table_prefix}employees on payment_to_employee = emp_id",
+                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
             ),
             array (
                 "payment.is_trash = 0 and (company_name LIKE" => $requestData['search']['value'] . "%",
@@ -936,10 +965,10 @@ if(isset($_GET['page']) and $_GET['page'] == "expensesList") {
             "payments as payment",
             "payment_id, payment_reference, payment_status, if(item_description is not null AND item_description != '', item_description, combine_description(payment_description, item_description)) as payment_description, company_name, emp_firstname, emp_lastname, emp_PIN, accounts_name, payment_date, payment_amount, payment_from, payment_method",
             array (
-                "left join {$table_prefeix}accounts on payment_from = accounts_id",
-                "left join {$table_prefeix}companies on payment_to_company = company_id",
-                "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+                "left join {$table_prefix}accounts on payment_from = accounts_id",
+                "left join {$table_prefix}companies on payment_to_company = company_id",
+                "left join {$table_prefix}employees on payment_to_employee = emp_id",
+                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
             ),
             array (
               "payment.is_trash = 0",
@@ -971,10 +1000,10 @@ if(isset($_GET['page']) and $_GET['page'] == "expensesList") {
           "payments as payment",
           "payment_id, payment_reference, payment_status, if(item_description is not null AND item_description != '', item_description, combine_description(payment_description, item_description)) as payment_description, item_description, company_name, emp_firstname, emp_lastname, emp_PIN, accounts_name, payment_date, payment_amount, payment_from, payment_method",
           array (
-            "left join {$table_prefeix}accounts on payment_from = accounts_id",
-            "left join {$table_prefeix}companies on payment_to_company = company_id",
-            "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-            "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+            "left join {$table_prefix}accounts on payment_from = accounts_id",
+            "left join {$table_prefix}companies on payment_to_company = company_id",
+            "left join {$table_prefix}employees on payment_to_employee = emp_id",
+            "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
           ),
           array("payment.is_trash = 0"),
           array (
@@ -1031,7 +1060,9 @@ if(isset($_GET['page']) and $_GET['page'] == "expensesList") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
+
 }
+
 
 /***************** Delete Payments ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deletePayment") {
@@ -1100,7 +1131,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePayment") {
 
             $getPurchasePaidAmount = easySelectD("SELECT 
                         sum(payment_amount) as payment_amount 
-                    from {$table_prefeix}payments 
+                    from {$table_prefix}payments 
                     where is_trash = 0 and payment_purchase_id = '{$deletedPaymentData["payment_purchase_id"]}' 
                     group by payment_purchase_id"
             );
@@ -1110,7 +1141,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePayment") {
             }
 
             // Get purchase grand total
-            $purchaseGrandTotal = easySelectD("SELECT purchase_grand_total from {$table_prefeix}purchases where purchase_id = {$deletedPaymentData["payment_purchase_id"]}")["data"][0]["purchase_grand_total"];
+            $purchaseGrandTotal = easySelectD("SELECT purchase_grand_total from {$table_prefix}purchases where purchase_id = {$deletedPaymentData["payment_purchase_id"]}")["data"][0]["purchase_grand_total"];
 
             $purchaseDue = $purchaseGrandTotal - $totalPurchasePayment;
 
@@ -1139,21 +1170,23 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePayment") {
                 )
             );
 
-
-
         }
-
         
         echo '{
             "title": "'. __("The payment item has been deleted successfully.") .'"
         }';
 
-    } 
+    }
+
 }
 
 
 /*************************** Payment Return List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "paymentsReturnList") {
+
+    if( !current_user_can("payments_return.View") ) {
+        return _e("Sorry! you do not have permission to view payment return list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1197,10 +1230,10 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentsReturnList") {
             "table"     => "payments_return as payments_return",
             "fields"    => "payments_return_id, payments_return_date, payments_return_type, emp_firstname, emp_lastname, emp_PIN, accounts_name, customer_name, company_name, round(payments_return_amount, 2) as payments_return_amount, payments_return_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on payments_return_emp_id = emp_id",
-                "left join {$table_prefeix}companies on company_id = payments_return_company_id",
-                "left join {$table_prefeix}customers on customer_id = payments_return_customer_id",
-                "left join {$table_prefeix}accounts on payments_return_accounts = accounts_id"
+                "left join {$table_prefix}employees on payments_return_emp_id = emp_id",
+                "left join {$table_prefix}companies on company_id = payments_return_company_id",
+                "left join {$table_prefix}customers on customer_id = payments_return_customer_id",
+                "left join {$table_prefix}accounts on payments_return_accounts = accounts_id"
             ),
             "where" => array(
                 "payments_return.is_trash=0 AND (",
@@ -1230,10 +1263,10 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentsReturnList") {
             "table"     => "payments_return as payments_return",
             "fields"    => "payments_return_id, payments_return_date, payments_return_type, emp_firstname, emp_lastname, emp_PIN, accounts_name, customer_name, company_name, round(payments_return_amount, 2) as payments_return_amount, payments_return_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on payments_return_emp_id = emp_id",
-                "left join {$table_prefeix}companies on company_id = payments_return_company_id",
-                "left join {$table_prefeix}customers on customer_id = payments_return_customer_id",
-                "left join {$table_prefeix}accounts on payments_return_accounts = accounts_id"
+                "left join {$table_prefix}employees on payments_return_emp_id = emp_id",
+                "left join {$table_prefix}companies on company_id = payments_return_company_id",
+                "left join {$table_prefix}customers on customer_id = payments_return_customer_id",
+                "left join {$table_prefix}accounts on payments_return_accounts = accounts_id"
             ),
             "where" => array(
                 "payments_return.is_trash=0"
@@ -1481,6 +1514,9 @@ if(isset($_GET['page']) and $_GET['page'] == "addSalary") {
 /************************** Add Monthly Salary **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addMonthlySalary") {
 
+    if( !current_user_can("Salary.Add") ) {
+        return _e("Sorry! you do not have permission to add salary");
+    }
 
     if(empty($_POST["employeeId"])) {
         return _e("Please select employee");
@@ -1507,15 +1543,15 @@ if(isset($_GET['page']) and $_GET['page'] == "addMonthlySalary") {
                 loan_id, loan_amount, loan_installment_amount, 
                 if(thisMonthInstallmentPayingStatus is null, 0, 1) as thisMonthInstallmentPayingStatus,
                 if(loan_paid_amount is null, 0, loan_paid_amount) as loan_paid_amount
-            from {$table_prefeix}loan as loan
+            from {$table_prefix}loan as loan
             left join (select 
                     loan_ids, 
                     sum(loan_installment_paying_amount) as loan_paid_amount 
-                from {$table_prefeix}loan_installment where is_trash = 0 group by loan_ids
+                from {$table_prefix}loan_installment where is_trash = 0 group by loan_ids
             ) as totalPaidAmount on loan_id = totalPaidAmount.loan_ids
             left join (select 
                     loan_ids, 1 as thisMonthInstallmentPayingStatus
-                from {$table_prefeix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
+                from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
             ) as thisMonthStatus on loan_id = thisMonthStatus.loan_ids
             where loan.is_trash = 0 and loan_borrower = {$emp_id} and loan_installment_starting_from <= '{$year}-{$month}-01'
             and ( loan_paid_amount is null or loan_paid_amount < loan_amount)" 
@@ -1613,6 +1649,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addMonthlySalary") {
 
 /*************************** Added Salary List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "salaryList") {
+
+    if( !current_user_can("Salary.View") ) {
+        return _e("Sorry! you do not have permission to view salary list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1646,7 +1686,7 @@ if(isset($_GET['page']) and $_GET['page'] == "salaryList") {
             "salaries as salary",
             "salary_id, salary_month, emp_firstname, emp_lastname, emp_PIN, salary_type, salary_amount, salary_description",
             array (
-              "left join {$table_prefeix}employees on salary_emp_id = emp_id"
+              "left join {$table_prefix}employees on salary_emp_id = emp_id"
             ),
             array (
                 "salary.is_trash = 0",
@@ -1674,7 +1714,7 @@ if(isset($_GET['page']) and $_GET['page'] == "salaryList") {
             "salaries as salary",
             "salary_id, emp_PIN, salary_month, emp_firstname, emp_lastname, emp_PIN, salary_type, salary_amount, salary_description",
             array (
-              "left join {$table_prefeix}employees on salary_emp_id = emp_id"
+              "left join {$table_prefix}employees on salary_emp_id = emp_id"
             ),
             array (
               "salary.is_trash = 0 and ( emp_firstname LIKE '". $requestData["columns"][2]['search']['value'] ."%' ",
@@ -1701,7 +1741,7 @@ if(isset($_GET['page']) and $_GET['page'] == "salaryList") {
             "salaries as salary",
             "salary_id, salary_month, emp_firstname, emp_lastname, emp_PIN, salary_type, salary_amount, salary_description",
             array (
-            "left join {$table_prefeix}employees on salary_emp_id = emp_id"
+            "left join {$table_prefix}employees on salary_emp_id = emp_id"
             ),
             array("salary.is_trash=0"),
             array (
@@ -1792,6 +1832,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteSalary") {
 
 /************************** Edit Salary **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editMonthlySalary") {
+
+    if( !current_user_can("Salary.Edit") ) {
+        return _e("Sorry! you do not have permission to edit salary");
+    }
   
     // Include the modal header
     modal_header("Edit Salary", full_website_address() . "/xhr/?module=expenses&page=updateMonthlySalary");
@@ -1800,7 +1844,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editMonthlySalary") {
         "salaries",
         "*",
         array (
-            "left join {$table_prefeix}employees on salary_emp_id = emp_id"
+            "left join {$table_prefix}employees on salary_emp_id = emp_id"
         ),
         array (
             "salary_id"     => $_GET["id"]
@@ -1886,6 +1930,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editMonthlySalary") {
 /************************** Update Monthly Salary **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateMonthlySalary") {
 
+    if( !current_user_can("Salary.Edit") ) {
+        return _e("Sorry! you do not have permission to edit salary");
+    }
+
     if(empty($_POST["salaryMonth"])) {
         return _e("Please select month");
     } elseif(empty($_POST["salaryYear"])) {
@@ -1924,7 +1972,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateMonthlySalary") {
         array (
             "emp_id"    => $emp_id
         )
-      );
+    );
 
     if($UpdateSalary === true and $updatePayableSalary === true) {
         _s("%s successfully updated", safe_entities($_POST['salaryType']) );
@@ -1935,201 +1983,6 @@ if(isset($_GET['page']) and $_GET['page'] == "updateMonthlySalary") {
 }
 
 
-
-/************************** Add Advance Salary **********************/
-if(isset($_GET['page']) and $_GET['page'] == "payAdvanceSalary") {
-  
-    // Include the modal header
-    modal_header("Advance Salary", full_website_address() . "/xhr/?module=expenses&page=payNewAdvanceSalary");
-    
-    ?>
-      <div class="box-body">
-        
-        <div class="form-group required">
-            <label for="advancePaymentEmployee"><?= __("Employee"); ?></label>
-            <select name="advancePaymentEmployee" id="advancePaymentEmployee" select2-minimum-input-length="1" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=employeeList" style="width: 100%;" required>
-                <option value=""><?= __("Select Employee"); ?>....</option>
-            </select>
-        </div>
-        <div class="form-group required">
-            <label for="advancePaymentsFrom"><?= __("Accounts"); ?></label>
-            <i data-toggle="tooltip" data-placement="right" title="<?= __("Which accounts the advance is paying from"); ?>" class="fa fa-question-circle"></i>
-            <select name="advancePaymentsFrom" id="advancePaymentsFrom" class="form-control select2" style="width: 100%;" required>
-                <?php
-                    
-                    foreach($selectAccounts["data"] as $accounts) {
-                        echo "<option value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
-                    }
-                ?>
-            </select>
-        </div>
-        <div class="form-group required">
-            <label for="advanceSalaryAmount"><?= __("Amount"); ?></label>
-            <input type="number" name="advanceSalaryAmount" id="advanceSalaryAmount" class="form-control" required>
-        </div>
-        <div class="form-group">
-            <label for="advanceSalaryDescription"><?= __("Description"); ?></label>
-            <textarea name="advanceSalaryDescription" id="advanceSalaryDescription" rows="3" class="form-control"></textarea>
-        </div>
-
-        <div id="ajaxSubmitMsg"></div>
-
-      </div>
-      <!-- /Box body-->
-
-    <?php
-  
-    // Include the modal footer
-    modal_footer("Pay Advance");
-  
-}
-
-
-
-/************************** Add Advance Salary **********************/
-if(isset($_GET['page']) and $_GET['page'] == "payNewAdvanceSalary") {
-    
-    $accounts_balance = accounts_balance($_POST["advancePaymentsFrom"]);
-
-    if(empty($_POST["advancePaymentEmployee"]))  {
-        return _e("Please select employee");
-    } elseif(empty($_POST["advanceSalaryAmount"]))  {
-        return _e("Please advance amount");
-    } else if(!negative_value_is_allowed($_POST["advancePaymentsFrom"]) and $accounts_balance < $_POST["advanceSalaryAmount"] ) {
-        return _e("Payment amount is exceeded of account balance (%.2f)", number_format($accounts_balance, 2));
-    }
-       
-    // insert advance salary
-    $insertAdvanceSalary = easyInsert(
-        "advance_salary",
-        array (
-            "advance_salary_pay_to"         => $_POST["advancePaymentEmployee"],
-            "advance_salary_paying_from"    => $_POST["advancePaymentsFrom"],
-            "advance_salary_amount"         => $_POST["advanceSalaryAmount"],
-            "advance_salary_description"    => $_POST["advanceSalaryAmount"],
-            "advance_salary_pay_by"         => $_SESSION["sid"]
-        )
-    );
-
-    if($insertAdvanceSalary === true) {
-        // Update Accounts Balance
-        updateAccountBalance($_POST["advancePaymentsFrom"]);
-
-        _s("Advance suceessfully added.");
-
-    } else {
-        _e($insertAdvanceSalary);
-    }
-
-}
-
-
-// Seeme like this is not required
-/*************************** Advance Salary List ***********************/
-if(isset($_GET['page']) and $_GET['page'] == "advanceSalaryList") {
-    
-    $requestData = $_REQUEST;
-    $getData = [];
-
-    // List of all columns name
-    $columns = array(
-        "",
-        "emp_firstname",
-        "accounts_name",
-        "total_advance_salary_amount",
-        "total_advance_salary_adjustment_amount",
-        "total_due_amount"
-    );
-    
-    // Count Total recrods
-    $totalFilteredRecords = $totalRecords = easySelectA(array(
-        "table" => "advance_salary",
-        "fields" => "count(*) as totalRow",
-        "groupby" => "advance_salary_pay_to",
-        "where" => array(
-            "is_trash = 0"
-        )
-    ))["data"][0]["totalRow"];
-
-    if($requestData['length'] == -1) {
-        $requestData['length'] = $totalRecords;
-    }
-    
-    $search = safe_input($requestData['search']['value']);
-    $orderBy = safe_input($requestData['order'][0]['dir']);
-  
-    $getData = easySelectD(
-        "select 
-            emp_firstname, 
-            emp_lastname, 
-            emp_PIN, 
-            advance_salary_pay_to, 
-            accounts_name,
-            if(advance_salary_amount is null, 0, advance_salary_amount) as total_advance_salary_amount, 
-            if(advance_salary_adjustment_amount is null, 0, advance_salary_adjustment_amount) as total_advance_salary_adjustment_amount, 
-            (if(advance_salary_amount is null, 0, advance_salary_amount) - if(advance_salary_adjustment_amount is null, 0, advance_salary_adjustment_amount)) as total_due_amount
-        from 
-            (select advance_salary_paying_from, advance_salary_pay_to,
-                sum(advance_salary_amount) as advance_salary_amount 
-            from {$table_prefeix}advance_salary group by advance_salary_pay_to) as {$table_prefeix}advance_salary
-        inner join {$table_prefeix}accounts on advance_salary_paying_from = accounts_id
-        left join 
-            (select 
-                advance_salary_adjustment_for, 
-                sum(advance_salary_adjustment_amount) as advance_salary_adjustment_amount 
-            from {$table_prefeix}advance_salary_adjustment group by advance_salary_adjustment_for) as {$table_prefeix}advance_salary_adjustment 
-            on advance_salary_pay_to = advance_salary_adjustment_for
-        left join 
-            {$table_prefeix}employees 
-            on advance_salary_pay_to = emp_id
-        where 
-            emp_firstname like '{$search}%' 
-            or emp_PIN = '{$search}'
-        order by 
-            {$columns[$requestData['order'][0]['column']]} {$orderBy}
-        "
-    );
-    
-  
-    $allData = [];
-    // Check if there have more then zero data
-    if(isset($getData['count']) and $getData['count'] > 0) {
-        
-        foreach($getData['data'] as $key => $value) {
-            $allNestedData = [];
-            $allNestedData[] = $value["emp_firstname"] . ' ' . $value["emp_lastname"];
-            $allNestedData[] = $value["accounts_name"];
-            $allNestedData[] = $value["total_advance_salary_amount"];
-            $allNestedData[] = $value["total_advance_salary_adjustment_amount"];
-            $allNestedData[] = $value["total_due_amount"];
-            // The action button
-            $allNestedData[] = '<div class="btn-group">
-                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                    action
-                                    <span class="caret"></span>
-                                    <span class="sr-only">Toggle Dropdown</span>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=expenses&page=advance-salary&id='. $value["advance_salary_pay_to"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> View Details</a></li>
-                                    </ul>
-                                </div>';
-            
-            $allData[] = $allNestedData;
-        }
-    }
-    
-  
-    $jsonData = array (
-        "draw"              => intval( $requestData['draw'] ),
-        "recordsTotal"      => intval( $totalRecords ),
-        "recordsFiltered"   => intval( $totalFilteredRecords ),
-        "data"              => $allData
-    );
-    
-    // Encode in Json Formate
-    echo json_encode($jsonData); 
-}
-
 /************************** Add Bill **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newBill") {
   
@@ -2137,7 +1990,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newBill") {
     modal_header("New Bill", full_website_address() . "/xhr/?module=expenses&page=addNewBill");
     
     ?>
-      <div class="box-body">      
+    <div class="box-body">      
         
         <div class="row">
             <div class="col-md-6">
@@ -2206,7 +2059,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newBill") {
     
         <div id="ajaxSubmitMsg"></div>
 
-      </div>
+    </div>
          
     <script>
 
@@ -2276,6 +2129,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newBill") {
 
 /************************** Add New Bill **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewBill") {
+
+    if( !current_user_can("bills.Add") ) {
+        return _e("Sorry! you do not have permission to add bill");
+    }
 
     if(empty($_POST["billsDate"]))  {
         return _e("Please select bill date");
@@ -2364,6 +2221,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewBill") {
 
 /*************************** Bills List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "billsList") {
+
+    if( !current_user_can("bills.View") ) {
+        return _e("Sorry! you do not have permission to view bill list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -2397,8 +2258,8 @@ if(isset($_GET['page']) and $_GET['page'] == "billsList") {
             "bills as bills",
             "bills_id, bills_date, bills_reference, bills_company_id, company_name, bills_amount, all_description",
             array (
-                "left join {$table_prefeix}companies on bills_company_id = company_id",
-                "left join ( select bill_items_bill_id, group_concat(bill_items_note SEPARATOR ', ') as all_description from {$table_prefeix}bill_items group by bill_items_bill_id ) as bill_items on bill_items_bill_id = bills_id"
+                "left join {$table_prefix}companies on bills_company_id = company_id",
+                "left join ( select bill_items_bill_id, group_concat(bill_items_note SEPARATOR ', ') as all_description from {$table_prefix}bill_items group by bill_items_bill_id ) as bill_items on bill_items_bill_id = bills_id"
             ),
             array (
                 "bills.is_trash = 0 and company_name LIKE" => $requestData['search']['value'] . "%"
@@ -2420,8 +2281,8 @@ if(isset($_GET['page']) and $_GET['page'] == "billsList") {
             "bills as bills",
             "bills_id, bills_date, bills_reference, bills_company_id, company_name, bills_amount, all_description",
             array (
-                "left join {$table_prefeix}companies on bills_company_id = company_id",
-                "left join ( select bill_items_bill_id, group_concat(bill_items_note SEPARATOR ', ') as all_description from {$table_prefeix}bill_items group by bill_items_bill_id ) as bill_items on bill_items_bill_id = bills_id"
+                "left join {$table_prefix}companies on bills_company_id = company_id",
+                "left join ( select bill_items_bill_id, group_concat(bill_items_note SEPARATOR ', ') as all_description from {$table_prefix}bill_items group by bill_items_bill_id ) as bill_items on bill_items_bill_id = bills_id"
             ),
             array("bills.is_trash = 0"),
             array (
@@ -2455,12 +2316,15 @@ if(isset($_GET['page']) and $_GET['page'] == "billsList") {
                                     <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=expenses&page=companyBillDetails&bill_id='. $value["bills_id"] .'"  data-target="#modalDefault"><i class="fa fa-eye"></i> View Bill</a></li>
-                                    <li><a class="'. ( current_user_can("bills.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=expenses&page=deleteBills" data-to-be-deleted="'. $value["bills_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                        <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=expenses&page=companyBillDetails&bill_id='. $value["bills_id"] .'"  data-target="#modalDefault"><i class="fa fa-eye"></i> View Bill</a></li>
+                                        <li><a class="'. ( current_user_can("bills.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=expenses&page=deleteBills" data-to-be-deleted="'. $value["bills_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
                                     </ul>
                                 </div>';
+
             $allData[] = $allNestedData;
+
         }
+
     }
     
 
@@ -2473,6 +2337,7 @@ if(isset($_GET['page']) and $_GET['page'] == "billsList") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
+
 }
 
 
@@ -2513,6 +2378,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteBills") {
 
 /************************** Bill Details **********************/
 if(isset($_GET['page']) and $_GET['page'] == "companyBillDetails") {
+
+    if( !current_user_can("bills.View") ) {
+        return _e("Sorry! you do not have permission to view bill");
+    }
   
     // Include the modal header
     modal_header("Bill Details", "");
@@ -2521,7 +2390,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyBillDetails") {
         "bill_items",
         "bill_items_category, payment_category_name, round(bill_items_amount, 2) as bill_items_amount, bill_items_note",
         array (
-            "left join {$table_prefeix}payments_categories on bill_items_category = payment_category_id"
+            "left join {$table_prefix}payments_categories on bill_items_category = payment_category_id"
         ),
         array (
             "bill_items_bill_id"     => $_GET["bill_id"]
@@ -2702,6 +2571,10 @@ if(isset($_GET['page']) and $_GET['page'] == "dueBillPay") {
 /************************** Bill Payment **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newDueBillPay") {
 
+    if( !current_user_can("payments.Add") ) {
+        return _e("Sorry! you do not have permission to pay due bill");
+    }
+
     $accounts_balance = accounts_balance($_POST["dueBillPaymentAccount"]);
 
     if(empty($_POST["dueBillPaymentDate"])) {
@@ -2872,6 +2745,10 @@ if(isset($_GET['page']) and $_GET['page'] == "payAdvancePayment") {
 /************************** Pay Advance Payment **********************/
 if(isset($_GET['page']) and $_GET['page'] == "payNewAdvancePayment") {
 
+    if( !current_user_can("advance_bill_payments.Add") ) {
+        return _e("Sorry! you do not have permission to add advance payment");
+    }
+
     $accounts_balance = accounts_balance($_POST["advancePaymentPaymentsFrom"]);
 
     if(empty($_POST["advancePaymentsDate"]))  {
@@ -2959,6 +2836,10 @@ if(isset($_GET['page']) and $_GET['page'] == "payNewAdvancePayment") {
 
 /*************************** Advance Payment Payments Details ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "advancePaymentOverview") {
+
+    if( !current_user_can("advance_bill_payments.View") ) {
+        return _e("Sorry! you do not have permission to view advance payment");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -3002,9 +2883,9 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentOverview") {
             "employees",
             "emp_id, emp_firstname, emp_lastname, emp_PIN, if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount, if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount",
             array (
-                "left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments where is_trash = 0 and advance_payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id",
-                "left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where is_trash = 0 and payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id",
-                "left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return where is_trash = 0 and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id "
+                "left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments where is_trash = 0 and advance_payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id",
+                "left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where is_trash = 0 and payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id",
+                "left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return where is_trash = 0 and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id "
             ),
             array (
                 "advance_payment_amount_sum > 0",
@@ -3029,9 +2910,9 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentOverview") {
             "employees",
             "emp_id, emp_firstname, emp_lastname, emp_PIN, if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount, if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount",
             array (
-                "left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id",
-                "left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id",
-                "left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id "
+                "left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id",
+                "left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id",
+                "left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id "
             ),
             array (
                 "advance_payment_amount_sum > 0"
@@ -3078,6 +2959,10 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentOverview") {
 
 /*************************** advancePaymentList ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "advancePaymentList") {
+
+    if( !current_user_can("advance_bill_payments.View") ) {
+        return _e("Sorry! you do not have permission to view advance payment");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -3115,8 +3000,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentList") {
             "table"     => "advance_payments as advance_payment",
             "fields"    => "advance_payment_id, advance_payment_date, advance_payment_reference, emp_firstname, emp_lastname, emp_PIN, accounts_name, advance_payment_amount, advance_payment_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on emp_id = advance_payment_pay_to",
-                "left join {$table_prefeix}accounts on accounts_id = advance_payment_pay_from"
+                "left join {$table_prefix}employees on emp_id = advance_payment_pay_to",
+                "left join {$table_prefix}accounts on accounts_id = advance_payment_pay_from"
             ),
             "where" => array(
                 "advance_payment.is_trash=0",
@@ -3144,8 +3029,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentList") {
             "table"     => "advance_payments as advance_payment",
             "fields"    => "advance_payment_id, advance_payment_date, advance_payment_reference, emp_firstname, emp_lastname, emp_PIN, accounts_name, advance_payment_amount, advance_payment_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on advance_payment_pay_to = emp_id",
-                "left join {$table_prefeix}accounts on advance_payment_pay_from = accounts_id"
+                "left join {$table_prefix}employees on advance_payment_pay_to = emp_id",
+                "left join {$table_prefix}accounts on advance_payment_pay_from = accounts_id"
             ),
             "where" => array(
                 "advance_payment.is_trash=0"
@@ -3251,6 +3136,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteAdvancePayment") {
 
 /************************** Edit Advance Payment **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editAdvancePayment") {
+
+    if( !current_user_can("advance_bill_payments.Edit") ) {
+        return _e("Sorry! you do not have permission to edit advance payment");
+    }
   
     // Include the modal header
     modal_header("Edit Advance Payment", full_website_address() . "/xhr/?module=expenses&page=updateAdvancePayment");
@@ -3259,7 +3148,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editAdvancePayment") {
         "table"     => "advance_payments",
         "fields"    => "advance_payment_id, advance_payment_date, advance_payment_reference, advance_payment_pay_to, emp_firstname, emp_lastname, advance_payment_pay_from, advance_payment_amount, advance_payment_description, advance_payment_payment_method",
         "join"      => array(
-            "left join {$table_prefeix}employees on advance_payment_pay_to = emp_id"
+            "left join {$table_prefix}employees on advance_payment_pay_to = emp_id"
         ),
         "where"     => array(
             "advance_payment_id" => $_GET["id"]
@@ -3330,6 +3219,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editAdvancePayment") {
 /************************** Update Advance Payment **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateAdvancePayment") {
 
+    if( !current_user_can("advance_bill_payments.Edit") ) {
+        return _e("Sorry! you do not have permission to edit advance payment");
+    }
+
     $accounts_balance = accounts_balance($_POST["advancePaymentPaymentsFrom"]);
     
     // Add the privouse data
@@ -3396,6 +3289,11 @@ if(isset($_GET['page']) and $_GET['page'] == "updateAdvancePayment") {
 
 /************************** Advance Payment Adjustment List **********************/
 if(isset($_GET['page']) and $_GET['page'] == "advancePaymentAdjustmentList") {
+
+    if( !current_user_can("payment_adjustment.Edit") ) {
+        return _e("Sorry! you do not have permission to view payment adjustment");
+    }
+
     // Include the modal header
     modal_header("Advance Adjustment List", "");
     
@@ -3645,14 +3543,18 @@ if(isset($_GET['page']) and $_GET['page'] == "adjustAdvancePayment") {
 /************************** Adjust Advance Payment **********************/
 if(isset($_GET['page']) and $_GET['page'] == "adjustAdvancePaymentSubmit") {
 
+    if( !current_user_can("payment_adjustment.Add") ) {
+        return _e("Sorry! you do not have permission to add payment adjustment");
+    }
+
     $empAdvancePayment = easySelectD("
         select emp_id,
             if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount,
             if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount
-        from {$table_prefeix}employees
-        left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
-        left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
-        left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
+        from {$table_prefix}employees
+        left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
+        left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
+        left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
         where emp_id = " . safe_input($_POST['advancePaymentAdjustEmployee'])
     )["data"][0];
 
@@ -3920,16 +3822,20 @@ if(isset($_GET['page']) and $_GET['page'] == "returnAdvancePayment") {
 /************************** Return Advance Payment Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "returnAdvancePaymentSubmit") {
 
+    if( !current_user_can("payments_return.Add") ) {
+        return _e("Sorry! you do not have permission to return advance payment");
+    }
+
     $emp_id = safe_input($_POST["returnAdvancePaymentEmployee"]);
 
     $getEmpAdvancePaymentData = easySelectD("
         select emp_id,
             if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount,
             if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount
-        from {$table_prefeix}employees
-        left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
-        left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
-        left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
+        from {$table_prefix}employees
+        left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
+        left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
+        left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
             where emp_id = {$emp_id}"
     )["data"][0];
 
@@ -3965,8 +3871,112 @@ if(isset($_GET['page']) and $_GET['page'] == "returnAdvancePaymentSubmit") {
 }
 
 
+/************************** Return Customer Payment **********************/
+if(isset($_GET['page']) and $_GET['page'] == "returnCustomerPayment") {
+  
+    // Include the modal header
+    modal_header("Return Customer Payment", full_website_address() . "/xhr/?module=expenses&page=returnCustomerPaymentSubmit");
+    
+    ?>
+    
+    <div class="box-body">
+        <div class="form-group required">
+            <label for="returnPaymentCustomer"><?= __("Customer"); ?></label>
+            <select name="returnPaymentCustomer" id="returnPaymentCustomer" select2-minimum-input-length="1" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=customerList" style="width: 100%;" required>
+                <option value=""><?= __("Select Customer"); ?>...</option>
+            </select>
+        </div>
+        <div class="form-group required">
+            <label for="returnAdvancePaymentsDate"><?= __("Date:"); ?></label>
+            <input type="text" name="returnAdvancePaymentsDate" id="returnAdvancePaymentsDate" value="<?php echo date("Y-m-d"); ?>" class="form-control datePicker" required>
+        </div>
+        <div class="form-group required">
+            <label for="returnAdvanceDirection"><?= __("Direction/ Type:"); ?></label>
+            <select name="returnAdvanceDirection" id="returnAdvanceDirection" class="form-control" required>
+                <option value="">Select direction</option>
+                <option value="Outgoing">Outgoing</option>
+                <option value="Incoming">Incoming</option>
+            </select>
+        </div>
+        <div class="form-group required">
+            <label for="returnPaymentAccounts"><?= __("Accounts"); ?></label>
+            <i data-toggle="tooltip" data-placement="right" title="Which accounts the return amount will ad deduct" class="fa fa-question-circle"></i>
+            <select name="returnPaymentAccounts" id="returnPaymentAccounts" class="form-control select2" style="width: 100%;" required>
+                <?php
+                    
+                    foreach($selectAccounts["data"] as $accounts) {
+                        $selected = (isset($_SESSION['aid']) and $_SESSION['aid'] === $accounts['accounts_id']) ? "selected" : "";
+                        echo "<option {$selected} value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
+                    }
+                ?>
+            </select>
+        </div>
+        <div class="form-group required">
+            <label for="returnablePaymentAmount">Returnable Amount</label>
+            <input type="number" name="returnablePaymentAmount" id="returnablePaymentAmount" value="" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="returnPaymentDescription"><?= __("Description:"); ?></label>
+            <textarea name="returnPaymentDescription" id="returnPaymentDescription" rows="3" class="form-control"></textarea>
+        </div>
+    
+        <div id="ajaxSubmitMsg"></div>
+
+    </div> <!-- /.box-body -->
+      
+
+    <?php
+  
+    // Include the modal footer
+    modal_footer("Submit");
+  
+}
+
+
+/************************** Return Advance Payment Payments **********************/
+if(isset($_GET['page']) and $_GET['page'] == "returnCustomerPaymentSubmit") {
+
+    if( !current_user_can("payments_return.Add") ) {
+        return _e("Sorry! you do not have permission to return advance payment");
+    }
+
+
+    // Insert return amount 
+    $insertReturn = easyInsert(
+        "payments_return",
+        array (
+            "payments_return_date"              => $_POST["returnAdvancePaymentsDate"] . date(" H:i:s"),
+            "payments_return_type"              => $_POST["returnAdvanceDirection"],
+            "payments_return_customer_id"       => $_POST["returnPaymentCustomer"],
+            "payments_return_accounts"          => $_POST["returnPaymentAccounts"],
+            "payments_return_amount"            => $_POST["returnablePaymentAmount"],
+            "payments_return_description"       => $_POST["returnPaymentDescription"],
+            "payments_return_by"                => $_SESSION["uid"]
+        )
+    );
+    
+    
+    if($insertReturn === true) {
+
+        // Update Accounts Balance
+        updateAccountBalance($_POST["returnPaymentAccounts"]);
+
+        _s("Return successfully completed.");
+
+    } else {
+        _e($insertReturn);
+    }
+
+}
+
+
+
 /*************************** advancePaymentReturnList ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "advancePaymentReturnList") {
+
+    if( !current_user_can("payments_return.View") ) {
+        return _e("Sorry! you do not have permission to view advance payment return list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -3997,8 +4007,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentReturnList") {
             "table"     => "payments_return as payments_return",
             "fields"    => "payments_return_id, payments_return_date, emp_firstname, emp_lastname, emp_PIN, accounts_name, payments_return_amount, payments_return_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on payments_return_emp_id = emp_id",
-                "left join {$table_prefeix}accounts on payments_return_accounts = accounts_id"
+                "left join {$table_prefix}employees on payments_return_emp_id = emp_id",
+                "left join {$table_prefix}accounts on payments_return_accounts = accounts_id"
             ),
             "where" => array(
                 "payments_return.is_trash=0 and emp_firstname like" => "%".$requestData['search']['value'] . "%",
@@ -4022,8 +4032,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentReturnList") {
             "table"     => "payments_return as payments_return",
             "fields"    => "payments_return_id, payments_return_date, emp_firstname, emp_lastname, emp_PIN, accounts_name, payments_return_amount, payments_return_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on payments_return_emp_id = emp_id",
-                "left join {$table_prefeix}accounts on payments_return_accounts = accounts_id"
+                "left join {$table_prefix}employees on payments_return_emp_id = emp_id",
+                "left join {$table_prefix}accounts on payments_return_accounts = accounts_id"
             ),
             "where" => array(
                 "payments_return.is_trash=0"
@@ -4082,6 +4092,10 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentReturnList") {
 // Delete Payment Return
 if(isset($_GET['page']) and $_GET['page'] == "deletePaymentReturn") {
 
+    if( !current_user_can("payments_return.Delete") ) {
+        return _e("Sorry! you do not have permission to delete advance payment return");
+    }
+
     $selectDeletedPaymentReturn = easySelectA(array(
         "table"     => "payments_return",
         "fields"    => "payments_return_sales_id, payments_return_purchase_id",
@@ -4104,14 +4118,14 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePaymentReturn") {
         if($selectDeletedPaymentReturn["payments_return_sales_id"] !== NULL or $selectDeletedPaymentReturn["payments_return_sales_id"] > 0 ) {
 
             $totalReturnAmount = 0;
-            $getReturnAmount = easySelectD("SELECT sum(payments_return_amount) as totalReturnAmount FROM {$table_prefeix}payments_return where is_trash = 0 and payments_return_sales_id = {$selectDeletedPaymentReturn["payments_return_sales_id"]} group by payments_return_sales_id");
+            $getReturnAmount = easySelectD("SELECT sum(payments_return_amount) as totalReturnAmount FROM {$table_prefix}payments_return where is_trash = 0 and payments_return_sales_id = {$selectDeletedPaymentReturn["payments_return_sales_id"]} group by payments_return_sales_id");
 
             if($getReturnAmount !== false) {
                 $totalReturnAmount = $getReturnAmount["data"][0]["totalReturnAmount"];
             }
 
             // Select sales
-            $selectSales = easySelectD("SELECT sales_grand_total, is_return from {$table_prefeix}sales where sales_id = {$selectDeletedPaymentReturn["payments_return_sales_id"]} ")["data"][0];
+            $selectSales = easySelectD("SELECT sales_grand_total, is_return from {$table_prefix}sales where sales_id = {$selectDeletedPaymentReturn["payments_return_sales_id"]} ")["data"][0];
 
  
             // Generate the payment status
@@ -4146,12 +4160,12 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePaymentReturn") {
 
 
             $totalPurchaseReturnPayment = 0;
-            $getPurchaseReturnAmount = easySelectD("SELECT sum(payments_return_amount) as totalReturnAmount FROM {$table_prefeix}payments_return where is_trash = 0 and payments_return_purchase_id = {$selectDeletedPaymentReturn["payments_return_purchase_id"]} group by payments_return_sales_id");
+            $getPurchaseReturnAmount = easySelectD("SELECT sum(payments_return_amount) as totalReturnAmount FROM {$table_prefix}payments_return where is_trash = 0 and payments_return_purchase_id = {$selectDeletedPaymentReturn["payments_return_purchase_id"]} group by payments_return_sales_id");
             if($getPurchaseReturnAmount !== false) {
                 $totalPurchaseReturnPayment = $getPurchaseReturnAmount["data"][0]["totalReturnAmount"];
             }
 
-            $purchaseReturnGrandTotal = easySelectD("SELECT purchase_grand_total from {$table_prefeix}purchases where purchase_id = {$selectDeletedPaymentReturn["payments_return_purchase_id"]}")["data"][0]["purchase_grand_total"];
+            $purchaseReturnGrandTotal = easySelectD("SELECT purchase_grand_total from {$table_prefix}purchases where purchase_id = {$selectDeletedPaymentReturn["payments_return_purchase_id"]}")["data"][0]["purchase_grand_total"];
 
 
             $purchasePaymentStatus = "due";
@@ -4231,6 +4245,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newPaymentAdjustment") {
 
 if(isset($_GET['page']) and $_GET['page'] == "addNewPaymentAdjustment") {
 
+    if( !current_user_can("payment_adjustment.Add") ) {
+        return _e("Sorry! you do not have permission to adjust payment");
+    }
+
     if(empty($_POST["adjustmentDate"]))  {
         return _e("Please select adjustment date");
     } elseif(empty($_POST["adjustmentCompany"]))  {
@@ -4263,6 +4281,12 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewPaymentAdjustment") {
 /*************************** paymentAdjustmentList ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "paymentAdjustmentList") {
     
+
+    if( !current_user_can("payment_adjustment.View") ) {
+        return _e("Sorry! you do not have permission to view adjust payment list");
+    }
+
+
     $requestData = $_REQUEST;
     $getData = [];
 
@@ -4294,7 +4318,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentAdjustmentList") {
         $getData = easySelectA(array(
             "table"    => "payment_adjustment as payment_adjustment",
             "join"     => array(
-                "left join {$table_prefeix}companies on pa_company = company_id"
+                "left join {$table_prefix}companies on pa_company = company_id"
             ),
             "where"     => array(
                 "payment_adjustment.is_trash = 0 and company_name like " => $requestData['search']['value'] . "%",
@@ -4316,7 +4340,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentAdjustmentList") {
         $getData = easySelectA(array(
             "table"    => "payment_adjustment as payment_adjustment",
             "join"     => array(
-                "left join {$table_prefeix}companies on pa_company = company_id"
+                "left join {$table_prefix}companies on pa_company = company_id"
             ),
             "where"     => array(
                 "payment_adjustment.is_trash = 0"
@@ -4375,6 +4399,10 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentAdjustmentList") {
 // Delete Payment Adjustment
 if(isset($_GET['page']) and $_GET['page'] == "deletePaymentAdjustment") {
 
+    if( !current_user_can("payment_adjustment.Delete") ) {
+        return _e("Sorry! you do not have permission to delete adjust payment");
+    }
+
     $deleteData = easyDelete(
         "payment_adjustment",
         array(
@@ -4391,6 +4419,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePaymentAdjustment") {
 
 /************************** newPaymentAdjustment **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editPaymentAdjustment") {
+
+    if( !current_user_can("payment_adjustment.Edit") ) {
+        return _e("Sorry! you do not have permission to edit adjust payment");
+    }
   
     // Include the modal header
     modal_header("Edit Payment Adjustment", full_website_address() . "/xhr/?module=expenses&page=updatePaymentAdjustment");
@@ -4401,7 +4433,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editPaymentAdjustment") {
             "pa_id" => $_GET["id"]
         ),
         "join"  => array(
-            "left join {$table_prefeix}companies on pa_company = company_id"
+            "left join {$table_prefix}companies on pa_company = company_id"
         )
     ))["data"][0];
     
@@ -4444,6 +4476,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editPaymentAdjustment") {
 
 
 if(isset($_GET['page']) and $_GET['page'] == "updatePaymentAdjustment") {
+
+    if( !current_user_can("payment_adjustment.Edit") ) {
+        return _e("Sorry! you do not have permission to edit adjust payment");
+    }
 
     if(empty($_POST["adjustmentDate"]))  {
         return _e("Please select adjustment date");

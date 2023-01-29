@@ -20,10 +20,9 @@
  */
 
 
-
 // Site Configuration
 define('ACTIVE_THEME', 'rui');
-define('TABLE_PREFIX', 'bms_');
+define('TABLE_PREFIX', 'ro_');
 define('AUTO_LOGOUT_TIME', 300); // in Second. Default is five minutes
 
 // Directory Configuration
@@ -50,7 +49,7 @@ define('DB_CONN', DIR_INCLUDE . 'db/db.php');
 $_SETTINGS["MAX_UPLOAD_SIZE"] = 8;
 
 /**
- * Define allowed extension and mime type.
+ * Define allowed mime type.
  * 
  * Can be seen common mime type here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
  * or
@@ -58,7 +57,7 @@ $_SETTINGS["MAX_UPLOAD_SIZE"] = 8;
  * 
  */
 
-// Vaild image type for upload. must be in lower case
+// Valid image type for upload. must be in lower case
 $_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"] = array(
     "jpeg"  => array("image/jpeg"),
     "jpg"   => array("image/jpeg"),
@@ -88,7 +87,6 @@ $_SETTINGS["VALID_VIDEO_TYPE_FOR_UPLOAD"] = array(
     "webm"  => array("video/webm"),
     "mp4"   => array("video/mp4")
 );
-
 // Page title variable. All page title will be included here
 $_SETTINGS["PAGE_TITLE"] = array();
 

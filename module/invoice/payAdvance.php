@@ -5,8 +5,8 @@
       "table"     => "advance_payments as advance_payment",
       "fields"    => "advance_payment_id, advance_payment_date, advance_payment_reference, advance_payment_payment_method, emp_PIN, emp_positions, emp_firstname, emp_lastname, accounts_name, advance_payment_amount, advance_payment_description",
       "join"      => array(
-          "left join {$table_prefeix}employees on advance_payment_pay_to = emp_id",
-          "left join {$table_prefeix}accounts on advance_payment_pay_from = accounts_id"
+          "left join {$table_prefix}employees on advance_payment_pay_to = emp_id",
+          "left join {$table_prefix}accounts on advance_payment_pay_from = accounts_id"
       ),
       "where" => array(
           "advance_payment.is_trash=0 and advance_payment.advance_payment_id" => $_GET["id"]

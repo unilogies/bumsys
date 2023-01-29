@@ -11,19 +11,19 @@ if(isset($_GET['page']) and $_GET['page'] == "newCategory") {
   ?>
     <div class="box-body">
       
-      <div class="form-group">
-        <label class="required" for="categoryName"><?= __("Category Name:"); ?></label>
-        <input type="text" name="categoryName" value="<?php echo $categoryName; ?>" id="categoryName" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="shopId"><?= __("Shop:"); ?> </label>
-        <i data-toggle="tooltip" data-placement="right" title="<?= __("In which shop the category will appears. If keep empty the category will appears on all shops."); ?>" class="fa fa-question-circle"></i>
-        
-        <select name="shopId" id="shopId" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=shopList" style="width: 100%;">
-          <option value=""><?= __("Select Shop"); ?>....</option>
-        </select>
-        
-      </div>
+        <div class="form-group">
+            <label class="required" for="categoryName"><?= __("Category Name:"); ?></label>
+            <input type="text" name="categoryName" value="<?php echo $categoryName; ?>" id="categoryName" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="shopId"><?= __("Shop:"); ?> </label>
+            <i data-toggle="tooltip" data-placement="right" title="<?= __("In which shop the category will appears. If keep empty the category will appears on all shops."); ?>" class="fa fa-question-circle"></i>
+            
+            <select name="shopId" id="shopId" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=shopList" style="width: 100%;">
+            <option value=""><?= __("Select Shop"); ?>....</option>
+            </select>
+            
+        </div>
             
     </div>
     <!-- /Box body-->
@@ -39,26 +39,30 @@ if(isset($_GET['page']) and $_GET['page'] == "newCategory") {
 /************************** Add new Category **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewCategory") {
 
-  if(empty($_POST["categoryName"])) {
-    return _e("Please enter category name.");
-  }
-  
-  $returnMsg = easyInsert(
-      "product_category", // Table name
-      array( // Fileds Name and value
-          "category_name"     => $_POST["categoryName"],
-          "category_shop_id"  => empty($_POST["shopId"]) ? NULL : $_POST["shopId"]
-      ),
-      array( // No duplicate allow.
-          "category_name"   => $_POST["categoryName"]
-      )
-  );
+    if( !current_user_can("product_category.Add") ) {
+        return _e("Sorry! you do not have permission to add product category");
+    }
 
-  if($returnMsg === true) {
-      _s("New category added successfully.");
-  } else {
-      _e($returnMsg);
-  }
+    if(empty($_POST["categoryName"])) {
+        return _e("Please enter category name.");
+    }
+    
+    $returnMsg = easyInsert(
+        "product_category", // Table name
+        array( // Fileds Name and value
+            "category_name"     => $_POST["categoryName"],
+            "category_shop_id"  => empty($_POST["shopId"]) ? NULL : $_POST["shopId"]
+        ),
+        array( // No duplicate allow.
+            "category_name"   => $_POST["categoryName"]
+        )
+    );
+
+    if($returnMsg === true) {
+        _s("New category added successfully.");
+    } else {
+        _e($returnMsg);
+    }
 
 }
 
@@ -66,124 +70,132 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewCategory") {
 /*************************** Product Category List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productCategoryList") {
     
-  $requestData = $_REQUEST;
-  $getData = [];
 
-  // List of all columns name
-  $columns = array(
-      "category_name",
-      "shop_name"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-        "table" => "product_category",
-        "fields" => "count(*) as totalRow",
-        "where" => array(
-            "is_trash = 0"
-        )
-    ))["data"][0]["totalRow"];
+    if( !current_user_can("product_category.Add") ) {
+        return _e("Sorry! you do not have permission to view product category list");
+    }
 
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
+    $requestData = $_REQUEST;
+    $getData = [];
 
-  if(!empty($requestData["search"]["value"])) {  // get data with search
-      
-      $getData = easySelect(
-          "product_category",
-          "category_id, category_name, shop_name",
-          array(
-              "left join {$table_prefeix}shops on category_shop_id = shop_id"
-          ),
-          array (
-              "{$table_prefeix}product_category.is_trash = 0 and category_name LIKE" => $requestData['search']['value'] . "%",
-              " OR shop_name LIKE" => $requestData['search']['value'] . "%"
-          ),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
+    // List of all columns name
+    $columns = array(
+        "category_name",
+        "shop_name"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+            "table" => "product_category",
+            "fields" => "count(*) as totalRow",
+            "where" => array(
+                "is_trash = 0"
+            )
+        ))["data"][0]["totalRow"];
 
-      $totalFilteredRecords = $getData ? $getData["count"] : 0;
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
 
-  } else { // Get data withouth search
+    if(!empty($requestData["search"]["value"])) {  // get data with search
+        
+        $getData = easySelect(
+            "product_category",
+            "category_id, category_name, shop_name",
+            array(
+                "left join {$table_prefix}shops on category_shop_id = shop_id"
+            ),
+            array (
+                "{$table_prefix}product_category.is_trash = 0 and category_name LIKE" => $requestData['search']['value'] . "%",
+                " OR shop_name LIKE" => $requestData['search']['value'] . "%"
+            ),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
 
-      $getData = easySelect(
-          "product_category",
-          "category_id, category_name, shop_name",
-          array(
-              "left join {$table_prefeix}shops on category_shop_id = shop_id"
-          ),
-          array("{$table_prefeix}product_category.is_trash = 0"),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
+        $totalFilteredRecords = $getData ? $getData["count"] : 0;
 
-  }
+    } else { // Get data withouth search
 
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
-          $allNestedData = [];
-          $allNestedData[] = $value["category_name"];
-          $allNestedData[] = $value["shop_name"];
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                  <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editCategory&id='. $value["category_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
-                                  <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteCategory" data-to-be-deleted="'. $value["category_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
+        $getData = easySelect(
+            "product_category",
+            "category_id, category_name, shop_name",
+            array(
+                "left join {$table_prefix}shops on category_shop_id = shop_id"
+            ),
+            array("{$table_prefix}product_category.is_trash = 0"),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
 
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Formate
-  echo json_encode($jsonData); 
+    }
+
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $allNestedData[] = $value["category_name"];
+            $allNestedData[] = $value["shop_name"];
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editCategory&id='. $value["category_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                    <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteCategory" data-to-be-deleted="'. $value["category_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
+
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
   
 }
 
 
 /***************** Delete Product Category ****************/
-// Delete Group
 if(isset($_GET['page']) and $_GET['page'] == "deleteCategory") {
 
-  $deleteData = easyDelete(
-      "product_category",
-      array(
-          "category_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("product_category.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product category");
+    }
 
-  if($deleteData === true) {
-      echo 1;
-  } 
+    $deleteData = easyDelete(
+        "product_category",
+        array(
+            "category_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo 1;
+    } 
 
 }
 
@@ -191,46 +203,50 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteCategory") {
 /************************** Edit Category **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editCategory") {
 
-  $selectProductCategory = easySelect(
-    "product_category",
-    "category_id, category_name, shop_id, shop_name",
-    array(
-        "left join {$table_prefeix}shops on category_shop_id = shop_id"
-    ),
-    array(
-        "category_id" => $_GET['id']
-    )
-  );
+    if( !current_user_can("product_category.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product category");
+    }
 
-  $productCategory = $selectProductCategory["data"][0];
+    $selectProductCategory = easySelect(
+        "product_category",
+        "category_id, category_name, shop_id, shop_name",
+        array(
+            "left join {$table_prefix}shops on category_shop_id = shop_id"
+        ),
+        array(
+            "category_id" => $_GET['id']
+        )
+    );
 
-  // Include the modal header
-  modal_header("Edit Category", full_website_address() . "/xhr/?module=products&page=updateCategory");
-  
-  ?>
-    <div class="box-body">
-      
-      <div class="form-group">
-        <label class="required" for="categoryName"><?= __("Category Name:"); ?></label>
-        <input type="text" name="categoryName" value="<?php echo $productCategory["category_name"]; ?>" id="categoryName" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="shopId"><?= __("Shop:"); ?> </label>
-        <i data-toggle="tooltip" data-placement="right" title="<?= __("In which shop the category will appears. If keep empty the category will appears on all shops."); ?>" class="fa fa-question-circle"></i>
+    $productCategory = $selectProductCategory["data"][0];
+
+    // Include the modal header
+    modal_header("Edit Category", full_website_address() . "/xhr/?module=products&page=updateCategory");
+    
+    ?>
+        <div class="box-body">
         
-        <select name="shopId" id="shopId" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=shopList" style="width: 100%;">
-          <option value="<?php echo $productCategory["shop_id"]; ?>"><?php echo $productCategory["shop_name"]; ?></option>  
-        </select>
-        <input type="hidden" name="category_id" value="<?php echo safe_entities($_GET['id']); ?>">
-      </div>
+        <div class="form-group">
+            <label class="required" for="categoryName"><?= __("Category Name:"); ?></label>
+            <input type="text" name="categoryName" value="<?php echo $productCategory["category_name"]; ?>" id="categoryName" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="shopId"><?= __("Shop:"); ?> </label>
+            <i data-toggle="tooltip" data-placement="right" title="<?= __("In which shop the category will appears. If keep empty the category will appears on all shops."); ?>" class="fa fa-question-circle"></i>
             
-    </div>
-    <!-- /Box body-->
+            <select name="shopId" id="shopId" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=shopList" style="width: 100%;">
+            <option value="<?php echo $productCategory["shop_id"]; ?>"><?php echo $productCategory["shop_name"]; ?></option>  
+            </select>
+            <input type="hidden" name="category_id" value="<?php echo safe_entities($_GET['id']); ?>">
+        </div>
+                
+        </div>
+        <!-- /Box body-->
 
-  <?php
+    <?php
 
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
@@ -238,27 +254,31 @@ if(isset($_GET['page']) and $_GET['page'] == "editCategory") {
 //*******************************  Update Product Category ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateCategory") {
 
-  if(empty($_POST["categoryName"])) {
-    return _e("Please enter category name.");
-  }
- 
-  // Update Other Information
-  $updateCategory = easyUpdate(
-      "product_category",
-      array(
-          "category_name"     => $_POST["categoryName"],
-          "category_shop_id"  => empty($_POST["shopId"]) ? NULL : $_POST["shopId"]
-      ),
-      array(
-          "category_id" => $_POST["category_id"]
-      )
-  );
+    if( !current_user_can("product_category.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product category");
+    }
 
-  if($updateCategory === true) {
-      _s("Category successfully updated.");
-  } else {
-      _e($updateCategory);
-  }
+    if(empty($_POST["categoryName"])) {
+        return _e("Please enter category name.");
+    }
+    
+    // Update Other Information
+    $updateCategory = easyUpdate(
+        "product_category",
+        array(
+            "category_name"     => $_POST["categoryName"],
+            "category_shop_id"  => empty($_POST["shopId"]) ? NULL : $_POST["shopId"]
+        ),
+        array(
+            "category_id" => $_POST["category_id"]
+        )
+    );
+
+    if($updateCategory === true) {
+        _s("Category successfully updated.");
+    } else {
+        _e($updateCategory);
+    }
 
 }
 
@@ -267,6 +287,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
 
     //print_r($_POST);
     //exit();
+
+    if( !current_user_can("products.Add") ) {
+        return _e("Sorry! you do not have permission to add new product");
+    }
 
     if(empty($_POST["productCode"])) {
         return _e("Please enter product code.");
@@ -336,7 +360,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
             "product_type"                  => $_POST["productType"],
             "product_group"                 => empty($_POST["productGroupSelect"]) ? NULL : $_POST["productGroupSelect"],
             "product_description"           => $_POST["productDescription"],
-            "product_edition"               => NULL, //$_POST["productEdition"],
+            "product_edition"               => empty($_POST["productEdition"]) ? NULL : $_POST["productEdition"],
             "product_variations"            => isset($_POST["product_attribute"]) ? serialize($_POST["product_attribute"]) : NULL,
             "product_purchase_price"        => $_POST["productPurchasePrice"],
             "product_sale_price"            => $_POST["productSalePrice"],
@@ -380,7 +404,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
         if( $_POST["productType"] === "Grouped" or $_POST["productType"] === "Bundle" ) {
 
             // Insert Bundle/ Sub product
-            $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
+            $insertSubProduct = "INSERT INTO {$table_prefix}bg_product_items(
                 bg_product_id,
                 bg_item_product_id,
                 bg_product_price,
@@ -403,7 +427,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
         }
 
         // Insert intital stock
-        $initalStockEntry = "INSERT INTO {$table_prefeix}product_stock (
+        $initalStockEntry = "INSERT INTO {$table_prefix}product_stock (
             stock_type,
             stock_entry_date,
             stock_warehouse_id,
@@ -421,7 +445,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
 
             $initalStockEntry .= "(
                 'initial',
-                '". date("Y-m-d") ."'
+                '". date("Y-m-d") ."',
                 '{$_SESSION["wid"]}',
                 '{$insertProduct["last_insert_id"]}',
                 '". safe_input($_POST["productPurchasePrice"]) ."',
@@ -452,7 +476,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
             }
 
             // Insert variable product
-            $insertVariableProduct = "INSERT INTO {$table_prefeix}products(
+            $insertVariableProduct = "INSERT INTO {$table_prefix}products(
                 product_code,
                 product_name,
                 product_group,
@@ -484,7 +508,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
 
 
             // Product meta
-            $productMeta = "INSERT INTO {$table_prefeix}product_meta(
+            $productMeta = "INSERT INTO {$table_prefix}product_meta(
                 product_id,
                 meta_type,
                 meta_key,
@@ -565,7 +589,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
                 //         // Then multiply the bgProductQnt with unit base qty
                 //         if(isset($_POST["product_variation"]["Units"][$vKey] ) ) {
 
-                //             $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefeix}product_units where unit_name = '". $_POST["product_variation"]["Units"][$vKey] ."' )";
+                //             $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefix}product_units where unit_name = '". $_POST["product_variation"]["Units"][$vKey] ."' )";
 
                 //         } else {
                             
@@ -574,7 +598,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
                 //         }
 
                 //         $insertSubProduct .= "(
-                //             (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                //             (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                 //             '{$bgProductId}',
                 //             '". $_POST["bgProductSalePrice"][$pkey] ."',
                 //             {$bgProductQty}
@@ -592,9 +616,9 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
 
                     $initalStockEntry .= "(
                         'initial',
-                        '". date("Y-m-d") ."'
+                        '". date("Y-m-d") ."',
                         '{$_SESSION["wid"]}',
-                        (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                        (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                         '{$variationPurchasePirce}',
                         '". safe_input($_POST["productVariationIntitalStock"][$vKey]) ."',
                         '". safe_input($_POST["productVariationIntitalStock"][$vKey]) * $variationPurchasePirce ."',
@@ -611,7 +635,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
 
                     $productMeta .= "
                     (
-                        (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                        (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                         'Variation',
                         '". $attributeName ."',
                         '". $variationName ."'
@@ -701,6 +725,9 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
 /******************** Attach Sub Product *******************/
 if(isset($_GET['page']) and $_GET['page'] == "attachSubProduct") {
 
+    if( !current_user_can("products.Add") ) {
+        return _e("Sorry! you do not have permission to attach sub product");
+    }
 
     $selectProduct = easySelectA(array(
         "table"     => "products",
@@ -750,7 +777,7 @@ if(isset($_GET['page']) and $_GET['page'] == "attachSubProduct") {
 
 
             // Insert Bundle/ Sub product
-            $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
+            $insertSubProduct = "INSERT INTO {$table_prefix}bg_product_items(
                 bg_product_id,
                 bg_item_product_id,
                 bg_product_price,
@@ -764,7 +791,7 @@ if(isset($_GET['page']) and $_GET['page'] == "attachSubProduct") {
                 // Then multiply the bgProductQnt with unit base qty
                 if( !empty($product['product_unit']) ) {
 
-                    $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefeix}product_units where unit_name = '{$product['product_unit']}' )";
+                    $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefix}product_units where unit_name = '{$product['product_unit']}' )";
 
                 } else {
                     
@@ -820,6 +847,10 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
    // print_r($_POST);
     //exit();
+
+    if( !current_user_can("products.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product");
+    }
 
     if(empty($_POST["productCode"])) {
         return _e("Please enter product code.");
@@ -903,10 +934,10 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
             "product_type"                  => $_POST["productType"],
             "product_group"                 => empty($_POST["productGroupSelect"]) ? NULL : $_POST["productGroupSelect"],
             "product_description"           => $_POST["productDescription"],
-            // "product_edition"               => $_POST["productEdition"], // Product edition no need to update
+            "product_edition"               => empty($_POST["productEdition"]) ? NULL : $_POST["productEdition"],
             "product_variations"            => isset($_POST["product_attribute"]) ? serialize($_POST["product_attribute"]) : NULL,
-            "product_purchase_price"        => $_POST["productPurchasePrice"],
-            "product_sale_price"            => $_POST["productSalePrice"],
+            // "product_purchase_price"        => $_POST["productPurchasePrice"], // Product price are updated to product_price table
+            // "product_sale_price"            => $_POST["productSalePrice"],
             "product_distributor_discount"  => $_POST["productDistributorDiscount"],
             "product_wholesaler_discount"   => $_POST["productWholesalerDiscount"],
             "product_retailer_discount"     => $_POST["productRetailerDiscount"],
@@ -935,6 +966,44 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
     if($updateProduct === true) {
 
+        $product_id = safe_input( $_POST["product_id"] );
+        $newPurchasePrice = safe_input( $_POST["productPurchasePrice"] );
+        $newSalePrice = safe_input( $_POST["productSalePrice"] );
+
+        /**
+         * Update Price on all shops
+         * If the checkbox is checked or
+         * OR $_SESSION['sid'] is not set
+         */
+        if( isset( $_POST["updatePriceOnAllShop"] ) or !isset( $_SESSION['sid']) ) {
+
+            $selectShop = easySelectA(array(
+                "table" => "shops",
+                "where" => array(
+                    "is_trash = 0"
+                )
+            ));
+
+            if( $selectShop !== false ) {
+
+                foreach($selectShop as $shop) {
+                    // Update product price based on shops
+                    runQuery("REPLACE INTO {$table_prefix}product_price (product_id, shop_id, purchase_price, sale_price) 
+                                        VALUES ('{$product_id}', '{$shop['shop_id']}', '{$newPurchasePrice}', '{$newSalePrice}') ");
+
+                }
+                
+            }
+
+
+        } else {
+
+            // Update product price based on shops
+            runQuery("REPLACE INTO {$table_prefix}product_price (product_id, shop_id, purchase_price, sale_price) 
+                                                            VALUES ('{$product_id}', '{$_SESSION['sid']}', '{$newPurchasePrice}', '{$newSalePrice}') ");
+
+        }
+
         
         /**
          * If the product is grouped or bundle then insert grouped or bundle item
@@ -951,7 +1020,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
 
             // Insert Bundle/ Grouped product
-            $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
+            $insertSubProduct = "INSERT INTO {$table_prefix}bg_product_items(
                 bg_product_id,
                 bg_item_product_id,
                 bg_product_price,
@@ -1045,8 +1114,8 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
                         "product_group"                 => empty($_POST["productGroupSelect"]) ? NULL : $_POST["productGroupSelect"],
                         "product_variations"            => serialize($variations),
                         "product_description"           => $_POST["edit"]["productVariationDescription"][$vKey],
-                        "product_purchase_price"        => $_POST["edit"]["productVariationPurchasePrice"][$vKey],
-                        "product_sale_price"            => $_POST["edit"]["productVariationSalePrice"][$vKey],
+                        // "product_purchase_price"        => $_POST["edit"]["productVariationPurchasePrice"][$vKey], // Product price are updated to product_price table
+                        // "product_sale_price"            => $_POST["edit"]["productVariationSalePrice"][$vKey],
                         "product_distributor_discount"  => $_POST["edit"]["productDistributorVariationDiscount"][$vKey],
                         "product_wholesaler_discount"   => $_POST["edit"]["productWholesalerVariationDiscount"][$vKey],
                         "product_retailer_discount"     => $_POST["edit"]["productRetailerVariationDiscount"][$vKey],
@@ -1067,6 +1136,39 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
                         "product_id"    => $productId
                     )
                 );
+
+
+                // Add / update variable product price based on shops
+                $productId = safe_input( $productId );
+                $newPurchasePrice = $_POST["edit"]["productVariationPurchasePrice"][$vKey];
+                $newSalePrice = $_POST["edit"]["productVariationSalePrice"][$vKey];
+
+
+                // Update Price on all shops
+                if( isset( $_POST["updatePriceOnAllShop"] ) or !isset( $_SESSION['sid']) ) {
+
+                    if( $selectShop !== false ) {
+
+                        foreach($selectShop as $shop) {
+
+                            // Update product price based on shops
+                            runQuery("REPLACE INTO {$table_prefix}product_price (product_id, shop_id, purchase_price, sale_price) 
+                                                                        VALUES ('{$product_id}', '{$shop['shop_id']}', '{$newPurchasePrice}', '{$newSalePrice}') ");
+
+                        }
+                        
+                    }
+
+
+                } else if( isset( $_SESSION['sid'] ) ) {
+
+                    // Update product price based on shops
+                    runQuery("REPLACE INTO {$table_prefix}product_price (product_id, shop_id, purchase_price, sale_price) 
+                                                                VALUES ('{$product_id}', '{$_SESSION['sid']}', '{$newPurchasePrice}', '{$newSalePrice}') ");
+
+                }
+
+                
 
             }
 
@@ -1092,7 +1194,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
             }
 
             // Insert variable product
-            $insertVariableProduct = "INSERT INTO {$table_prefeix}products(
+            $insertVariableProduct = "INSERT INTO {$table_prefix}products(
                 product_code,
                 product_name,
                 product_group,
@@ -1123,7 +1225,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
             ) VALUES ";
 
             // Product meta
-            $productMeta = "INSERT INTO {$table_prefeix}product_meta(
+            $productMeta = "INSERT INTO {$table_prefix}product_meta(
                 product_id,
                 meta_type,
                 meta_key,
@@ -1132,7 +1234,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
 
             // Insert intital stock
-            $initalStockEntry = "INSERT INTO {$table_prefeix}product_stock (
+            $initalStockEntry = "INSERT INTO {$table_prefix}product_stock (
                 stock_type,
                 stock_entry_date,
                 stock_warehouse_id,
@@ -1213,7 +1315,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
                         'initial',
                         '". date("Y-m-d") ."',
                         '{$_SESSION["wid"]}',
-                        (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                        (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                         '{$variationPurchasePirce}',
                         '". safe_input($_POST["productVariationIntitalStock"][$vKey]) ."',
                         '". safe_input($_POST["productVariationIntitalStock"][$vKey]) * $variationPurchasePirce ."',
@@ -1230,7 +1332,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
                     $productMeta .= "
                     (
-                        (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                        (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                         'Variation',
                         '". $attributeName ."',
                         '". $variationName ."'
@@ -1327,143 +1429,175 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
 /*************************** Product List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productList") {
+
+    if( !current_user_can("products.View") ) {
+        return _e("Sorry! you do not have permission to view product list");
+    }
     
-  $requestData = $_REQUEST;
+    $requestData = $_REQUEST;
+    $getData = [];
 
-  $getData = [];
-
-  // List of all columns name
-  $columns = array(
-      "",
-      "product_id",
-      "product_name",
-      "product_group",
-      "product_generic",
-      "product_edition",
-      "category_name",
-      "product_weight",
-      "product_sale_price"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-        "table" => "products",
-        "fields" => "count(*) as totalRow",
-        "where" => array(
-            "is_trash = 0 and product_type != 'Child'"
-        )
-    ))["data"][0]["totalRow"];
-
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
-
-  if(!empty($requestData["search"]["value"]) or !empty($requestData["columns"][5]['search']['value']) or !empty($requestData["columns"][6]['search']['value'])) {  // get data with search
-
-        // If there are any edition to filter, we do not need product_type != 'Child' filter
-        $productEditionFilter = !empty($requestData["columns"][5]['search']['value']) ? " product_edition = '{$requestData["columns"][5]['search']['value']}' " : " product_type != 'Child' ";
-      
-        $getData = easySelect(
-            "products as product",
-            "product_id, product_code, product_name, product_type, product_group, product_generic, product_description, round(product_purchase_price, 2) as product_purchase_price, 
-            round(product_sale_price, 2) as product_sale_price, category_name, product_edition, has_sub_product",
-            array (
-            "left join {$table_prefeix}product_category on product_category_id = category_id"
-            ),
-            array (
-                "product.is_trash = 0 and {$productEditionFilter} and (product_code LIKE '". safe_input($requestData['search']['value']) ."%' ",
-                " OR product_name LIKE" => $requestData['search']['value'] . "%",
-                " OR category_name LIKE" => $requestData['search']['value'] . "%",
-                ")",
-                " AND product_category_id" => $requestData["columns"][6]['search']['value'],
-            ),
-            array (
-                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-            ),
-            array (
-                "start" => $requestData['start'],
-                "length" => $requestData['length']
+    // List of all columns name
+    $columns = array(
+        "",
+        "product_id",
+        "product_name",
+        "product_group",
+        "product_generic",
+        "product_edition",
+        "category_name",
+        "product_weight",
+        "product_sale_price"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+            "table" => "products",
+            "fields" => "count(*) as totalRow",
+            "where" => array(
+                "is_trash = 0 and product_type != 'Child'"
             )
-        );
+        ))["data"][0]["totalRow"];
 
-      $totalFilteredRecords = $getData ? $getData["count"] : 0;
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
 
-  } else { // Get data withouth search
+    if(!empty($requestData["search"]["value"]) or 
+        !empty($requestData["columns"][6]['search']['value']) or 
+        !empty($requestData["columns"][7]['search']['value'])
+        ) {  // get data with search
 
-        $getData = easySelect(
-            "products as product",
-            "product_id, product_code, product_name, product_group, product_generic, product_type, product_description, round(product_purchase_price, 2) as product_purchase_price, 
-            round(product_sale_price, 2) as product_sale_price, category_name, product_edition, has_sub_product",
-            array (
-                "left join {$table_prefeix}product_category on product_category_id = category_id"
-            ),
-            array("product.is_trash = 0 and product_type != 'Child'"),
-            array (
-                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-            ),
-            array (
-                "start" => $requestData['start'],
-                "length" => $requestData['length']
-            )
-        );
+            // If there are any edition to filter, we do not need product_type != 'Child' filter
+            $product_edition = safe_input($requestData["columns"][6]['search']['value']);
+            $productEditionFilter = !empty($product_edition) ? " product_edition = '{$product_edition}' " : " product_type != 'Child' ";
+        
+            $getData = easySelect(
+                "products as product",
+                "product_id, product_code, product_name, product_type, product_group, product_generic, product_description, 
+                round( COALESCE(purchase_price, product_purchase_price), 2) as product_purchase_price, 
+                round( COALESCE(sale_price, product_sale_price), 2) as product_sale_price, 
+                category_name, product_edition, has_sub_product",
+                array (
+                    "left join {$table_prefix}product_category on product_category_id = category_id",
+                    // Because Of we have different price based on shop
+                    "left join (SELECT
+                                    product_id,
+                                    purchase_price,
+                                    sale_price
+                        FROM {$table_prefix}product_price    
+                        WHERE shop_id = '{$_SESSION['sid']}'
+                    ) as product_price using(product_id) "
+                ),
+                array (
+                    "product.is_trash = 0 and {$productEditionFilter} and (product_code LIKE '". safe_input($requestData['search']['value']) ."%' ",
+                    " OR product_name LIKE" => $requestData['search']['value'] . "%",
+                    " OR category_name LIKE" => $requestData['search']['value'] . "%",
+                    ")",
+                    " AND product_category_id" => $requestData["columns"][7]['search']['value'],
+                ),
+                array (
+                    $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+                ),
+                array (
+                    "start" => $requestData['start'],
+                    "length" => $requestData['length']
+                )
+            );
 
-  }
+        $totalFilteredRecords = $getData ? $getData["count"] : 0;
 
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
+    } else { // Get data withouth search
 
-            $subProductAttachment = "";
-            if( $value["has_sub_product"] == 1 ) {
-                $subProductAttachment = '<li><a href="'. full_website_address() .'/products/attach-sub-product/?pid='. $value["product_id"] .'"><i class="fa fa-link"></i> Link SubProduct</a></li>';
-            }
+            $getData = easySelect(
+                "products as product",
+                "product_id, product_code, product_name, product_group, product_generic, product_type, product_description, 
+                round( COALESCE(purchase_price, product_purchase_price)  , 2) as product_purchase_price, 
+                round( COALESCE(sale_price, product_sale_price) , 2) as product_sale_price, 
+                category_name, product_edition, has_sub_product",
+                array (
+                    "left join {$table_prefix}product_category on product_category_id = category_id",
+                    // Because Of we have different price based on shop
+                    "left join (SELECT
+                                    product_id,
+                                    purchase_price,
+                                    sale_price
+                        FROM {$table_prefix}product_price    
+                        WHERE shop_id = '{$_SESSION['sid']}'
+                    ) as product_price using(product_id) "
+                ),
+                array("product.is_trash = 0 and product_type != 'Child'"),
+                array (
+                    $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+                ),
+                array (
+                    "start" => $requestData['start'],
+                    "length" => $requestData['length']
+                )
+            );
 
-          $allNestedData = [];
-          $allNestedData[] = "";
-          $allNestedData[] = $value["product_code"];
-          $allNestedData[] = $value["product_name"];
-          $allNestedData[] = $value["product_group"];
-          $allNestedData[] = $value["product_generic"];
-          $allNestedData[] = $value["product_edition"];
-          $allNestedData[] = $value["category_name"];
-          $allNestedData[] = "";
-          $allNestedData[] = $value["product_purchase_price"] . " / " . $value["product_sale_price"];
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a href="'. full_website_address() .'/products/edit-product/?pid='. $value["product_id"] .'"><i class="fa fa-edit"></i> Edit</a></li>
-                                    '. $subProductAttachment .'
-                                    <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteProduct" data-to-be-deleted="'. $value["product_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
+    }
 
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Formate
-  echo json_encode($jsonData); 
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+
+                $subProductAttachment = "";
+                if( $value["has_sub_product"] == 1 ) {
+                    $subProductAttachment = '<li><a href="'. full_website_address() .'/products/attach-sub-product/?pid='. $value["product_id"] .'"><i class="fa fa-link"></i> Link SubProduct</a></li>';
+                }
+
+            $allNestedData = [];
+            $allNestedData[] = "";
+            $allNestedData[] = $value["product_id"];
+            $allNestedData[] = $value["product_code"];
+            $allNestedData[] = $value["product_name"];
+            $allNestedData[] = $value["product_group"];
+            $allNestedData[] = $value["product_generic"];
+            $allNestedData[] = $value["product_edition"];
+            $allNestedData[] = $value["category_name"];
+            $allNestedData[] = "";
+            $allNestedData[] = $value["product_purchase_price"] . " / " . $value["product_sale_price"];
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a href="'. full_website_address() .'/products/edit-product/?pid='. $value["product_id"] .'"><i class="fa fa-edit"></i> Edit</a></li>
+                                        '. $subProductAttachment .'
+                                        <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteProduct" data-to-be-deleted="'. $value["product_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
+
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
 
 }
 
 
 /***************** Delete Product ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteProduct") {
+
+    if( !current_user_can("products.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product");
+    }
 
     $deleteData = easyDelete(
         "products",
@@ -1491,6 +1625,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteProduct") {
 
 /***************** Delete Variation Product ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteVariationProduct") {
+
+    if( !current_user_can("products.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product");
+    }
 
     $deleteVariationProduct = easyDelete(
         "products",
@@ -1554,6 +1692,11 @@ if(isset($_GET['page']) and $_GET['page'] == "newUnit") {
 // Add new user group page
 if(isset($_GET['page']) and $_GET['page'] == "addNewUnit") {
 
+
+    if( !current_user_can("product_units.Add") ) {
+        return _e("Sorry! you do not have permission to add product unit");
+    }
+
     if(empty($_POST["unitName"])) {
         return _e("Please enter unit name.");
     } else if(empty($_POST["unitShortname"])) {
@@ -1601,88 +1744,95 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewUnit") {
 
 /*************************** Unit List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "itemUnitList") {
+
+    if( !current_user_can("product_units.View") ) {
+        return _e("Sorry! you do not have permission to view product unit list");
+    }
     
-  $requestData = $_REQUEST;
-  $getData = [];
+    $requestData = $_REQUEST;
+    $getData = [];
 
-  // List of all columns name
-  $columns = array(
-      "unit_name",
-      "unit_description"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-        "table" => "product_units",
-        "fields" => "count(*) as totalRow",
-        "where" => array(
-            "is_trash = 0"
-        )
-    ))["data"][0]["totalRow"];
+    // List of all columns name
+    $columns = array(
+        "unit_name",
+        "unit_description"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+            "table" => "product_units",
+            "fields" => "count(*) as totalRow",
+            "where" => array(
+                "is_trash = 0"
+            )
+        ))["data"][0]["totalRow"];
 
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
 
-  $search = $requestData["search"]["value"];
-  $getData = easySelectD("
-      SELECT unit_id, unit_name, short_name, unit_description, equal_unit_qnt, equal_unit_name FROM `{$table_prefeix}product_units` unit1
-          left join (
-              select 
-                  unit_id as id,
-                  unit_name as equal_unit_name
-              from {$table_prefeix}product_units
-          ) unit2 on unit1.equal_unit_id = unit2.id
-      where is_trash=0 and unit_name like '{$search}%'
-      order by {$columns[$requestData['order'][0]['column']]} {$requestData['order'][0]['dir']}
-  ");
+    $search = $requestData["search"]["value"];
+    $getData = easySelectD("
+        SELECT unit_id, unit_name, short_name, unit_description, equal_unit_qnt, equal_unit_name FROM `{$table_prefix}product_units` unit1
+            left join (
+                select 
+                    unit_id as id,
+                    unit_name as equal_unit_name
+                from {$table_prefix}product_units
+            ) unit2 on unit1.equal_unit_id = unit2.id
+        where is_trash=0 and unit_name like '{$search}%'
+        order by {$columns[$requestData['order'][0]['column']]} {$requestData['order'][0]['dir']}
+    ");
 
-  $totalFilteredRecords = $getData ? $getData["count"] : 0;
+    $totalFilteredRecords = $getData ? $getData["count"] : 0;
 
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
-          $allNestedData = [];
-          $equalTo = !empty($value['equal_unit_name']) ? " ({$value['equal_unit_qnt']} {$value['equal_unit_name']}) " : "";
-          $allNestedData[] = $value["unit_name"] . $equalTo;
-          $allNestedData[] = $value["short_name"];
-          $allNestedData[] = $value["unit_description"];
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                  <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editUnit&id='. $value["unit_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
-                                  <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteUnit" data-to-be-deleted="'. $value["unit_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $equalTo = !empty($value['equal_unit_name']) ? " ({$value['equal_unit_qnt']} {$value['equal_unit_name']}) " : "";
+            $allNestedData[] = $value["unit_name"] . $equalTo;
+            $allNestedData[] = $value["short_name"];
+            $allNestedData[] = $value["unit_description"];
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editUnit&id='. $value["unit_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                        <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteUnit" data-to-be-deleted="'. $value["unit_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
 
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Formate
-  echo json_encode($jsonData); 
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
 
 }
 
 
 /***************** Delete Item Unit ****************/
-// Delete Group
 if(isset($_GET['page']) and $_GET['page'] == "deleteUnit") {
+
+    if( !current_user_can("product_units.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product unit");
+    }
 
   $deleteData = easyDelete(
       "product_units",
@@ -1701,68 +1851,76 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteUnit") {
 /************************** Edit Item Unit **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editUnit") {
 
-  $unit_id = safe_input($_GET['id']);
+    if( !current_user_can("product_units.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product unit");
+    }
 
-  $selectItemUnit = easySelectD("
-      SELECT unit_id, equal_unit_id, unit_name, short_name, unit_description, equal_unit_qnt, equal_unit_name FROM `{$table_prefeix}product_units` unit1
-          left join (
-              select 
-                  unit_id as id,
-                  unit_name as equal_unit_name
-              from {$table_prefeix}product_units
-          ) unit2 on unit1.equal_unit_id = unit2.id
-      where is_trash=0 and unit_id = '{$unit_id}'
-  ");
+    $unit_id = safe_input($_GET['id']);
 
-  $itemUnit = $selectItemUnit["data"][0];
+    $selectItemUnit = easySelectD("
+        SELECT unit_id, equal_unit_id, unit_name, short_name, unit_description, equal_unit_qnt, equal_unit_name FROM `{$table_prefix}product_units` unit1
+            left join (
+                select 
+                    unit_id as id,
+                    unit_name as equal_unit_name
+                from {$table_prefix}product_units
+            ) unit2 on unit1.equal_unit_id = unit2.id
+        where is_trash=0 and unit_id = '{$unit_id}'
+    ");
 
-  // Include the modal header
-  modal_header("Edit Unit", full_website_address() . "/xhr/?module=products&page=updateUnit");
-  
-  ?>
+    $itemUnit = $selectItemUnit["data"][0];
+
+    // Include the modal header
+    modal_header("Edit Unit", full_website_address() . "/xhr/?module=products&page=updateUnit");
+    
+    ?>
     <div class="box-body">
-      
-      <div class="form-group required">
-        <label for="unitName"><?= __("Unit Name:"); ?></label>
-        <i data-toggle="tooltip" data-placement="right" title="E.G: Dozen, Litter" class="fa fa-question-circle"></i>
-        <input type="text" name="unitName" id="unitName" value="<?php echo $itemUnit["unit_name"]; ?>" class="form-control">
-      </div>
-      <div class="form-group required">
-        <label for="unitShortname"><?= __("Unit Shortname:"); ?></label>
-        <input type="text" name="unitShortname" placeholder="E.G: kg" value="<?php echo $itemUnit["short_name"]; ?>"  id="unitShortname" class="form-control" required>
-      </div>
-      <div class="form-group">
-          <label for="equal_unit_qnt"><?= __("Equal To:"); ?> </label>
-          <div class="row">
-              <div class="col-md-4">
-                  <input type="number" onclick="this.select();" name="equalUnitQnt" id="equal_unit_qnt" value="<?php echo $itemUnit["equal_unit_qnt"]; ?>" class="form-control">
-              </div>
-              <div class="col-md-8">
-                  <select name="equalUnit" id="equalUnit" class=" form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=itemUnitList" style="width: 100%;">
-                      <option value="<?php echo $itemUnit["equal_unit_id"]; ?>"><?php echo $itemUnit["equal_unit_name"]; ?></option>
-                  </select>
-              </div>
-          </div>
-          
-      </div>
-      <div class="form-group">
-        <label for="unitDescription"><?= __("Unit Description"); ?></label>
-        <textarea name="unitDescription" id="unitDescription" rows="3" class="form-control"><?php echo $itemUnit["unit_description"]; ?></textarea>
-      </div>
-      <input type="hidden" name="unit_id" value="<?php echo safe_entities($_GET['id']); ?>">
+        
+        <div class="form-group required">
+            <label for="unitName"><?= __("Unit Name:"); ?></label>
+            <i data-toggle="tooltip" data-placement="right" title="E.G: Dozen, Litter" class="fa fa-question-circle"></i>
+            <input type="text" name="unitName" id="unitName" value="<?php echo $itemUnit["unit_name"]; ?>" class="form-control">
+        </div>
+        <div class="form-group required">
+            <label for="unitShortname"><?= __("Unit Shortname:"); ?></label>
+            <input type="text" name="unitShortname" placeholder="E.G: kg" value="<?php echo $itemUnit["short_name"]; ?>"  id="unitShortname" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="equal_unit_qnt"><?= __("Equal To:"); ?> </label>
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="number" onclick="this.select();" name="equalUnitQnt" id="equal_unit_qnt" value="<?php echo $itemUnit["equal_unit_qnt"]; ?>" class="form-control">
+                </div>
+                <div class="col-md-8">
+                    <select name="equalUnit" id="equalUnit" class=" form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=itemUnitList" style="width: 100%;">
+                        <option value="<?php echo $itemUnit["equal_unit_id"]; ?>"><?php echo $itemUnit["equal_unit_name"]; ?></option>
+                    </select>
+                </div>
+            </div>
+            
+        </div>
+        <div class="form-group">
+            <label for="unitDescription"><?= __("Unit Description"); ?></label>
+            <textarea name="unitDescription" id="unitDescription" rows="3" class="form-control"><?php echo $itemUnit["unit_description"]; ?></textarea>
+        </div>
+        <input type="hidden" name="unit_id" value="<?php echo safe_entities($_GET['id']); ?>">
     </div>
     <!-- /Box body-->
 
-  <?php
+    <?php
 
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
 
 //*******************************  Update Item Unit ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateUnit") {
+
+    if( !current_user_can("product_units.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product unit");
+    }
 
     if(empty($_POST["unitName"])) {
         return _e("Please enter unit name.");
@@ -1785,27 +1943,27 @@ if(isset($_GET['page']) and $_GET['page'] == "updateUnit") {
 
     }
 
-  // Update Other Information
-  $updateUnit = easyUpdate(
-      "product_units",
-      array(
-          "unit_name"         => $_POST["unitName"],
-          "short_name"        => $_POST["unitShortname"],
-          "equal_unit_id"     => empty($_POST["equalUnit"]) ? NULL : $_POST["equalUnit"],
-          "equal_unit_qnt"    => $_POST["equalUnitQnt"],
-          "base_qnt"          => ( empty($_POST["equalUnitQnt"]) or $_POST["equalUnitQnt"] == 0 ) ? 1 : $base_qnt * $_POST["equalUnitQnt"],
-          "unit_description"  => $_POST["unitDescription"]
-      ),
-      array(
-          "unit_id" => $_POST["unit_id"]
-      )
-  );
+    // Update Other Information
+    $updateUnit = easyUpdate(
+        "product_units",
+        array(
+            "unit_name"         => $_POST["unitName"],
+            "short_name"        => $_POST["unitShortname"],
+            "equal_unit_id"     => empty($_POST["equalUnit"]) ? NULL : $_POST["equalUnit"],
+            "equal_unit_qnt"    => $_POST["equalUnitQnt"],
+            "base_qnt"          => ( empty($_POST["equalUnitQnt"]) or $_POST["equalUnitQnt"] == 0 ) ? 1 : $base_qnt * $_POST["equalUnitQnt"],
+            "unit_description"  => $_POST["unitDescription"]
+        ),
+        array(
+            "unit_id" => $_POST["unit_id"]
+        )
+    );
 
-  if($updateUnit === true) {
-      _s("Unit successfully updated.");
-  } else {
-      _e($updateUnit);
-  }
+    if($updateUnit === true) {
+        _s("Unit successfully updated.");
+    } else {
+        _e($updateUnit);
+    }
   
 }
 
@@ -1843,6 +2001,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductEdition") {
   
 // Add Edition
 if(isset($_GET['page']) and $_GET['page'] == "addNewProductEdition") {
+
+    if( !current_user_can("product_variations.Add") ) {
+        return _e("Sorry! you do not have permission to add product edition");
+    }
   
     if(empty($_POST["editionName"])) {
       return _e("Please enter edition name.");
@@ -1870,6 +2032,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewProductEdition") {
   
 /*************************** Edition List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productEditionList") {
+
+    if( !current_user_can("product_variations.View") ) {
+        return _e("Sorry! you do not have permission to view product edition list");
+    }
       
     $requestData = $_REQUEST;
     $getData = [];
@@ -1952,6 +2118,10 @@ if(isset($_GET['page']) and $_GET['page'] == "productEditionList") {
   
 /***************** Delete Product Edition ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteProductEdition") {
+
+    if( !current_user_can("product_variations.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product edition");
+    }
   
     $deleteData = easyDelete(
         "product_editions",
@@ -1970,6 +2140,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteProductEdition") {
   
 /************************** Edition Product edition **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editProductEdition") {
+
+    if( !current_user_can("product_variations.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product edition");
+    }
   
     $productEdition = easySelect(
         "product_editions",
@@ -2008,6 +2182,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductEdition") {
   
 // Update Product edition
 if(isset($_GET['page']) and $_GET['page'] == "updateProductEdition") {
+
+    if( !current_user_can("product_variations.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product edition");
+    }
   
     if(empty($_POST["editionName"])) {
       return _e("Please enter edition name.");
@@ -2067,190 +2245,212 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductBrand") {
 // Add new user group page
 if(isset($_GET['page']) and $_GET['page'] == "addNewProductBrand") {
 
-  if(empty($_POST["brandName"])) {
-    return _e("Please enter brand name.");
-  }
-  
-  $returnMsg = easyInsert(
-      "product_brands", // Table name
-      array( // Fileds Name and value
-          "brand_name"         => $_POST["brandName"],
-          "brand_description"  => $_POST["brandDescription"]
-      ),
-      array( // No duplicate allow.
-          "brand_name"   => $_POST["brandName"]
-      )
-  );
+    if( !current_user_can("product_brands.Add") ) {
+        return _e("Sorry! you do not have permission to add product brand");
+    }
 
-  if($returnMsg === true) {
-      _s("New brand added successfully.");
-  } else {
-      _e($returnMsg);
-  }
+    if(empty($_POST["brandName"])) {
+        return _e("Please enter brand name.");
+    }
+    
+    $returnMsg = easyInsert(
+        "product_brands", // Table name
+        array( // Fileds Name and value
+            "brand_name"         => $_POST["brandName"],
+            "brand_description"  => $_POST["brandDescription"]
+        ),
+        array( // No duplicate allow.
+            "brand_name"   => $_POST["brandName"]
+        )
+    );
+
+    if($returnMsg === true) {
+        _s("New brand added successfully.");
+    } else {
+        _e($returnMsg);
+    }
 
 }
 
 
 /*************************** Unit List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productBrandList") {
+
+    if( !current_user_can("product_brands.View") ) {
+        return _e("Sorry! you do not have permission to view product brand list");
+    }
     
-  $requestData = $_REQUEST;
-  $getData = [];
+    $requestData = $_REQUEST;
+    $getData = [];
 
-  // List of all columns name
-  $columns = array(
-      "brand_name",
-      "brand_description"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-      "table" => "product_brands",
-      "fields" => "count(*) as totalRow",
-      "where" => array(
-          "is_trash = 0"
-      )
-  ))["data"][0]["totalRow"];
+    // List of all columns name
+    $columns = array(
+        "brand_name",
+        "brand_description"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+        "table" => "product_brands",
+        "fields" => "count(*) as totalRow",
+        "where" => array(
+            "is_trash = 0"
+        )
+    ))["data"][0]["totalRow"];
 
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
 
-  $getData = easySelect(
-      "product_brands",
-      "*",
-      array(),
-      array (
-          "is_trash=0 and brand_name LIKE" => $requestData['search']['value'] . "%",
-      ),
-      array (
-          $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-      ),
-      array (
-          "start" => $requestData['start'],
-          "length" => $requestData['length']
-      )
-  );
-  $totalFilteredRecords = $getData ? $getData["count"] : 0;
+    $getData = easySelect(
+        "product_brands",
+        "*",
+        array(),
+        array (
+            "is_trash=0 and brand_name LIKE" => $requestData['search']['value'] . "%",
+        ),
+        array (
+            $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+        ),
+        array (
+            "start" => $requestData['start'],
+            "length" => $requestData['length']
+        )
+    );
+    $totalFilteredRecords = $getData ? $getData["count"] : 0;
 
 
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
-          $allNestedData = [];
-          $allNestedData[] = $value["brand_name"];
-          $allNestedData[] = $value["brand_description"];
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                  <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editProductBrand&id='. $value["brand_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
-                                  <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteProductBrand" data-to-be-deleted="'. $value["brand_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $allNestedData[] = $value["brand_name"];
+            $allNestedData[] = $value["brand_description"];
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editProductBrand&id='. $value["brand_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                        <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteProductBrand" data-to-be-deleted="'. $value["brand_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
 
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Format
-  echo json_encode($jsonData); 
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Format
+    echo json_encode($jsonData); 
 
 }
+
+
 
 /***************** Delete Product Brand ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteProductBrand") {
 
-  $deleteData = easyDelete(
-      "product_brands",
-      array(
-          "brand_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("product_brands.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product brand");
+    }
 
-  if($deleteData === true) {
-      echo 1;
-  } else {
-      echo $deleteData;
-  }
+    $deleteData = easyDelete(
+        "product_brands",
+        array(
+            "brand_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo 1;
+    } else {
+        echo $deleteData;
+    }
 
 }
 
 /************************** Add new product Brand **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editProductBrand") {
 
-  $ProductBrand = easySelect(
-      "product_brands",
-      "*",
-      array(),
-      array(
-          "brand_id" => $_GET['id']
-      )
-  )["data"][0];
+    if( !current_user_can("product_brands.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product brand");
+    }
 
-  // Include the modal header
-  modal_header("New Product Brand", full_website_address() . "/xhr/?module=products&page=updateProductBrand");
-  
-  ?>
+    $ProductBrand = easySelect(
+        "product_brands",
+        "*",
+        array(),
+        array(
+            "brand_id" => $_GET['id']
+        )
+    )["data"][0];
+
+    // Include the modal header
+    modal_header("Edit Product Brand", full_website_address() . "/xhr/?module=products&page=updateProductBrand");
+    
+    ?>
     <div class="box-body">
-      
-      <div class="required" class="form-group">
-        <label for="brandName"><?= __("Brand Name:"); ?></label>
-        <input type="text" name="brandName" id="brandName" class="form-control" value="<?php echo $ProductBrand["brand_name"]; ?>" required>
-      </div>
-      <div class="form-group">
-        <label for="brandDescription"><?= __("Brand Description:"); ?></label>
-        <textarea name="brandDescription" id="brandDescription" rows="3" class="form-control"><?php echo $ProductBrand["brand_description"]; ?></textarea>
-      </div>
-      <input type="hidden" name="brand_id" value="<?php echo safe_entities($_GET['id']); ?>">
-            
+        
+        <div class="required" class="form-group">
+            <label for="brandName"><?= __("Brand Name:"); ?></label>
+            <input type="text" name="brandName" id="brandName" class="form-control" value="<?php echo $ProductBrand["brand_name"]; ?>" required>
+        </div>
+        <div class="form-group">
+            <label for="brandDescription"><?= __("Brand Description:"); ?></label>
+            <textarea name="brandDescription" id="brandDescription" rows="3" class="form-control"><?php echo $ProductBrand["brand_description"]; ?></textarea>
+        </div>
+        <input type="hidden" name="brand_id" value="<?php echo safe_entities($_GET['id']); ?>">
+                
     </div>
     <!-- /Box body-->
 
-  <?php
+    <?php
 
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
 // Add new user group page
 if(isset($_GET['page']) and $_GET['page'] == "updateProductBrand") {
 
-  if(empty($_POST["brandName"])) {
-    return _e("Please enter brand name.");
-  }
-  
-  $returnMsg = easyUpdate(
-      "product_brands",
-      array(
-          "brand_name"         => $_POST["brandName"],
-          "brand_description"  => $_POST["brandDescription"]
-      ),
-      array(
-          "brand_id"   => $_POST["brand_id"]
-      )
-  );
+    if( !current_user_can("product_brands.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product brand");
+    }
 
-  if($returnMsg === true) {
-      _s("The brand successfully updated.");
-  } else {
-      _e($returnMsg);
-  }
+    if(empty($_POST["brandName"])) {
+        return _e("Please enter brand name.");
+    }
+    
+    $returnMsg = easyUpdate(
+        "product_brands",
+        array(
+            "brand_name"         => $_POST["brandName"],
+            "brand_description"  => $_POST["brandDescription"]
+        ),
+        array(
+            "brand_id"   => $_POST["brand_id"]
+        )
+    );
+
+    if($returnMsg === true) {
+        _s("The brand successfully updated.");
+    } else {
+        _e($returnMsg);
+    }
 
 }
 
@@ -2310,33 +2510,38 @@ if(isset($_GET['page']) and $_GET['page'] == "newAuthor") {
 /************************** Add new Author **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewAuthor") {
 
-  if(empty($_POST["authoryName"])) {
-    return _e("Please enter author name.");
-  }
-  
-  $returnMsg = easyInsert(
-      "product_authors", 
-      array( 
-          "author_name"       => $_POST["authoryName"],
-          "author_birth_date" => empty($_POST["authoryDoB"]) ? NULL : $_POST["authoryDoB"],
-          "author_death_date" => empty($_POST["authoryDoD"]) ? NULL : $_POST["authoryDoD"],
-          "author_mobile"     => empty($_POST["authorMobile"]) ? NULL : $_POST["authorMobile"],
-          "author_address"    => $_POST["authorAdress"],
-          "author_country"    => $_POST["authorCountry"],
-          "author_description" => $_POST["authorDescription"],
-          "author_website"    => $_POST["authorWebsite"]
-      ),
-      array( // No duplicate allow.
-          "author_mobile" => $_POST["authorMobile"],
-          "author_name"  => $_POST["authoryName"]
-      )
-  );
 
-  if($returnMsg === true) {
-      _s("New author added successfully.");
-  } else {
-      _e($returnMsg);
-  }
+    if( !current_user_can("product_authors.Add") ) {
+        return _e("Sorry! you do not have permission to add new author");
+    }
+
+    if(empty($_POST["authoryName"])) {
+        return _e("Please enter author name.");
+    }
+    
+    $returnMsg = easyInsert(
+        "product_authors", 
+        array( 
+            "author_name"       => $_POST["authoryName"],
+            "author_birth_date" => empty($_POST["authoryDoB"]) ? NULL : $_POST["authoryDoB"],
+            "author_death_date" => empty($_POST["authoryDoD"]) ? NULL : $_POST["authoryDoD"],
+            "author_mobile"     => empty($_POST["authorMobile"]) ? NULL : $_POST["authorMobile"],
+            "author_address"    => $_POST["authorAdress"],
+            "author_country"    => $_POST["authorCountry"],
+            "author_description" => $_POST["authorDescription"],
+            "author_website"    => $_POST["authorWebsite"]
+        ),
+        array( // No duplicate allow.
+            "author_mobile" => $_POST["authorMobile"],
+            "author_name"  => $_POST["authoryName"]
+        )
+    );
+
+    if($returnMsg === true) {
+        _s("New author added successfully.");
+    } else {
+        _e($returnMsg);
+    }
 
 }
 
@@ -2344,108 +2549,117 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewAuthor") {
 /*************************** Unit List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "authorList") {
     
-  $requestData = $_REQUEST;
-  $getData = [];
 
-  // List of all columns name
-  $columns = array(
-      "author_name",
-      "author_birth_date",
-      "author_death_date",
-      "author_mobile",
-      "author_address",
-      "author_description"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-      "table" => "product_authors",
-      "fields" => "count(*) as totalRow",
-      "where" => array(
-          "is_trash = 0"
-      )
-  ))["data"][0]["totalRow"];
+    if( !current_user_can("product_authors.View") ) {
+        return _e("Sorry! you do not have permission to view author list");
+    }
 
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
+    $requestData = $_REQUEST;
+    $getData = [];
 
-  $getData = easySelectA(array(
-    "table" => "product_authors",
-    "where" => array(
-      "is_trash = 0 and author_name LIKE" => $requestData['search']['value'] . "%",
-      " and author_mobile" => $requestData['search']['value'],
-    ),
-    "orderby" => array(
-      $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-    ),
-    "limit" => array(
-      "start" => $requestData['start'],
-      "length" => $requestData['length']
-    )
-  ));
+    // List of all columns name
+    $columns = array(
+        "author_name",
+        "author_birth_date",
+        "author_death_date",
+        "author_mobile",
+        "author_address",
+        "author_description"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+        "table" => "product_authors",
+        "fields" => "count(*) as totalRow",
+        "where" => array(
+            "is_trash = 0"
+        )
+    ))["data"][0]["totalRow"];
+
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
+
+    $getData = easySelectA(array(
+        "table" => "product_authors",
+        "where" => array(
+        "is_trash = 0 and author_name LIKE" => $requestData['search']['value'] . "%",
+        " and author_mobile" => $requestData['search']['value'],
+        ),
+        "orderby" => array(
+        $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+        ),
+        "limit" => array(
+        "start" => $requestData['start'],
+        "length" => $requestData['length']
+        )
+    ));
 
 
-  $totalFilteredRecords = $getData ? $getData["count"] : 0;
+    $totalFilteredRecords = $getData ? $getData["count"] : 0;
 
 
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
-          $allNestedData = [];
-          $allNestedData[] = $value["author_name"];
-          $allNestedData[] = $value["author_birth_date"];
-          $allNestedData[] = $value["author_death_date"];
-          $allNestedData[] = $value["author_mobile"];
-          $allNestedData[] = $value["author_address"] . ', ' . $value["author_country"];
-          $allNestedData[] = $value["author_description"];
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                  <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editAuthor&id='. $value["author_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
-                                  <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteAuthor" data-to-be-deleted="'. $value["author_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $allNestedData[] = $value["author_name"];
+            $allNestedData[] = $value["author_birth_date"];
+            $allNestedData[] = $value["author_death_date"];
+            $allNestedData[] = $value["author_mobile"];
+            $allNestedData[] = $value["author_address"] . ', ' . $value["author_country"];
+            $allNestedData[] = $value["author_description"];
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editAuthor&id='. $value["author_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                        <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteAuthor" data-to-be-deleted="'. $value["author_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
 
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Format
-  echo json_encode($jsonData); 
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Format
+    echo json_encode($jsonData); 
 
 }
 
 /***************** Delete Product Authors ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteAuthor") {
 
-  $deleteData = easyDelete(
-      "product_authors",
-      array(
-          "author_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("product_authors.Delete") ) {
+        return _e("Sorry! you do not have permission to delete author");
+    }
 
-  if($deleteData === true) {
-      echo 1;
-  } else {
-      echo $deleteData;
-  }
+    $deleteData = easyDelete(
+        "product_authors",
+        array(
+            "author_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo 1;
+    } else {
+        echo $deleteData;
+    }
 
 }
 
@@ -2454,92 +2668,100 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteAuthor") {
 /************************** Edit Author **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editAuthor") {
 
-  // Include the modal header
-  modal_header("Edit Author", full_website_address() . "/xhr/?module=products&page=updateAuthor");
+    if( !current_user_can("product_authors.Edit") ) {
+        return _e("Sorry! you do not have permission to edit author");
+    }
 
-  $author = easySelectA(array(
-    "table" => "product_authors",
-    "where" => array(
-      "author_id" => $_GET["id"]
-    )
-  ))["data"][0];
-  
-  ?>
+    // Include the modal header
+    modal_header("Edit Author", full_website_address() . "/xhr/?module=products&page=updateAuthor");
+
+    $author = easySelectA(array(
+        "table" => "product_authors",
+        "where" => array(
+            "author_id" => $_GET["id"]
+        )
+    ))["data"][0];
+    
+    ?>
     <div class="box-body">
-      
-      <div class="form-group required">
-        <label for="authoryName"><?= __("Author Name:"); ?></label>
-        <input type="text" name="authoryName" placeholder="Enter author name" value="<?= $author["author_name"]; ?>" id="authoryName" class="form-control" required>
-      </div>
-      <div class="form-group">
-        <label for="authoryDoB"><?= __("Author Birth Date:"); ?></label>
-        <input type="text" name="authoryDoB" id="authoryDoB" value="<?= $author["author_birth_date"]; ?>" class="form-control datePicker" autoComplete="off">
-      </div>
-      <div class="form-group">
-        <label for="authoryDoD"><?= __("Author Death Date:"); ?></label>
-        <input type="text" name="authoryDoD" id="authoryDoD" value="<?= $author["author_death_date"]; ?>" class="form-control datePicker" autoComplete="off">
-      </div>
-      <div class="form-group">
-        <label for="authorMobile"><?= __("Author Mobile:"); ?></label>
-        <input type="text" name="authorMobile" id="authorMobile" value="<?= $author["author_mobile"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="authorAdress"><?= __("Address:"); ?></label>
-        <input type="text" name="authorAdress" id="authorAdress" value="<?= $author["author_address"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="authorCountry"><?= __("Country:"); ?></label>
-        <input type="text" name="authorCountry" id="authorCountry" value="<?= $author["author_country"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="authorDescription"><?= __("Description:"); ?></label>
-        <textarea class="form-control" name="authorDescription" id="authorDescription" cols="30" rows="3"><?= $author["author_description"]; ?></textarea>
-      </div>
-      <div class="form-group">
-        <label for="authorWebsite"><?= __("Website:"); ?></label>
-        <input type="text" name="authorWebsite" id="authorWebsite" value="<?= $author["author_website"]; ?>" class="form-control">
-      </div>
-      <input type="hidden" name="authorId" value="<?php echo safe_entities($_GET["id"]); ?>">
-      
+        
+        <div class="form-group required">
+            <label for="authoryName"><?= __("Author Name:"); ?></label>
+            <input type="text" name="authoryName" placeholder="Enter author name" value="<?= $author["author_name"]; ?>" id="authoryName" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="authoryDoB"><?= __("Author Birth Date:"); ?></label>
+            <input type="text" name="authoryDoB" id="authoryDoB" value="<?= $author["author_birth_date"]; ?>" class="form-control datePicker" autoComplete="off">
+        </div>
+        <div class="form-group">
+            <label for="authoryDoD"><?= __("Author Death Date:"); ?></label>
+            <input type="text" name="authoryDoD" id="authoryDoD" value="<?= $author["author_death_date"]; ?>" class="form-control datePicker" autoComplete="off">
+        </div>
+        <div class="form-group">
+            <label for="authorMobile"><?= __("Author Mobile:"); ?></label>
+            <input type="text" name="authorMobile" id="authorMobile" value="<?= $author["author_mobile"]; ?>" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="authorAdress"><?= __("Address:"); ?></label>
+            <input type="text" name="authorAdress" id="authorAdress" value="<?= $author["author_address"]; ?>" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="authorCountry"><?= __("Country:"); ?></label>
+            <input type="text" name="authorCountry" id="authorCountry" value="<?= $author["author_country"]; ?>" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="authorDescription"><?= __("Description:"); ?></label>
+            <textarea class="form-control" name="authorDescription" id="authorDescription" cols="30" rows="3"><?= $author["author_description"]; ?></textarea>
+        </div>
+        <div class="form-group">
+            <label for="authorWebsite"><?= __("Website:"); ?></label>
+            <input type="text" name="authorWebsite" id="authorWebsite" value="<?= $author["author_website"]; ?>" class="form-control">
+        </div>
+        <input type="hidden" name="authorId" value="<?php echo safe_entities($_GET["id"]); ?>">
+        
     </div>
     <!-- /Box body-->
 
-  <?php
+    <?php
 
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
 /************************** Add new Author **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateAuthor") {
 
-  if(empty($_POST["authoryName"])) {
-    return _e("Please enter author name.");
-  }
-  
-  $returnMsg = easyUpdate(
-      "product_authors", 
-      array( 
-          "author_name"       => $_POST["authoryName"],
-          "author_birth_date" => empty($_POST["authoryDoB"]) ? NULL : $_POST["authoryDoB"],
-          "author_death_date" => empty($_POST["authoryDoD"]) ? NULL : $_POST["authoryDoD"],
-          "author_mobile"     => empty($_POST["authorMobile"]) ? NULL : $_POST["authorMobile"],
-          "author_address"    => $_POST["authorAdress"],
-          "author_country"    => $_POST["authorCountry"],
-          "author_description" => $_POST["authorDescription"],
-          "author_website"    => $_POST["authorWebsite"]
-      ),
-      array( 
-          "author_id" => $_POST["authorId"]
-      )
-  );
+    if( !current_user_can("product_authors.Edit") ) {
+        return _e("Sorry! you do not have permission to edit author");
+    }
 
-  if($returnMsg === true) {
-      _s("The author has been successfully updated.");
-  } else {
-      _e($returnMsg);
-  }
+    if(empty($_POST["authoryName"])) {
+        return _e("Please enter author name.");
+    }
+    
+    $returnMsg = easyUpdate(
+        "product_authors", 
+        array( 
+            "author_name"       => $_POST["authoryName"],
+            "author_birth_date" => empty($_POST["authoryDoB"]) ? NULL : $_POST["authoryDoB"],
+            "author_death_date" => empty($_POST["authoryDoD"]) ? NULL : $_POST["authoryDoD"],
+            "author_mobile"     => empty($_POST["authorMobile"]) ? NULL : $_POST["authorMobile"],
+            "author_address"    => $_POST["authorAdress"],
+            "author_country"    => $_POST["authorCountry"],
+            "author_description" => $_POST["authorDescription"],
+            "author_website"    => $_POST["authorWebsite"]
+        ),
+        array( 
+            "author_id" => $_POST["authorId"]
+        )
+    );
+
+    if($returnMsg === true) {
+        _s("The author has been successfully updated.");
+    } else {
+        _e($returnMsg);
+    }
 
 }
 
@@ -2578,11 +2800,15 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductAttribute") {
   
     // Include the modal footer
     modal_footer();
+
+}
   
-  }
-  
-  /************************** Add new Author **********************/
-  if(isset($_GET['page']) and $_GET['page'] == "addNewProductAttribute") {
+/************************** Add new Author **********************/
+if(isset($_GET['page']) and $_GET['page'] == "addNewProductAttribute") {
+
+    if( !current_user_can("product_attributes.Add") ) {
+        return _e("Sorry! you do not have permission to add product attribute");
+    }
   
     if(empty($_POST["attributeName"])) {
         return _e("Please enter attribute name.");
@@ -2608,11 +2834,15 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductAttribute") {
         _e($returnMsg);
     }
   
-  }
+}
   
 
 /*************************** Attribute List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productAttributeList") {
+
+    if( !current_user_can("product_attributes.View") ) {
+        return _e("Sorry! you do not have permission to view product attribute list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -2637,22 +2867,22 @@ if(isset($_GET['page']) and $_GET['page'] == "productAttributeList") {
     }
   
     $getData = easySelectA(array(
-      "table"   => "product_attributes as attributes",
-      "fields"  => "pa_id, attributes.pa_name as attribute_name, pa_type, pa_description, group_concat(pv_name SEPARATOR ', ') as variations_list",
-      "where"   => array(
-        "attributes.is_trash = 0 and attributes.pa_name LIKE" => $requestData['search']['value'] . "%"
-      ),
-      "join"    => array(
-          "left join {$table_prefeix}product_variations as variations on variations.pa_name = attributes.pa_name"
-      ),
-      "groupby" => "attributes.pa_name",
-      "orderby" => array(
-        $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-      ),
-      "limit" => array(
-        "start" => $requestData['start'],
-        "length" => $requestData['length']
-      )
+        "table"   => "product_attributes as attributes",
+        "fields"  => "pa_id, attributes.pa_name as attribute_name, pa_type, pa_description, group_concat(pv_name SEPARATOR ', ') as variations_list",
+        "where"   => array(
+            "attributes.is_trash = 0 and attributes.pa_name LIKE" => $requestData['search']['value'] . "%"
+        ),
+        "join"    => array(
+            "left join {$table_prefix}product_variations as variations on variations.pa_name = attributes.pa_name"
+        ),
+        "groupby" => "attributes.pa_name",
+        "orderby" => array(
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+        ),
+        "limit" => array(
+            "start" => $requestData['start'],
+            "length" => $requestData['length']
+        )
     ));
   
   
@@ -2677,8 +2907,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productAttributeList") {
                                     <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editProductAttribute&id='. $value["pa_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
-                                    <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteProductAttribute" data-to-be-deleted="'. $value["pa_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                        <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editProductAttribute&id='. $value["pa_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                        <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteProductAttribute" data-to-be-deleted="'. $value["pa_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
                                     </ul>
                                 </div>';
             
@@ -2703,23 +2933,31 @@ if(isset($_GET['page']) and $_GET['page'] == "productAttributeList") {
 /***************** Delete Product Authors ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteProductAttribute") {
 
-  $deleteData = easyDelete(
-      "product_attributes",
-      array(
-          "pa_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("product_attributes.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product attribute");
+    }
 
-  if($deleteData === true) {
-      echo 1;
-  } else {
-      echo $deleteData;
-  }
+    $deleteData = easyDelete(
+        "product_attributes",
+        array(
+            "pa_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo 1;
+    } else {
+        echo $deleteData;
+    }
 
 }
 
 /************************** Edit Product Attribute **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editProductAttribute") {
+
+    if( !current_user_can("product_attributes.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product attribute");
+    }
 
     // Include the modal header
     modal_header("Edit Attribute", full_website_address() . "/xhr/?module=products&page=updateProductAttribute");
@@ -2736,20 +2974,20 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductAttribute") {
       <div class="box-body">
         
         <div class="form-group required">
-          <label for="attributeName"><?= __("Attribute Name:"); ?></label>
-          <input type="text" name="attributeName" placeholder="Enter attribute name" id="attributeName" value="<?php echo $pa["pa_name"] ; ?>" class="form-control" required>
+            <label for="attributeName"><?= __("Attribute Name:"); ?></label>
+            <input type="text" name="attributeName" placeholder="Enter attribute name" id="attributeName" value="<?php echo $pa["pa_name"] ; ?>" class="form-control" required>
         </div>
         <div class="form-group required">
-          <label for="attributeType"><?= __("Attribute Type:"); ?></label>
-          <select name="attributeType" id="attributeType" class="form-control">
-              <option <?php echo ( $pa["pa_type"] === "Select" ) ? "selected" : ""; ?> value="Select">Select</option>
-              <option <?php echo ( $pa["pa_type"] === "Color" ) ? "selected" : ""; ?> value="Color">Color</option>
-              <option <?php echo ( $pa["pa_type"] === "Radio" ) ? "selected" : ""; ?> value="Radio">Radio</option>
-          </select>
+            <label for="attributeType"><?= __("Attribute Type:"); ?></label>
+            <select name="attributeType" id="attributeType" class="form-control">
+                <option <?php echo ( $pa["pa_type"] === "Select" ) ? "selected" : ""; ?> value="Select">Select</option>
+                <option <?php echo ( $pa["pa_type"] === "Color" ) ? "selected" : ""; ?> value="Color">Color</option>
+                <option <?php echo ( $pa["pa_type"] === "Radio" ) ? "selected" : ""; ?> value="Radio">Radio</option>
+            </select>
         </div>
         <div class="form-group">
-          <label for="attributeDescription"><?= __("Attribute Description:"); ?></label>
-          <textarea name="attributeDescription" id="attributeDescription" cols="30" rows="3" class="form-control"><?php echo $pa["pa_description"] ; ?></textarea>
+            <label for="attributeDescription"><?= __("Attribute Description:"); ?></label>
+            <textarea name="attributeDescription" id="attributeDescription" cols="30" rows="3" class="form-control"><?php echo $pa["pa_description"] ; ?></textarea>
         </div>
         <input type="hidden" name="pa_id" value="<?php echo safe_entities($_GET["id"]); ?>">
         
@@ -2766,6 +3004,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductAttribute") {
   
 /************************** Add new Author **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateProductAttribute") {
+
+    if( !current_user_can("product_attributes.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product attribute");
+    }
   
     if(empty($_POST["attributeName"])) {
         return _e("Please enter attribute name.");
@@ -2841,10 +3083,15 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductVariation") {
     // Include the modal footer
     modal_footer();
   
-  }
+}
   
-  /************************** Add new Author **********************/
-  if(isset($_GET['page']) and $_GET['page'] == "addNewProductVariation") {
+
+/************************** Add new Author **********************/
+if(isset($_GET['page']) and $_GET['page'] == "addNewProductVariation") {
+
+    if( !current_user_can("product_variations.Add") ) {
+        return _e("Sorry! you do not have permission to add product variation");
+    }
   
     if(empty($_POST["variationName"])) {
         return _e("Please enter variation name.");
@@ -2873,8 +3120,12 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductVariation") {
   }
   
 
-/*************************** Attribute List ***********************/
+/*************************** Variation List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productVariationList") {
+
+    if( !current_user_can("product_variations.View") ) {
+        return _e("Sorry! you do not have permission to view product variation");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -2896,23 +3147,23 @@ if(isset($_GET['page']) and $_GET['page'] == "productVariationList") {
     ))["data"][0]["totalRow"];
   
     if($requestData['length'] == -1) {
-      $requestData['length'] = $totalRecords;
+        $requestData['length'] = $totalRecords;
     }
   
     $getData = easySelectA(array(
-      "table"   => "product_variations",
-      "where"   => array(
-        "is_trash = 0 and ( pv_name LIKE '". safe_input($requestData['search']['value']) ."%'",
-        " or pa_name LIKE" => $requestData['search']['value'] . "%",
-        ")"
-      ),
-      "orderby" => array(
-        $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-      ),
-      "limit" => array(
-        "start" => $requestData['start'],
-        "length" => $requestData['length']
-      )
+        "table"   => "product_variations",
+        "where"   => array(
+            "is_trash = 0 and ( pv_name LIKE '". safe_input($requestData['search']['value']) ."%'",
+            " or pa_name LIKE" => $requestData['search']['value'] . "%",
+            ")"
+        ),
+        "orderby" => array(
+            $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+        ),
+        "limit" => array(
+            "start" => $requestData['start'],
+            "length" => $requestData['length']
+        )
     ));
   
   
@@ -2962,18 +3213,22 @@ if(isset($_GET['page']) and $_GET['page'] == "productVariationList") {
 /***************** Delete Product Authors ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteProductVariation") {
 
-  $deleteData = easyDelete(
-      "product_variations",
-      array(
-          "pv_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("product_variations.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product variation");
+    }
 
-  if($deleteData === true) {
-      echo 1;
-  } else {
-      echo $deleteData;
-  }
+    $deleteData = easyDelete(
+        "product_variations",
+        array(
+            "pv_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo 1;
+    } else {
+        echo $deleteData;
+    }
 
 }
 
@@ -2981,8 +3236,12 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteProductVariation") {
 /************************** Edit Product Variation **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editProductVariation") {
 
+    if( !current_user_can("product_variations.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product variation");
+    }
+
     // Include the modal header
-    modal_header("New Variation", full_website_address() . "/xhr/?module=products&page=updateProductVariation");
+    modal_header("Edit Variation", full_website_address() . "/xhr/?module=products&page=updateProductVariation");
 
     $pv = easySelectA(array(
         "table"     => "product_variations",
@@ -2992,53 +3251,56 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductVariation") {
     ))["data"][0];
     
     ?>
-      <div class="box-body">
+    <div class="box-body">
         
         <div class="form-group required">
-          <label for="variationName"><?= __("Variation Name:"); ?></label>
-          <input type="text" name="variationName" placeholder="Enter variation name" id="variationName" value="<?php echo $pv["pv_name"]; ?>" class="form-control" required>
+            <label for="variationName"><?= __("Variation Name:"); ?></label>
+            <input type="text" name="variationName" placeholder="Enter variation name" id="variationName" value="<?php echo $pv["pv_name"]; ?>" class="form-control" required>
         </div>
         <div class="form-group required">
-          <label for="variationAttribute"><?= __("Attribute:"); ?></label>
-          <select name="variationAttribute" id="variationAttribute" class="form-control">
-              <option value="">Select Attribute....</option>
-              <?php 
-                $pa = easySelectA(array(
-                    "table" => "product_attributes",
-                    "where" => array(
-                        "is_trash = 0"
-                    )
-                ))["data"];
+            <label for="variationAttribute"><?= __("Attribute:"); ?></label>
+            <select name="variationAttribute" id="variationAttribute" class="form-control">
+                <option value="">Select Attribute....</option>
+                <?php 
+                    $pa = easySelectA(array(
+                        "table" => "product_attributes",
+                        "where" => array(
+                            "is_trash = 0"
+                        )
+                    ))["data"];
 
-                foreach($pa as $paVal) {
+                    foreach($pa as $paVal) {
 
-                    $selected = ( $pv["pa_name"] === $paVal['pa_name'] ) ? "selected" : "";
-                    echo "<option {$selected} value='{$paVal['pa_name']}'>{$paVal['pa_name']}</option>";
-                }
+                        $selected = ( $pv["pa_name"] === $paVal['pa_name'] ) ? "selected" : "";
+                        echo "<option {$selected} value='{$paVal['pa_name']}'>{$paVal['pa_name']}</option>";
+                    }
 
-              ?>
-              
-          </select>
+                ?>
+                
+            </select>
         </div>
         <div class="form-group">
-          <label for="variationDescription"><?= __("Description:"); ?></label>
-          <textarea name="variationDescription" id="variationDescription" cols="30" rows="3" class="form-control"><?php echo $pv["pv_description"]; ?></textarea>
+          extarea name="variationDescription" id="variationDescription" cols="30" rows="3" class="form-control"><?php echo $pv["pv_description"]; ?></textarea>
         </div>
         <input type="hidden" name="pv_id" value="<?php echo safe_entities($_GET["id"]); ?>">
         
         
-      </div>
-      <!-- /Box body-->
+    </div>
+    <!-- /Box body-->
   
     <?php
   
     // Include the modal footer
     modal_footer();
   
-  }
+}
   
-  /************************** Add new Author **********************/
-  if(isset($_GET['page']) and $_GET['page'] == "updateProductVariation") {
+/************************** Update Product variation **********************/
+if(isset($_GET['page']) and $_GET['page'] == "updateProductVariation") {
+
+    if( !current_user_can("product_variations.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product variation");
+    }
   
     if(empty($_POST["variationName"])) {
         return _e("Please enter variation name.");
@@ -3125,6 +3387,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newProductGeneric") {
   
 /************************** Add new Author **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewProductGeneric") {
+
+    if( !current_user_can("product_generics.Add") ) {
+        return _e("Sorry! you do not have permission to add product generic");
+    }
   
     if(empty($_POST["genericName"])) {
         return _e("Please enter generic name.");
@@ -3152,6 +3418,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewProductGeneric") {
 
 /*************************** Attribute List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productGenericList") {
+
+    if( !current_user_can("product_generics.View") ) {
+        return _e("Sorry! you do not have permission to view product generic");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -3176,17 +3446,17 @@ if(isset($_GET['page']) and $_GET['page'] == "productGenericList") {
     }
   
     $getData = easySelectA(array(
-      "table"   => "product_generic",
-      "where"   => array(
-        "is_trash = 0 and generic_name LIKE" => $requestData['search']['value'] . "%"
-      ),
-      "orderby" => array(
-        $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-      ),
-      "limit" => array(
-        "start" => $requestData['start'],
-        "length" => $requestData['length']
-      )
+        "table"   => "product_generic",
+        "where"   => array(
+            "is_trash = 0 and generic_name LIKE" => $requestData['search']['value'] . "%"
+        ),
+        "orderby" => array(
+            $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+        ),
+        "limit" => array(
+            "start" => $requestData['start'],
+            "length" => $requestData['length']
+        )
     ));
   
   
@@ -3211,8 +3481,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productGenericList") {
                                     <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editProductGeneric&id='. $value["generic_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
-                                    <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteProductGeneric" data-to-be-deleted="'. $value["generic_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                        <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=products&page=editProductGeneric&id='. $value["generic_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                        <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=products&page=deleteProductGeneric" data-to-be-deleted="'. $value["generic_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
                                     </ul>
                                 </div>';
             
@@ -3237,24 +3507,32 @@ if(isset($_GET['page']) and $_GET['page'] == "productGenericList") {
 /***************** Delete Product Authors ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteProductGeneric") {
 
-  $deleteData = easyDelete(
-      "product_generic",
-      array(
-          "generic_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("product_generics.Delete") ) {
+        return _e("Sorry! you do not have permission to delete product generic");
+    }
 
-  if($deleteData === true) {
-      echo 1;
-  } else {
-      echo $deleteData;
-  }
+    $deleteData = easyDelete(
+        "product_generic",
+        array(
+            "generic_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo 1;
+    } else {
+        echo $deleteData;
+    }
 
 }
 
 
 /************************** Edit product Generic **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editProductGeneric") {
+
+    if( !current_user_can("product_generics.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product generic");
+    }
 
     // Include the modal header
     modal_header("Edit Generic", full_website_address() . "/xhr/?module=products&page=updateeProductGeneric");
@@ -3267,20 +3545,20 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductGeneric") {
     ))["data"][0];
     
     ?>
-      <div class="box-body">
+    <div class="box-body">
         
         <div class="form-group required">
-          <label for="genericName"><?= __("Generic Name:"); ?></label>
-          <input type="text" name="genericName" placeholder="Enter generic name" value="<?php echo $pg["generic_name"]; ?>" id="genericName" class="form-control" required>
+            <label for="genericName"><?= __("Generic Name:"); ?></label>
+            <input type="text" name="genericName" placeholder="Enter generic name" value="<?php echo $pg["generic_name"]; ?>" id="genericName" class="form-control" required>
         </div>
         <div class="form-group">
-          <label for="genericDescription"><?= __("Description:"); ?></label>
-          <textarea name="genericDescription" id="genericDescription" cols="30" rows="3" class="form-control"><?php echo $pg["generic_description"]; ?></textarea>
+            <label for="genericDescription"><?= __("Description:"); ?></label>
+            <textarea name="genericDescription" id="genericDescription" cols="30" rows="3" class="form-control"><?php echo $pg["generic_description"]; ?></textarea>
         </div>
         <input type="hidden" name="generic_id" value="<?php echo safe_entities($_GET["id"]); ?>">
         
-      </div>
-      <!-- /Box body-->
+    </div>
+    <!-- /Box body-->
   
     <?php
   
@@ -3291,6 +3569,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editProductGeneric") {
   
 /************************** Update generic **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateeProductGeneric") {
+
+    if( !current_user_can("product_generics.Edit") ) {
+        return _e("Sorry! you do not have permission to edit product generic");
+    }
   
     if(empty($_POST["genericName"])) {
         return _e("Please enter generic name.");
@@ -3314,5 +3596,6 @@ if(isset($_GET['page']) and $_GET['page'] == "updateeProductGeneric") {
     }
   
 }
+
 
 ?>

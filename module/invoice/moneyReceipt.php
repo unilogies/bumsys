@@ -5,10 +5,10 @@ $selectPayment = easySelectA(array(
   "table" => "received_payments",
   "fields" => "received_payments_id, received_payments_datetime, received_payments_type, received_payments_accounts, received_payments_shop, accounts_name, customer_name, received_payments_amount, received_payments_details, received_payments_method, received_payments_cheque_no, received_payments_cheque_date, received_payments_reference, upazila_name, district_name",
   "join"  => array(
-    "left join {$table_prefeix}accounts on accounts_id = received_payments_accounts",
-    "left join {$table_prefeix}customers on customer_id = received_payments_from",
-    "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-    "left join {$table_prefeix}districts on customer_district = district_id"
+    "left join {$table_prefix}accounts on accounts_id = received_payments_accounts",
+    "left join {$table_prefix}customers on customer_id = received_payments_from",
+    "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+    "left join {$table_prefix}districts on customer_district = district_id"
   ),
   "where" => array(
     "received_payments_id"  => $_GET["id"]

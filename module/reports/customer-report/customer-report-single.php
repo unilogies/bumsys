@@ -14,7 +14,7 @@ $getCustomerDetails = easySelectD(
     if(received_payments_amount is null, 0, received_payments_amount) as total_received_payments,
     if(received_payments_bonus is null, 0, received_payments_bonus) as total_given_bonus,
     if(discounts_amount is null, 0, discounts_amount) as special_discount
-  from {$table_prefeix}customers
+  from {$table_prefix}customers
   left join (
     select
         sales_customer_id,
@@ -24,21 +24,21 @@ $getCustomerDetails = easySelectD(
         sum(sales_shipping) as sales_shipping,
         sum(sales_grand_total) as sales_grand_total,
         sum(sales_due) as sales_due
-    from {$table_prefeix}sales where is_trash = 0 and is_return = 0 group by sales_customer_id
+    from {$table_prefix}sales where is_trash = 0 and is_return = 0 group by sales_customer_id
 ) as sales on customer_id = sales.sales_customer_id
   left join ( 
         select sales_customer_id, 
         sum(sales_grand_total) as returns_grand_total 
-  from {$table_prefeix}sales where is_trash = 0 and is_return = 1 group by sales_customer_id) as product_returns on customer_id = product_returns.sales_customer_id
+  from {$table_prefix}sales where is_trash = 0 and is_return = 1 group by sales_customer_id) as product_returns on customer_id = product_returns.sales_customer_id
   left join 
       ( select received_payments_from, 
       sum(received_payments_amount) as received_payments_amount, 
       sum(received_payments_bonus) as received_payments_bonus 
-  from {$table_prefeix}received_payments where is_trash = 0 and received_payments_type != 'Discounts' group by received_payments_from) as received_payments on customer_id = received_payments.received_payments_from
+  from {$table_prefix}received_payments where is_trash = 0 and received_payments_type != 'Discounts' group by received_payments_from) as received_payments on customer_id = received_payments.received_payments_from
   left join 
       ( select received_payments_from, 
       sum(received_payments_amount) as discounts_amount
-  from {$table_prefeix}received_payments where is_trash = 0 and received_payments_type = 'Discounts' group by received_payments_from) as given_discounts on customer_id = given_discounts.received_payments_from
+  from {$table_prefix}received_payments where is_trash = 0 and received_payments_type = 'Discounts' group by received_payments_from) as given_discounts on customer_id = given_discounts.received_payments_from
 
   where customer_id = '{$cid}'"
 )["data"][0];
@@ -167,17 +167,17 @@ $totalPaid = $getCustomerDetails["total_received_payments"] + $getCustomerDetail
                                 if(purchased_qnt is null, 0, sum(purchased_qnt)) -
                                 if(return_qnt is null, 0, sum(return_qnt)) 
                             ) as purchase_qty
-                        FROM {$table_prefeix}sales as sales
+                        FROM {$table_prefix}sales as sales
                         left join( SELECT
                                     stock_product_id,
                                     stock_sales_id,
                                     sum(CASE WHEN stock_type = 'sale' then stock_item_qty end) as purchased_qnt,
                                     sum(CASE WHEN stock_type = 'sale-return' then stock_item_qty end) as return_qnt
-                                from {$table_prefeix}product_stock
+                                from {$table_prefix}product_stock
                                 where is_trash = 0 and stock_type in ('sale', 'sale-return')
                                 group by stock_sales_id, stock_product_id
                         ) as product_stock on stock_sales_id = sales_id
-                        left join {$table_prefeix}products on product_id = stock_product_id
+                        left join {$table_prefix}products on product_id = stock_product_id
                         where sales_customer_id = '{$cid}' and sales.is_trash = 0 and sales.is_wastage = 0
                         group by stock_product_id
                         order by purchase_qty DESC limit 0,5
@@ -246,9 +246,9 @@ $last30DaysPurchaseDetails = easySelectD("
             stock_sales_id,
             stock_entry_date,
             sum(stock_item_qty) as stock_item_qty 
-        from {$table_prefeix}product_stock as product_stock
-        left join {$table_prefeix}sales on stock_sales_id = sales_id
-        where product_stock.is_trash = 0 and sales_customer_id = '{$cid}'
+        from {$table_prefix}product_stock as product_stock
+        left join {$table_prefix}sales on stock_sales_id = sales_id
+        where product_stock.is_trash = 0 and stock_type = 'sale' and sales_customer_id = '{$cid}'
         group by stock_sales_id, stock_entry_date 
     ) as get_sales_data on stock_entry_date = db_date
     where db_date BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) and DATE(NOW())  
@@ -267,14 +267,14 @@ if($last30DaysPurchaseDetails != false) {
 
 // Purchase Data By Month
 $purchaseByMonth = easySelectD("
-  select 
-        MONTHNAME(db_date) as sales_month, 
-        if(stock_item_qty is null, 0, sum(stock_item_qty)) as sold_by_month 
-    from time_dimension
-  left join {$table_prefeix}product_stock as product_stock on stock_entry_date = db_date
-  left join {$table_prefeix}sales as sales on stock_sales_id = sales_id
-  where year(db_date) = year(CURRENT_DATE) and sales.is_trash = 0 and sales.sales_customer_id  = '{$cid}' and product_stock.is_trash = 0 
-  group by month(db_date)
+    select 
+            MONTHNAME(db_date) as sales_month, 
+            if(stock_item_qty is null, 0, sum(stock_item_qty)) as sold_by_month 
+        from time_dimension
+    left join {$table_prefix}product_stock as product_stock on stock_entry_date = db_date
+    left join {$table_prefix}sales as sales on stock_sales_id = sales_id
+    where year(db_date) = year(CURRENT_DATE) and sales.is_trash = 0 and sales.is_return = 0 and sales.sales_customer_id = '{$cid}' and product_stock.is_trash = 0 
+    group by month(db_date)
 ");
 
 $purchaseMonth = array();

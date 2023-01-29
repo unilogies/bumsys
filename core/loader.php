@@ -4,16 +4,22 @@
  * @since 0.1
  */
  
-// Set the php coockie id only visible over http
-ini_set('session.cookie_httponly', true);
+// Set the php cookie id only visible over http
+//ini_set('session.cookie_httponly', true);
 
-// Check if the PHP version is at leat 7.0
+// Check if the PHP version is at least 7.0
 if( version_compare(PHP_VERSION, '7.0.0') <= 0 ) {
     header('HTTP/1.0 403 Forbidden');
     die("BumSys require at least PHP 7.0.0. You are running PHP " . PHP_VERSION);
 }
 
-// generate a sha1 string for session coockie
+// If there is no user agent
+if( !isset( $_SERVER["HTTP_USER_AGENT"] ) ) {
+    header('HTTP/1.0 403 Forbidden');
+    die("<strong>Error:</strong> You have no permission to access this server.");
+}
+
+// generate a sha1 string for session cookie
 $sha1 = sha1($_SERVER["HTTP_USER_AGENT"].$_SERVER["REMOTE_ADDR"]);
 
 // Set the session name
@@ -60,7 +66,7 @@ if( !isset($_GET["export"]) ) {
     // Enable zg compression
     //ob_start("ob_gzhandler");
 
-    // Santize the output if the page is not for dynamic images load
+    // Sanitize the output if the page is not for dynamic images load
     // will be not sanities for "js", "css" if it required
     if( !in_array($pageSlug, array("images", "barcode") ) ) {
         //ob_start("sanitize_output");
@@ -87,7 +93,7 @@ if(is_login() !== true and !in_array($pageSlug, array("css", "js", "api/v1")) ) 
 // Include the default menu
 require "menu.php";
 
-// Inclue the default permissions List
+// Include the default permissions List
 require "permissions.php";
 
 

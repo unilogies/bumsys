@@ -140,7 +140,7 @@ function pageSlug() {
 
     $URI = explode(root_domain(), rtrim($_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'], "/"));
     $URI = explode("?", $URI[1]);
-    return trim($URI[0], '/');
+    return safe_entities(trim($URI[0], '/'));
 
 }
 
@@ -259,7 +259,7 @@ function current_ip_is($action) {
  * @return  bool    Return true if is login
  */
 function is_login() {
-    global $table_prefeix; // table prefix;
+    global $table_prefix; // table prefix;
 
     // If "Don't Signout on inactivity" is not checked and last activity is more then AUTO_LOGOUT_TIME 
     // Then return false and unset session.
@@ -292,6 +292,8 @@ function is_login() {
     } else if(selectUser !== false) {
         $sha1 = sha1(selectUser["data"][0]["user_email"].$_SERVER["HTTP_USER_AGENT"].$_SERVER["REMOTE_ADDR"]);
     }
+
+    // $sha1 = sha1(selectUser["data"][0]["user_email"]);
 
     if(isset($_SESSION["uid"]) and isset($_SESSION["sak"]) and $sha1 === $_SESSION["sak"] and isset($_COOKIE["eid"]) and selectUser["count"] === 1 AND selectUser["data"][0]["user_emp_id"] === $_COOKIE["eid"]) {
         
@@ -647,7 +649,7 @@ function easyInsert(
     bool $extraInfo = false
     ) {
 
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
     $fields = "";			// The field variable will store all table field.
     $fieldsValue = "";		// The fieldValue variable will sotre all filed value
@@ -697,7 +699,7 @@ function easyInsert(
     $fieldsValue = rtrim($fieldsValue, ", ");
 	
 	// Build the query
-   $sqlQuery = "INSERT INTO {$table_prefeix}{$table} ($fields) VALUES ($fieldsValue)"; 
+   $sqlQuery = "INSERT INTO {$table_prefix}{$table} ($fields) VALUES ($fieldsValue)"; 
 
 	// Run the Query
 	$conn->query($sqlQuery);
@@ -773,7 +775,7 @@ function easySelect(
     array $limit=array()
     ) {
 
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
     $dataFromDB = [];
 
@@ -783,7 +785,7 @@ function easySelect(
     }
 
     // Build the query
-    $sqlQuery = "SELECT SQL_CALC_FOUND_ROWS {$field} FROM {$table_prefeix}{$table}";
+    $sqlQuery = "SELECT SQL_CALC_FOUND_ROWS {$field} FROM {$table_prefix}{$table}";
 
 /*     // Check if the table exists
     if($conn->query($sqlQuery) === false) {
@@ -901,7 +903,7 @@ function easySelect(
     if($getResult->num_rows > 0) {
         
 
-        // $countTotalFilteredRow = "SELECT count(*) as totalFilteredRow FROM {$table_prefeix}{$table}";
+        // $countTotalFilteredRow = "SELECT count(*) as totalFilteredRow FROM {$table_prefix}{$table}";
         // $countTotalFilteredRow .= " {$joinClues}";
         // $countTotalFilteredRow .= empty($whereClause) ? "" : " WHERE {$whereClause}";
         // $countTotalFilteredRow = $conn->query($countTotalFilteredRow)->fetch_all(true)[0]["totalFilteredRow"];
@@ -933,7 +935,7 @@ function easySelect(
 
 function easySelectA(array $query) {
 
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
     $dataFromDB = [];
     $table = $fields = $join = $where = $groupby = $orderBy = $limit = "";
@@ -996,7 +998,7 @@ function easySelectA(array $query) {
 
 
     // Build the query
-    $sqlQuery = "SELECT SQL_CALC_FOUND_ROWS {$fields} FROM {$table_prefeix}{$table}";
+    $sqlQuery = "SELECT SQL_CALC_FOUND_ROWS {$fields} FROM {$table_prefix}{$table}";
 
 
     // Join clues for joining multiple table
@@ -1115,7 +1117,7 @@ function easySelectA(array $query) {
     // Check if there is more then Zero (0) result.
     if($getResult->num_rows > 0) {
 
-        // $countTotalFilteredRow = "SELECT count(*) as totalFilteredRow FROM {$table_prefeix}{$table}";
+        // $countTotalFilteredRow = "SELECT count(*) as totalFilteredRow FROM {$table_prefix}{$table}";
         // $countTotalFilteredRow .= " {$joinClues}";
         // $countTotalFilteredRow .= empty($whereClause) ? "" : " WHERE {$whereClause}";
         // $countTotalFilteredRow = $conn->query($countTotalFilteredRow)->fetch_all(true)[0]["totalFilteredRow"];
@@ -1148,7 +1150,7 @@ function easySelectA(array $query) {
  */
 function easySelectD($query) {
 
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
     $dataFromDB = [];
 
@@ -1225,7 +1227,7 @@ function easyDelete(
     array $where
     ) {
 
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
 
 
@@ -1248,7 +1250,7 @@ function easyDelete(
     }
 
     // Build the query
-    $sqlQuery = "UPDATE {$table_prefeix}{$table} SET is_trash=1 WHERE {$whereClause}";  
+    $sqlQuery = "UPDATE {$table_prefix}{$table} SET is_trash=1 WHERE {$whereClause}";  
 
     // Run the query and check
     if($conn->query($sqlQuery) === TRUE) {
@@ -1285,7 +1287,7 @@ function easyPermDelete(
     array $where
     ) {
 
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
 
     // Check if the data exists or not
@@ -1307,7 +1309,7 @@ function easyPermDelete(
     }
 
     // Build the query
-    $sqlQuery = "DELETE FROM {$table_prefeix}{$table} WHERE {$whereClause}";
+    $sqlQuery = "DELETE FROM {$table_prefix}{$table} WHERE {$whereClause}";
 
     // Run the query and check
     if($conn->query($sqlQuery) === TRUE) {
@@ -1338,7 +1340,7 @@ function easyUpdate(
     array $where
     ) {
 
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
 
     // Check if the data exists or not
@@ -1382,7 +1384,7 @@ function easyUpdate(
     $setClues = rtrim($setClues, ", ");
 
     // Build the query
-    $sqlQuery = "UPDATE {$table_prefeix}{$table} SET {$setClues}";  
+    $sqlQuery = "UPDATE {$table_prefix}{$table} SET {$setClues}";  
 
      // Build the where clues
     $whereClause = "";   
@@ -1399,7 +1401,7 @@ function easyUpdate(
     // Run the query and check
     if($conn->query($sqlQuery) === TRUE) {
         // Save the query
-        //save_query("UPDATE {$table_prefeix}{$table} SET {$setClues}  WHERE {$whereClause}");
+        //save_query("UPDATE {$table_prefix}{$table} SET {$setClues}  WHERE {$whereClause}");
         
         return true;
 
@@ -1428,10 +1430,10 @@ function easyUpdate(
  * @param string $query The query we need to save
  */
 function save_query($query) {
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
     $query = json_encode($query);
-    $conn->query("INSERT INTO {$table_prefeix}latest_queries (query_value) VALUES ($query)");
+    $conn->query("INSERT INTO {$table_prefix}latest_queries (query_value) VALUES ($query)");
 
 }
 
@@ -1445,14 +1447,14 @@ function save_query($query) {
  * @param array $data  The deleted data we need to store
  */
 function save_deleted_date($table, $data) {
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
     
     // Serialize the data
     $data = serialize($data);
 
     // Insert deleted data
-    $conn->query("INSERT INTO {$table_prefeix}deleted_data (deleted_from, deleted_data, deleted_by) VALUES ('{$table}', '{$data}', '{$_SESSION['uid']}')");
+    $conn->query("INSERT INTO {$table_prefix}deleted_data (deleted_from, deleted_data, deleted_by) VALUES ('{$table}', '{$data}', '{$_SESSION['uid']}')");
 
 }
 
@@ -1465,7 +1467,7 @@ function save_deleted_date($table, $data) {
  * 
  */
 
- function easyUpload( 
+function easyUpload( 
     array $file, 
     string $location="db",
     string $newFileName="",
@@ -1558,7 +1560,6 @@ function save_deleted_date($table, $data) {
     }
     
 }
-
 
 function easyUpload_back(
     string $fileInputName, 
@@ -1754,15 +1755,15 @@ function spellNumbers($number)
  * @return int   Number of having product
  */
 function calculateProductHavingQuantity(int $productId) {
-    global $table_prefeix;
+    global $table_prefix;
 
     return easySelect(
         "products",
         "product_id, ( IF(purchase_item_quantity IS NULL, 0, SUM(purchase_item_quantity) + if(returns_products_quantity is null, 0, returns_products_quantity) ) - IF(sale_item_quantity IS NULL, 0, SUM(sale_item_quantity))) AS having_item_quantity",
         array (
-            "left join (select purchase_item_product_id, sum(purchase_item_quantity) as purchase_item_quantity from {$table_prefeix}product_purchase_items where is_trash = 0 group by purchase_item_product_id) as {$table_prefeix}product_purchase_items on purchase_item_product_id = product_id",
-            "left join (select sale_item_product_id, sum(sale_item_quantity) as sale_item_quantity from {$table_prefeix}sale_items where is_trash = 0 group by sale_item_product_id) as {$table_prefeix}sale_items on sale_item_product_id = product_id",
-            "left join (select product_return_items_product_id, sum(product_return_items_products_quantity) as returns_products_quantity from {$table_prefeix}product_return_items where is_trash = 0 group by product_return_items_product_id) as returns_product on product_id = product_return_items_product_id"
+            "left join (select purchase_item_product_id, sum(purchase_item_quantity) as purchase_item_quantity from {$table_prefix}product_purchase_items where is_trash = 0 group by purchase_item_product_id) as {$table_prefix}product_purchase_items on purchase_item_product_id = product_id",
+            "left join (select sale_item_product_id, sum(sale_item_quantity) as sale_item_quantity from {$table_prefix}sale_items where is_trash = 0 group by sale_item_product_id) as {$table_prefix}sale_items on sale_item_product_id = product_id",
+            "left join (select product_return_items_product_id, sum(product_return_items_products_quantity) as returns_products_quantity from {$table_prefix}product_return_items where is_trash = 0 group by product_return_items_product_id) as returns_product on product_id = product_return_items_product_id"
         ),
         array (
             "product_id " =>  $productId
@@ -1785,7 +1786,7 @@ function calculateProductHavingQuantity(int $productId) {
  * This function no longer required and will be deleted in near version
  */
 function getCustomerPaymentInfo_back(int $customer_id) {
-    global $table_prefeix;
+    global $table_prefix;
 
     easySelectD(
         "select customer_id, if(customer_opening_balance is null, 0, customer_opening_balance) as customer_opening_balance,
@@ -1793,26 +1794,26 @@ function getCustomerPaymentInfo_back(int $customer_id) {
             if(returns_grand_total is null, 0, returns_grand_total) as returns_grand_total,
             if(received_payments_amount is null, 0, received_payments_amount) as total_received_payments,
             if(received_payments_bonus is null, 0, received_payments_bonus) as total_given_bonus
-        from {$table_prefeix}customers
+        from {$table_prefix}customers
         left join (
             select
                 sales_customer_id,
                 sum(sales_grand_total) as sales_grand_total
-            from {$table_prefeix}sales where is_trash = 0 group by sales_customer_id
+            from {$table_prefix}sales where is_trash = 0 group by sales_customer_id
         ) as sales on customer_id = sales_customer_id
         left join ( 
             select 
                 product_returns_customer_id, 
                 sum(product_returns_grand_total) as returns_grand_total 
-            from {$table_prefeix}product_returns where is_trash = 0 group by product_returns_customer_id
+            from {$table_prefix}product_returns where is_trash = 0 group by product_returns_customer_id
         ) as product_returns on customer_id = product_returns_customer_id
         left join ( 
             select 
                 received_payments_from, 
                 sum(received_payments_amount) as received_payments_amount, 
                 sum(received_payments_bonus) as received_payments_bonus 
-            from {$table_prefeix}received_payments where is_trash = 0 group by received_payments_from
-        ) as {$table_prefeix}received_payments on customer_id = received_payments_from
+            from {$table_prefix}received_payments where is_trash = 0 group by received_payments_from
+        ) as {$table_prefix}received_payments on customer_id = received_payments_from
         where customer_id = {$customer_id}"
     );
 
@@ -1876,7 +1877,7 @@ function updateCustomerPaymentInfo_back(int $customer_id) {
  * @return bool True/False
  */
 function updateAccountBalance(int $accounts_id) {
-    global $table_prefeix;
+    global $table_prefix;
 
     // This safe_input function does not required in this case
     //$accounts_id = safe_input($accounts_id);
@@ -1896,20 +1897,20 @@ function updateAccountBalance(int $accounts_id) {
             if(payment_outgoing_return_amount_sum is null, 0, payment_outgoing_return_amount_sum) as payment_outgoing_return_amount_sum,
             if(journal_incoming_payment is null, 0, journal_incoming_payment) as journal_incoming_payment_sum,
             if(journal_outgoing_payment is null, 0, journal_outgoing_payment) as journal_outgoing_payment_sum
-        from {$table_prefeix}accounts
+        from {$table_prefix}accounts
         left join ( 
             select 
                 loan_paying_from, 
                 sum(loan_amount) as loan_amount_sum 
-            from {$table_prefeix}loan 
+            from {$table_prefix}loan 
             where is_trash = 0 
             group by loan_paying_from
-        ) as {$table_prefeix}loan on loan_paying_from = accounts_id
+        ) as {$table_prefix}loan on loan_paying_from = accounts_id
         left join ( 
             select 
                 capital_accounts, 
                 sum(capital_amounts) as capital_amounts_sum 
-            from {$table_prefeix}capital 
+            from {$table_prefix}capital 
             where is_trash = 0 
             group by capital_accounts 
         ) as capital on capital_accounts = accounts_id
@@ -1917,7 +1918,7 @@ function updateAccountBalance(int $accounts_id) {
             select 
                 incomes_accounts_id, 
                 sum(incomes_amount) as incomes_amount_sum 
-            from {$table_prefeix}incomes 
+            from {$table_prefix}incomes 
             where is_trash = 0 
             group by incomes_accounts_id 
         ) as incomes on incomes_accounts_id = accounts_id
@@ -1925,7 +1926,7 @@ function updateAccountBalance(int $accounts_id) {
             select 
                 payment_from, 
                 sum(payment_amount) as payment_amount_sum 
-            from {$table_prefeix}payments 
+            from {$table_prefix}payments 
             where is_trash = 0 and payment_status != 'Cancel' and ( payment_type != 'Advance Adjustment' or payment_type is null ) 
             group by payment_from 
         ) as payments on payment_from = accounts_id
@@ -1933,7 +1934,7 @@ function updateAccountBalance(int $accounts_id) {
             select 
                 transfer_money_from, 
                 sum(transfer_money_amount) as transfer_send_amount_sum 
-            from {$table_prefeix}transfer_money 
+            from {$table_prefix}transfer_money 
             where is_trash = 0 
             group by transfer_money_from 
         ) as transfer_money_send on transfer_money_from = accounts_id
@@ -1941,7 +1942,7 @@ function updateAccountBalance(int $accounts_id) {
             select 
                 transfer_money_to, 
                 sum(transfer_money_amount) as transfer_received_amount_sum 
-            from {$table_prefeix}transfer_money 
+            from {$table_prefix}transfer_money 
             where is_trash = 0 
             group by transfer_money_to 
         ) as transfer_money_received on transfer_money_to = accounts_id
@@ -1949,15 +1950,15 @@ function updateAccountBalance(int $accounts_id) {
             select 
                 received_payments_accounts, 
                 sum(received_payments_amount) as received_payments_amount_sum
-            from {$table_prefeix}received_payments 
+            from {$table_prefix}received_payments 
             where is_trash = 0 and received_payments_type != 'Discounts' 
             group by received_payments_accounts
-        ) as {$table_prefeix}received_payments on received_payments_accounts = accounts_id
+        ) as {$table_prefix}received_payments on received_payments_accounts = accounts_id
         left join ( 
             select 
                 sum(advance_payment_amount) as advance_payment_amount_sum, 
                 advance_payment_pay_from 
-            from {$table_prefeix}advance_payments 
+            from {$table_prefix}advance_payments 
             where is_trash = 0 
             group by advance_payment_pay_from 
         ) as get_advance_payments on advance_payment_pay_from = accounts_id
@@ -1966,7 +1967,7 @@ function updateAccountBalance(int $accounts_id) {
                 payments_return_accounts, 
                 sum( case when payments_return_type = 'Incoming' then payments_return_amount end ) as payment_incoming_return_amount_sum,
                 sum( case when payments_return_type = 'Outgoing' then payments_return_amount end ) as payment_outgoing_return_amount_sum
-            from {$table_prefeix}payments_return 
+            from {$table_prefix}payments_return 
             where is_trash = 0 
             group by payments_return_accounts 
         ) as get_return_payments on payments_return_accounts = accounts_id  
@@ -1975,7 +1976,7 @@ function updateAccountBalance(int $accounts_id) {
                 journal_records_accounts, 
                 sum( case when journal_records_payments_type = 'Incoming' then journal_records_payment_amount end) as journal_incoming_payment,
                 sum( case when journal_records_payments_type = 'Outgoing' then journal_records_payment_amount end) as journal_outgoing_payment 
-            from {$table_prefeix}journal_records 
+            from {$table_prefix}journal_records 
             where is_trash = 0  
             group by journal_records_accounts 
         ) as journal_incoming_records on journal_incoming_records.journal_records_accounts = accounts_id
@@ -2016,7 +2017,7 @@ function updateAccountBalance(int $accounts_id) {
  * @return string   Employee Payable Amount
  */
 function getEmployeePayableAmount(int $emp_id, string $salary_type) {
-    global $table_prefeix;
+    global $table_prefix;
 
     $emp_opening_balance_name = "emp_opening_". strtolower($salary_type);
 
@@ -2024,9 +2025,9 @@ function getEmployeePayableAmount(int $emp_id, string $salary_type) {
         select 
             emp_id,
             ( ( if(salary_amount_sum is null, 0, salary_amount_sum) - if(payment_items_amount_sum is null, 0, payment_items_amount_sum) ) + ({$emp_opening_balance_name}) ) as emp_payable_amount
-        from {$table_prefeix}employees
-        left join ( select salary_emp_id, salary_type, sum(salary_amount) as salary_amount_sum from {$table_prefeix}salaries where is_trash = 0 and salary_type='{$salary_type}' group by salary_emp_id ) as {$table_prefeix}salaries on salary_emp_id = emp_id
-        left join ( select payment_items_employee, sum(payment_items_amount) as payment_items_amount_sum from {$table_prefeix}payment_items where is_trash = 0 and payment_items_type='{$salary_type}' group by payment_items_employee ) as get_payments_items on payment_items_employee = emp_id
+        from {$table_prefix}employees
+        left join ( select salary_emp_id, salary_type, sum(salary_amount) as salary_amount_sum from {$table_prefix}salaries where is_trash = 0 and salary_type='{$salary_type}' group by salary_emp_id ) as {$table_prefix}salaries on salary_emp_id = emp_id
+        left join ( select payment_items_employee, sum(payment_items_amount) as payment_items_amount_sum from {$table_prefix}payment_items where is_trash = 0 and payment_items_type='{$salary_type}' group by payment_items_employee ) as get_payments_items on payment_items_employee = emp_id
         where emp_id = {$emp_id}
     ")["data"][0]["emp_payable_amount"];
 
@@ -2034,7 +2035,7 @@ function getEmployeePayableAmount(int $emp_id, string $salary_type) {
     if($salary_type === "salary") {
 
         $paidLoan = easySelectD("
-            select sum(loan_installment_paying_amount) as loan_paid_amount from {$table_prefeix}loan_installment where is_trash = 0 and loan_installment_provider = '{$emp_id}' group by loan_installment_provider
+            select sum(loan_installment_paying_amount) as loan_paid_amount from {$table_prefix}loan_installment where is_trash = 0 and loan_installment_provider = '{$emp_id}' group by loan_installment_provider
         ");
 
         $empPayableAmount -= $paidLoan ? $paidLoan["data"][0]["loan_paid_amount"] : 0;
@@ -2078,14 +2079,14 @@ function accounts_balance(int $accounts_id) {
  */
 
  function add_login_info(int $user_id) {
-    global $table_prefeix;	// table prefix;
+    global $table_prefix;	// table prefix;
     global $conn;			// MySQL connection variable.
 
     $user_ip = safe_input(get_ipaddr());
     $user_aggent = safe_input($_SERVER['HTTP_USER_AGENT']);
     
     // Insert User information Into Database
-    $conn->query("INSERT INTO {$table_prefeix}users_login_history (login_users_id, login_ip, login_user_aggent) 
+    $conn->query("INSERT INTO {$table_prefix}users_login_history (login_users_id, login_ip, login_user_aggent) 
                         VALUES ('{$user_id}', '{$user_ip}', '{$user_aggent}')");
     
 }
@@ -2359,12 +2360,13 @@ function get_title() {
      */
     function send_sms($number, $msg) {
 
-        global $table_prefeix;
+        global $table_prefix;
 
-	    $url = "http://example.com/api.php";
+	    $url = "http://api.com/api.php";
         $data= array(
-            'username'=>"username",
-            'password'=>"password",
+            'username'=>"",
+            'password'=>"",
+            'senderid'=> "",
             'number'=>$number,
             'message'=>$msg
         );
@@ -2379,7 +2381,7 @@ function get_title() {
 
         if( $sendstatus == 1101) {
 
-            $insertSmsLog = "INSERT INTO {$table_prefeix}sms_sender(
+            $insertSmsLog = "INSERT INTO {$table_prefix}sms_sender(
                 send_to,
                 send_time,
                 sms_text,
@@ -2649,12 +2651,22 @@ function get_title() {
             $debug_backtrace = debug_backtrace()[0];
         }
 
-        // If error msg not empty
-        if(!empty($msg)) {
 
-            $fp = fopen(DIR_BASE . $logFile, "a");
-            fwrite($fp, date("Y-m-d H:i:s") . " {$msg}. {$debug_backtrace['file']}, Line {$debug_backtrace['line']} \n");
+        write_file(date("Y-m-d H:i:s") . " {$msg}. {$debug_backtrace['file']}, Line {$debug_backtrace['line']} \n", "error.log");
+        
+
+    }
+
+
+    function write_file(string $data, string $file_location, string $mode ="a") {
+
+        // If error msg not empty
+        if(!empty($data)) {
+
+            $fp = fopen(DIR_BASE . $file_location, $mode); // use w for truncate /clear content
+            fwrite($fp, $data);
             fclose($fp);
+
         }
 
     }
@@ -2746,14 +2758,14 @@ function get_title() {
  */
 function near_unit_qty($product_id, $qty, $unit) {
 
-    global $table_prefeix;
+    global $table_prefix;
 
     $getData = easySelectA(array(
         "table"     => "products as whereProduct",
         "fields"    => "joinProduct.product_unit as product_unit, equal_unit_qnt, base_qnt",
         "join"      => array(
-            "left join {$table_prefeix}products as joinProduct on joinProduct.product_name = whereProduct.product_name",
-            "left join {$table_prefeix}product_units on unit_name = joinProduct.product_unit"
+            "left join {$table_prefix}products as joinProduct on joinProduct.product_name = whereProduct.product_name",
+            "left join {$table_prefix}product_units on unit_name = joinProduct.product_unit"
         ),
         "where"     => array(
             "joinProduct.is_trash = 0 and joinProduct.product_unit is not null and whereProduct.product_id" => $product_id

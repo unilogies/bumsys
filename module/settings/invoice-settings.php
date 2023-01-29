@@ -24,6 +24,16 @@
                         <div class="box-body">
 
                             <div class="form-group row">
+                                <label class="col-sm-3" for="invoiceType"><?= __("Invoice Type:"); ?></label>
+                                <div class="col-sm-6">
+                                    <select name="invoiceType" id="invoiceType" class="form-control select2">
+                                        <option <?php echo get_options("invoiceType") == "normal" ? "selected" : ""; ?> value="normal">Normal View</option>
+                                        <option <?php echo get_options("invoiceType") == "details" ? "selected" : ""; ?> value="details">Details View</option>
+                                        <option <?php echo get_options("invoiceType") == "pos" ? "selected" : ""; ?> value="pos">For POS Printer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-sm-3" for="invoiceHeader"><?= __("Invoice Header"); ?></label>
                                 <div class="col-sm-6">
                                     <textarea name="invoiceHeader" id="invoiceHeader" cols="30" rows="3" placeholder="Write invoice header text here" class="form-control"><?php echo get_options("invoiceHeader"); ?></textarea>

@@ -9,7 +9,7 @@ $header = getallheaders();
 
 // print_r($header);
 
-if( !isset($header["secret"]) or empty($header["secret"]) ) {
+if( !isset($header["Secret"]) or empty($header["Secret"]) ) {
 
     echo json_encode(array(
         "status"    => "error",
@@ -24,9 +24,11 @@ if( !isset($header["secret"]) or empty($header["secret"]) ) {
 $selectSecret = easySelectA(array(
     "table"     => "api_secrets",
     "where"     => array(
-        "is_trash = 0 and api_status = 'Active' and api_secret_key"    => $header["secret"]
+        "is_trash = 0 and api_status = 'Active' and api_secret_key"    => $header["Secret"]
     )
 ));
+
+
 
 if( $selectSecret === false ) {
 
@@ -40,7 +42,7 @@ if( $selectSecret === false ) {
 }
 
 
-if( !isset($header["route"]) or empty($header["route"]) ) {
+if( !isset($header["Route"]) or empty($header["Route"]) ) {
 
     echo json_encode(array(
         "status"    => "error",
@@ -52,10 +54,10 @@ if( !isset($header["route"]) or empty($header["route"]) ) {
 }
 
 // Get the route
-$route = $header["route"];
+$route = $header["Route"];
 
 
-$api_module = SYSTEM_API . "v1/routes/{$header["route"]}.php";
+$api_module = SYSTEM_API . "v1/routes/{$route}.php";
 
 if( file_exists($api_module) ) {
 
@@ -72,11 +74,6 @@ if( file_exists($api_module) ) {
     ));
 
 }
-
-
-
-
-
 
 
 ?>

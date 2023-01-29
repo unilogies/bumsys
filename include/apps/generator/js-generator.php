@@ -27,7 +27,7 @@ if( isset($_GET["q"]) and $_GET["q"] === "head" ) {
     include( DIR_ASSETS . "js/functions.min.js");
 
     // Include BMS JS
-    include( DIR_ASSETS . "js/bms.js");
+    include( DIR_ASSETS . "js/bms.min.js");
 
 
 } else if( isset($_GET["q"]) and $_GET["q"] === "foot" ) {
@@ -64,6 +64,20 @@ if( isset($_GET["q"]) and $_GET["q"] === "head" ) {
    include( DIR_ASSETS . "js/events.min.js");
    include( DIR_ASSETS . "js/initiator.min.js");
 
-} 
+} else if( isset($_GET["q"]) and $_GET["q"] === "csOld" ) {
 
+    include( DIR_ASSETS . "3rd-party/jssip/jssip-3.8.2.min.js");
+    include( DIR_ASSETS . "js/callCenterOld.min.js");
+
+}  else if( isset($_GET["q"]) and $_GET["q"] === "cs" ) {
+
+    include( DIR_ASSETS . "3rd-party/jssip/jssip-3.8.2.min.js");
+    include( DIR_ASSETS . "js/callCenter.js");
+
+} else if( isset($_GET["q"]) and $_GET["q"] === "voiceMessage" ) {
+
+    include( DIR_ASSETS . "3rd-party/jssip/jssip-3.8.2.min.js");
+    include( DIR_ASSETS . "js/voiceMessage.min.js");
+
+} 
 ?>

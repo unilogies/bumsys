@@ -2766,7 +2766,7 @@ table.text-center th {
   -o-transform: translate(0, 0);
   transform: translate(0, 0);
   padding: 10px;
-  height: 250px;
+  height: 350px;
   overflow: auto;
 }
 .direct-chat-msg,
@@ -2797,7 +2797,7 @@ table.text-center th {
   padding: 5px 10px;
   background: #d2d6de;
   border: 1px solid #d2d6de;
-  margin: 5px 0 0 50px;
+  margin: 5px 0 0 40px;
   color: #444;
 }
 .direct-chat-text:after,
@@ -2821,7 +2821,7 @@ table.text-center th {
   margin-top: -6px;
 }
 .right .direct-chat-text {
-  margin-right: 50px;
+  margin-right: 40px;
   margin-left: 0;
 }
 .right .direct-chat-text:after,
@@ -2834,8 +2834,9 @@ table.text-center th {
 .direct-chat-img {
   border-radius: 50%;
   float: left;
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
+  margin-top: 4px;
 }
 .right .direct-chat-img {
   float: right;
