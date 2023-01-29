@@ -40,9 +40,9 @@ if(isset($_GET['page']) and $_GET['page'] == "orderList") {
             "sales as sales",
             "sales_id, sales_order_date, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefix}customers on customer_id = sales_customer_id",
-                "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
-                "left join {$table_prefix}districts on district_id = customer_district"
+                "left join {$table_prefeix}customers on customer_id = sales_customer_id",
+                "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
+                "left join {$table_prefeix}districts on district_id = customer_district"
             ),
             array (
                 "sales.is_trash = 0 and sales.is_return = 0 and sales.sales_order_date is not null and sales_shop_id" => $_SESSION["sid"],
@@ -72,9 +72,9 @@ if(isset($_GET['page']) and $_GET['page'] == "orderList") {
             "sales as sales",
             "sales_id, sales_order_date, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefix}customers on customer_id = sales_customer_id",
-                "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
-                "left join {$table_prefix}districts on district_id = customer_district"
+                "left join {$table_prefeix}customers on customer_id = sales_customer_id",
+                "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
+                "left join {$table_prefeix}districts on district_id = customer_district"
             ),
             array (
               "sales.is_trash = 0 and sales.is_return = 0 and sales.sales_order_date is not null and sales_shop_id" => $_SESSION["sid"],
@@ -99,9 +99,9 @@ if(isset($_GET['page']) and $_GET['page'] == "orderList") {
           "sales as sales",
           "sales_id, sales_order_date, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
           array (
-            "left join {$table_prefix}customers on customer_id = sales_customer_id",
-            "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
-            "left join {$table_prefix}districts on district_id = customer_district"
+            "left join {$table_prefeix}customers on customer_id = sales_customer_id",
+            "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
+            "left join {$table_prefeix}districts on district_id = customer_district"
           ),
           array (
             "sales.is_trash = 0 and sales.is_return = 0 and sales.sales_order_date is not null and sales_shop_id" => $_SESSION["sid"],
@@ -220,8 +220,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productRequirments") {
             "table"     => "product_stock as product_stock",
             "fields"    => "stock_product_id, product_parent_id, product_name, product_unit, equal_unit_id, equal_unit_qnt, base_qty, sum(stock_item_qty*base_qty) as ordered_base_qty, if(stock_in is null, 0, stock_in) as stock_qty",
             "join"      => array(
-                "left join {$table_prefix}products on product_id = stock_product_id",
-                "left join {$table_prefix}product_units on unit_name = product_unit",
+                "left join {$table_prefeix}products on product_id = stock_product_id",
+                "left join {$table_prefeix}product_units on unit_name = product_unit",
                 "left join (select
                                 vp_id,
                                 base_qty,
@@ -246,8 +246,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productRequirments") {
             "table"     => "product_stock as product_stock",
             "fields"    => "stock_product_id, product_parent_id, product_name, product_unit, equal_unit_id, equal_unit_qnt, base_qty, sum(stock_item_qty*base_qty) as ordered_base_qty, if(stock_in is null, 0, stock_in) as stock_qty",
             "join"      => array(
-                "left join {$table_prefix}products on product_id = stock_product_id",
-                "left join {$table_prefix}product_units on unit_name = product_unit",
+                "left join {$table_prefeix}products on product_id = stock_product_id",
+                "left join {$table_prefeix}product_units on unit_name = product_unit",
                 "left join (select
                                 vp_id,
                                 base_qty,
@@ -366,8 +366,8 @@ if(isset($_GET['page']) and $_GET['page'] == "rawMaterialRequirments") {
             "table"     => "product_stock as product_stock",
             "fields"    => "stock_product_id, product_parent_id, product_name, product_unit, equal_unit_id, equal_unit_qnt, base_qty, sum(stock_item_qty*base_qty) as ordered_base_qty, if(stock_in is null, 0, stock_in) as stock_qty",
             "join"      => array(
-                "left join {$table_prefix}products on product_id = stock_product_id",
-                "left join {$table_prefix}product_units on unit_name = product_unit",
+                "left join {$table_prefeix}products on product_id = stock_product_id",
+                "left join {$table_prefeix}product_units on unit_name = product_unit",
                 "left join (select
                                 vp_id,
                                 base_qty,
@@ -396,9 +396,9 @@ if(isset($_GET['page']) and $_GET['page'] == "rawMaterialRequirments") {
                             sum(if(base_qty is null, stock_item_qty * bg_product_qnt * 1, stock_item_qty * bg_product_qnt * base_qty)) as ordered_base_qty, 
                             if(stock_in is null, 0, stock_in) as stock_qty",
             "join"      => array(
-                "left join {$table_prefix}bg_product_items on bg_product_id = stock_product_id",
-                "left join {$table_prefix}products on product_id = bg_item_product_id",
-                "left join {$table_prefix}product_units on unit_name = product_unit",
+                "left join {$table_prefeix}bg_product_items on bg_product_id = stock_product_id",
+                "left join {$table_prefeix}products on product_id = bg_item_product_id",
+                "left join {$table_prefeix}product_units on unit_name = product_unit",
                 "left join (select
                                 vp_id,
                                 base_qty,
@@ -530,7 +530,7 @@ if(isset($_GET['page']) and $_GET['page'] == "rmaProductList") {
               "product_id, product_code, product_name, product_type, product_group, product_generic, product_description, round(product_purchase_price, 2) as product_purchase_price, 
               round(product_sale_price, 2) as product_sale_price, category_name, product_edition, has_sub_product",
               array (
-              "left join {$table_prefix}product_category on product_category_id = category_id"
+              "left join {$table_prefeix}product_category on product_category_id = category_id"
               ),
               array (
                   "product.is_trash = 0 {$productEditionFilter} and (product_code LIKE '". safe_input($requestData['search']['value']) ."%' ",
@@ -557,7 +557,7 @@ if(isset($_GET['page']) and $_GET['page'] == "rmaProductList") {
               "product_id, product_code, product_name, product_group, product_generic, product_type, product_description, round(product_purchase_price, 2) as product_purchase_price, 
               round(product_sale_price, 2) as product_sale_price, category_name, product_edition, has_sub_product",
               array (
-                  "left join {$table_prefix}product_category on product_category_id = category_id"
+                  "left join {$table_prefeix}product_category on product_category_id = category_id"
               ),
               array("product.is_trash = 0"),
               array (
@@ -660,7 +660,7 @@ if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
 
 
             // Insert Bundle/ Sub product
-            $insertSubProduct = "INSERT INTO {$table_prefix}bg_product_items(
+            $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
                 bg_product_id,
                 bg_item_product_id,
                 bg_product_price,
@@ -679,56 +679,49 @@ if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
 
 
                 // Select all Child product of this variable product
-                $childProducts = easySelectA(array(
+                easySelectA(array(
                     "table" => "products",
                     "where" => array(
-                        "is_trash = 0 and product_type = 'Child' and parent_product_id" => $_POST["mainProduct"]
+                        "parent_product_id" => $_POST["mainProduct"]
                     )
                 ));
 
+                
 
-                // If there is any child product in the variable product then add raw materials on child products
-                if( $childProducts !== false ) {
+                // Delete Privous bg product
+                easyPermDelete(
+                    "bg_product_items",
+                    array(
+                        "bg_product_id" => $_POST["mainProduct"]
+                    )
+                );
 
-                    foreach($childProducts["data"] as $childProduct) {
+                
+                foreach($_POST["bgProductID"] as $pkey => $bgProductId) {
 
-                        // Delete Privous bg product
-                        easyPermDelete(
-                            "bg_product_items",
-                            array(
-                                "bg_product_id" => $childProduct["product_id"]
-                            )
-                        );
+                    // If there have any unit in this product
+                    // Then multiply the bgProductQnt with unit base qty
+                    if( !empty($product['product_unit']) ) {
 
+                        $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefeix}product_units where unit_name = '{$product['product_unit']}' )";
+
+                    } else {
                         
-                        foreach($_POST["bgProductID"] as $pkey => $bgProductId) {
-
-                            // If there have any unit in this child product
-                            // Then multiply the bgProductQnt with unit base qty
-                            if( !empty($childProduct['product_unit']) ) {
-
-                                $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefix}product_units where unit_name = '{$childProduct['product_unit']}' )";
-
-                            } else {
-                                
-                                $bgProductQty = safe_input($_POST["bgProductQnt"][$pkey]);
-
-                            }
-
-                            $insertSubProduct .= "(
-                                '{$childProduct['product_id']}',
-                                '{$bgProductId}',
-                                '". safe_input($_POST["bgProductSalePrice"][$pkey]) ."',
-                                '{$bgProductQty}',
-                                '1'
-                            ),";
-                            
-
-                        }
+                        $bgProductQty = safe_input($_POST["bgProductQnt"][$pkey]);
 
                     }
 
+                    $insertSubProduct .= "(
+                        '{$product['product_id']}',
+                        '{$bgProductId}',
+                        '". safe_input($_POST["bgProductSalePrice"][$pkey]) ."',
+                        '{$bgProductQty}',
+                        '1'
+                    ),";
+                    
+
                 }
+
 
             }
 
@@ -753,7 +746,7 @@ if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
                 // Then multiply the bgProductQnt with unit base qty
                 if( !empty($product['product_unit']) ) {
 
-                    $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefix}product_units where unit_name = '{$product['product_unit']}' )";
+                    $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefeix}product_units where unit_name = '{$product['product_unit']}' )";
 
                 } else {
                     

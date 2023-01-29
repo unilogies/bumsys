@@ -27,7 +27,6 @@
                 <thead>
                   <tr>
                     <th></th>
-                    <th><?= __("ID"); ?></th>
                     <th><?= __("Product Code"); ?></th>
                     <th><?= __("Product Name"); ?></th>
                     <th><?= __("Group"); ?></th>
@@ -43,7 +42,6 @@
                 <tfoot>
                   <tr>
                     <th></th>
-                    <th><?= __("ID"); ?></th>
                     <th><?= __("Product Code"); ?></th>
                     <th><?= __("Product Name"); ?></th>
                     <th><?= __("Group"); ?></th>

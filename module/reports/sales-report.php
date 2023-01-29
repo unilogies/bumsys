@@ -37,18 +37,12 @@ $date =  isset($_GET["salesDate"]) ? safe_entities($_GET["salesDate"]) : date("Y
          <?php
             $date = safe_input($date);
             $selectSales = easySelectD("
-                    select 
-                        customer_id, 
-                        customer_name,
-                        product_id,
-                        product_name,
-                        round(sum(stock_item_qty), 2) as sale_item_quantity_sum, 
-                        sum(stock_item_subtotal) as sale_item_subtotal_sum 
-                from {$table_prefix}product_stock as sale_item
-                inner join {$table_prefix}products on stock_product_id = product_id
-                inner join {$table_prefix}sales on sales_id = stock_sales_id
-                inner join {$table_prefix}customers on customer_id = sales_customer_id
-                where sale_item.stock_type = 'sale' and sale_item.is_trash = 0 and date(stock_item_add_on) = '{$date}' 
+                select customer_id, customer_name, product_id, product_name, round(sum(stock_item_qty), 2) as sale_item_quantity_sum, sum(stock_item_subtotal) as sale_item_subtotal_sum 
+                from {$table_prefeix}product_stock as sale_item
+                inner join {$table_prefeix}products on stock_product_id = product_id
+                inner join {$table_prefeix}sales on stock_sales_id  = sales_id
+                inner join {$table_prefeix}customers on sales_customer_id = customer_id
+                where stock_type = 'sale' and sale_item.is_trash = 0 and date(stock_item_add_on) = '{$date}' 
                 group by sales_customer_id, stock_product_id 
                 order by sales_customer_id, stock_product_id ASC
             ");

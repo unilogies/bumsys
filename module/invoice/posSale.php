@@ -1,19 +1,11 @@
 <?php 
 
-/** the $print_type and $selectShop variable is declared on /theme/invoice-print.php file */
+$print_type = get_options("printerType");
 
 if( $print_type === "normal" ) {
-
     require "posSaleForNormalPrinter.php";
-
-} else if( $print_type === "details" ) {
-
-    require "invoicePrintDetailsView.php";
-
 } else {
-    
     require "posSaleInvoiceForPosPrinter.php";
-
 }
 
 ?>

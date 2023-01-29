@@ -2,10 +2,6 @@
 
 /*************************** Employee Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
-
-    if( !current_user_can("employee_ledger.View") ) {
-        return _e("Sorry! You do not have permission to view employee ledger.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -31,22 +27,22 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
 						if(total_salary_paid_before_filtered_date is null, 0, total_salary_paid_before_filtered_date) +
 						if(loan_installment_paying_amount_before_filtered_date is null, 0, loan_installment_paying_amount_before_filtered_date)
 				)
-			FROM {$table_prefix}employees as employees
+			FROM {$table_prefeix}employees as employees
 			left join ( select
 					salary_emp_id,
 					sum(salary_amount) as total_salary_added_before_filtered_date
-				from {$table_prefix}salaries where is_trash = 0 and date(salary_add_on) < '{$dateRange[0]}' group by salary_emp_id
+				from {$table_prefeix}salaries where is_trash = 0 and date(salary_add_on) < '{$dateRange[0]}' group by salary_emp_id
 			) as added_salaries on salary_emp_id = emp_id
 			left join ( select
 					loan_installment_provider,
 					sum(loan_installment_paying_amount) as loan_installment_paying_amount_before_filtered_date
-				from {$table_prefix}loan_installment where is_trash = 0 and loan_installment_paying_date < '{$dateRange[0]}' group by loan_installment_provider
+				from {$table_prefeix}loan_installment where is_trash = 0 and loan_installment_paying_date < '{$dateRange[0]}' group by loan_installment_provider
 			) as loan_installment on loan_installment.loan_installment_provider = emp_id
 			left join ( select
 					payment_items_payments_id,
 					payment_items_employee,
 					sum(payment_items_amount) as total_salary_paid_before_filtered_date
-				from {$table_prefix}payment_items where is_trash = 0 and payment_items_type != 'Bill' and payment_items_date < '{$dateRange[0]}' group by payment_items_employee 
+				from {$table_prefeix}payment_items where is_trash = 0 and payment_items_type != 'Bill' and payment_items_date < '{$dateRange[0]}' group by payment_items_employee 
 			) as payments on payment_items_employee = emp_id
 			where emp_id = '{$emp_id}'
 		");
@@ -70,7 +66,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
                     combine_description( group_concat(salary_type, ' for ', date_format(salary_month, '%b, &apos;%y') ), salary_description) as description,
                     0 as debit,
                     salary_amount as credit
-                from {$table_prefix}salaries
+                from {$table_prefeix}salaries
                 where is_trash = 0 and date(salary_add_on) between '{$dateRange[0]}' and '{$dateRange[1]}' group by salary_id
 				UNION ALL
 				SELECT
@@ -80,7 +76,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
 					concat('Loan Installment for ', monthname(loan_installment_date), ', ', year(loan_installment_date) ) as description,
 					loan_installment_paying_amount as debit,
 					0 as credit
-				from {$table_prefix}loan_installment as loan_installment_received
+				from {$table_prefeix}loan_installment as loan_installment_received
 				where loan_installment_received.is_trash = 0 and date(loan_installment_received.loan_installment_paying_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by loan_installment_id
 				UNION ALL
                 SELECT
@@ -90,7 +86,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
                     combine_description( concat(payment_items_type, ' payment'), payment_items_description) as description,
                     payment_items_amount as debit,
                     0 as credit
-                from {$table_prefix}payment_items
+                from {$table_prefeix}payment_items
 				where is_trash = 0 and payment_items_type != 'Bill' and payment_items_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payment_items_id
 			) as get_data
 			where empl_id = '{$emp_id}'
@@ -134,10 +130,6 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
 
 /*************************** Accounts Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
-
-    if( !current_user_can("accounts_ledger.View") ) {
-        return _e("Sorry! You do not have permission to view accounts ledger.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -169,12 +161,12 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 						if(transfer_money_amount_sent is null, 0, transfer_money_amount_sent) +
                         if(payment_outgoing_return_amount_sum is null, 0, payment_outgoing_return_amount_sum)
 				)
-			FROM {$table_prefix}accounts accounts
+			FROM {$table_prefeix}accounts accounts
 			left join (
 					SELECT 
 							advance_payment_pay_from, 
 							sum(advance_payment_amount) as advance_payment_amount_sum
-					FROM {$table_prefix}advance_payments as advance_payments
+					FROM {$table_prefeix}advance_payments as advance_payments
 					WHERE advance_payments.is_trash = 0 and advance_payment_date < '{$dateRange[0]}'
 					group by advance_payment_pay_from
 			) as advance_payments on advance_payments.advance_payment_pay_from = accounts.accounts_id
@@ -182,7 +174,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					SELECT
 							incomes_accounts_id,
 							sum(incomes_amount) as incomes_amount_sum
-					FROM {$table_prefix}incomes
+					FROM {$table_prefeix}incomes
 					WHERE is_trash = 0 and incomes_date < '{$dateRange[0]}'
 					group by incomes_accounts_id
 			) as incomes on incomes.incomes_accounts_id = accounts.accounts_id
@@ -190,7 +182,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					SELECT
 							journal_records_accounts,
 							sum(journal_records_payment_amount)  as journal_records_payment_amount_outgoing
-					FROM {$table_prefix}journal_records
+					FROM {$table_prefeix}journal_records
 					WHERE is_trash = 0 and date(journal_records_datetime) < '{$dateRange[0]}' and journal_records_payments_type = 'Outgoing'
 					group by journal_records_accounts
 			) as journal_records_outgoing on journal_records_outgoing.journal_records_accounts = accounts.accounts_id
@@ -198,7 +190,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					SELECT
 							journal_records_accounts,
 							sum(journal_records_payment_amount)  as journal_records_payment_amount_incoming
-					FROM {$table_prefix}journal_records
+					FROM {$table_prefeix}journal_records
 					WHERE is_trash = 0 and date(journal_records_datetime) < '{$dateRange[0]}' and journal_records_payments_type = 'Incoming'
 					group by journal_records_accounts
 			) as journal_records_incoming on journal_records_incoming.journal_records_accounts = accounts.accounts_id
@@ -206,7 +198,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					SELECT
 							loan_paying_from,
 							sum(loan_amount) as loan_amount_sum
-					FROM {$table_prefix}loan
+					FROM {$table_prefeix}loan
 					WHERE is_trash = 0 and date(loan_pay_on) < '{$dateRange[0]}'
 					group by loan_paying_from
 			) as loan on loan.loan_paying_from = accounts.accounts_id
@@ -214,7 +206,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					SELECT
 							payment_from,
 							sum(payment_amount) as payment_amount_sum
-					FROM {$table_prefix}payments
+					FROM {$table_prefeix}payments
 					where is_trash = 0 and payment_status != 'Cancel' and ( payment_type != 'Advance Adjustment' or payment_type is null)
 					and payment_date < '{$dateRange[0]}'
 					group by payment_from
@@ -224,7 +216,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 						payments_return_accounts,
                         sum( case when payments_return_type = 'Incoming' then payments_return_amount end ) as payment_incoming_return_amount_sum,
                         sum( case when payments_return_type = 'Outgoing' then payments_return_amount end ) as payment_outgoing_return_amount_sum
-				FROM {$table_prefix}payments_return
+				FROM {$table_prefeix}payments_return
 				WHERE is_trash = 0 and date(payments_return_date) < '{$dateRange[0]}'
 				group by payments_return_accounts
 			) as payments_return on payments_return.payments_return_accounts = accounts.accounts_id
@@ -232,7 +224,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					SELECT
 							received_payments_accounts,
 							SUM(received_payments_amount) as received_payments_amount_sum
-					FROM {$table_prefix}received_payments
+					FROM {$table_prefeix}received_payments
 					where is_trash = 0 and received_payments_type != 'Discounts'
 					and date(received_payments_datetime) < '{$dateRange[0]}'
 					group by received_payments_accounts
@@ -241,7 +233,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					SELECT
 							transfer_money_to,
 							sum(transfer_money_amount) as transfer_money_amount_received
-					FROM {$table_prefix}transfer_money
+					FROM {$table_prefeix}transfer_money
 					WHERE is_trash = 0 and transfer_money_date < '{$dateRange[0]}'
 					group by transfer_money_to
 			) as transfer_money_received on transfer_money_received.transfer_money_to = accounts.accounts_id
@@ -249,7 +241,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					SELECT
 							transfer_money_from,
 							sum(transfer_money_amount) as transfer_money_amount_sent
-					FROM {$table_prefix}transfer_money
+					FROM {$table_prefeix}transfer_money
 					WHERE is_trash = 0 and transfer_money_date < '{$dateRange[0]}'
 					group by transfer_money_from
 			) as transfer_money_sent on transfer_money_sent.transfer_money_from = accounts.accounts_id
@@ -257,7 +249,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
                 SELECT
                         capital_accounts,
                         sum(capital_amounts) as capital_amount_sum
-                FROM {$table_prefix}capital
+                FROM {$table_prefeix}capital
                 WHERE is_trash = 0 and capital_received_date < '{$dateRange[0]}'
                 group by capital_accounts
             ) as capital on capital.capital_accounts = accounts.accounts_id
@@ -285,8 +277,8 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
                     combine_description( concat('Advance Payment to ', emp_firstname, ' ', emp_lastname, ' (', emp_PIN, ')' ), advance_payment_description ),
 					0 as debit,
 					advance_payment_amount as credit
-				from {$table_prefix}advance_payments as advance_payments
-				left join {$table_prefix}employees on advance_payment_pay_to = emp_id
+				from {$table_prefeix}advance_payments as advance_payments
+				left join {$table_prefeix}employees on advance_payment_pay_to = emp_id
 				where advance_payments.is_trash = 0 and advance_payment_date between '{$dateRange[0]}' and '{$dateRange[1]}'
 				UNION ALL
 				SELECT
@@ -297,7 +289,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description('Income', incomes_description),
 					incomes_amount,
 					0
-				from {$table_prefix}incomes
+				from {$table_prefeix}incomes
 				where is_trash = 0 and incomes_date between '{$dateRange[0]}' and '{$dateRange[1]}'
 				UNION ALL
 				SELECT
@@ -308,8 +300,8 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat('Journal payment to ', journals_name), journal_records_narration),
 					0,
 					journal_records_payment_amount
-				from {$table_prefix}journal_records as outgoing_journal_records
-				left join {$table_prefix}journals on journal_records_journal_id = journals_id
+				from {$table_prefeix}journal_records as outgoing_journal_records
+				left join {$table_prefeix}journals on journal_records_journal_id = journals_id
 				where outgoing_journal_records.is_trash = 0 and journal_records_payments_type = 'Outgoing' 
 				and date(journal_records_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}'
 				UNION ALL
@@ -321,8 +313,8 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat('Journal payment received from ', journals_name), journal_records_narration),
 					journal_records_payment_amount,
 					0
-				from {$table_prefix}journal_records as incoming_journal_records
-				left join {$table_prefix}journals on journal_records_journal_id = journals_id
+				from {$table_prefeix}journal_records as incoming_journal_records
+				left join {$table_prefeix}journals on journal_records_journal_id = journals_id
 				where incoming_journal_records.is_trash = 0 and journal_records_payments_type = 'Incoming'
 				and date(journal_records_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}'
 				UNION ALL
@@ -334,8 +326,8 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat('Loan pay to ', emp_firstname, ' ', emp_lastname, ' (', emp_PIN, ')' ), loan_details),
 					0,
 					loan_amount
-				from {$table_prefix}loan as loan
-				left join {$table_prefix}employees on loan_borrower = emp_id
+				from {$table_prefeix}loan as loan
+				left join {$table_prefeix}employees on loan_borrower = emp_id
 				where loan.is_trash = 0 and date(loan_pay_on) between '{$dateRange[0]}' and '{$dateRange[1]}'
 				UNION ALL
 				SELECT
@@ -346,8 +338,8 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat(payment_items_type,  if(payment_belongs_to is null, concat(' pay of ', payment_category_name), concat(' pay to ', payment_belongs_to) ) ), payment_items_description),
 					0,
 					payment_items_amount
-				from {$table_prefix}payment_items as payment_items
-				left join {$table_prefix}payments_categories on payment_items_category_id = payment_category_id
+				from {$table_prefeix}payment_items as payment_items
+				left join {$table_prefeix}payments_categories on payment_items_category_id = payment_category_id
 				inner join (
 					SELECT
 						payment_id,
@@ -355,9 +347,9 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 						payment_type,
 						payment_to_company,
 						payment_to_employee
-					from {$table_prefix}payments as payments
-					left join {$table_prefix}employees on payment_to_employee = emp_id
-					left join {$table_prefix}companies on payment_to_company = company_id
+					from {$table_prefeix}payments as payments
+					left join {$table_prefeix}employees on payment_to_employee = emp_id
+					left join {$table_prefeix}companies on payment_to_company = company_id
 					where payments.is_trash = 0 and payment_status != 'Cancel' and ( payment_type != 'Advance Adjustment' or payment_type is null)
 					and payment_date between '{$dateRange[0]}' and '{$dateRange[1]}'
 				) as get_payment_info on payment_items_payments_id = payment_id
@@ -371,9 +363,9 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat('Payment return from ', if(company_name is null,  concat(emp_firstname, '', 'emp_lastname', ' (', emp_PIN, ')' ), company_name ) ), payments_return_description),
 					payments_return_amount,
 					0
-				from {$table_prefix}payments_return as payments_return
-				left join {$table_prefix}employees on payments_return_emp_id = emp_id
-                left join {$table_prefix}companies on payments_return_company_id = company_id
+				from {$table_prefeix}payments_return as payments_return
+				left join {$table_prefeix}employees on payments_return_emp_id = emp_id
+                left join {$table_prefeix}companies on payments_return_company_id = company_id
 				where payments_return.is_trash = 0 and payments_return_type = 'Incoming' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}'
 				UNION ALL
                 SELECT
@@ -384,8 +376,8 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat('Payment return to ', customer_name ), payments_return_description),
 					0,
 					payments_return_amount
-				from {$table_prefix}payments_return as payments_return
-				left join {$table_prefix}customers on payments_return_customer_id = customer_id
+				from {$table_prefeix}payments_return as payments_return
+				left join {$table_prefeix}customers on payments_return_customer_id = customer_id
 				where payments_return.is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}'
 				UNION ALL
 				SELECT
@@ -396,10 +388,10 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat(received_payments_type, ' from ', customer_name, ', ', upazila_name, ', ', district_name), received_payments_details),
 					received_payments_amount,
 					0
-				from {$table_prefix}received_payments as received_payments
-				left join {$table_prefix}customers on received_payments_from = customer_id
-				left join {$table_prefix}upazilas on upazila_id = customer_upazila
-				left join {$table_prefix}districts on district_id = customer_district
+				from {$table_prefeix}received_payments as received_payments
+				left join {$table_prefeix}customers on received_payments_from = customer_id
+				left join {$table_prefeix}upazilas on upazila_id = customer_upazila
+				left join {$table_prefeix}districts on district_id = customer_district
 				where received_payments.is_trash = 0 and received_payments_type != 'Discounts' and date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}'
                 UNION ALL
 				SELECT
@@ -410,8 +402,8 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat('Transfer money from ', accounts_name), transfer_money_description),
 					transfer_money_amount,
 					0
-				from {$table_prefix}transfer_money as transfer_money_outgoing
-				left join {$table_prefix}accounts on transfer_money_from = accounts_id
+				from {$table_prefeix}transfer_money as transfer_money_outgoing
+				left join {$table_prefeix}accounts on transfer_money_from = accounts_id
 				where transfer_money_outgoing.is_trash = 0 and transfer_money_date between '{$dateRange[0]}' and '{$dateRange[1]}'
 				UNION ALL
 				SELECT
@@ -422,8 +414,8 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description( concat('Transfer money to ', accounts_name), transfer_money_description),
 					0,
 					transfer_money_amount
-				from {$table_prefix}transfer_money as transfer_money_incoming
-				left join {$table_prefix}accounts on transfer_money_to = accounts_id
+				from {$table_prefeix}transfer_money as transfer_money_incoming
+				left join {$table_prefeix}accounts on transfer_money_to = accounts_id
 				where transfer_money_incoming.is_trash = 0 and transfer_money_date between '{$dateRange[0]}' and '{$dateRange[1]}'
                 UNION ALL
 				SELECT
@@ -434,7 +426,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					combine_description('Capital', capital_description),
 					capital_amounts,
                     0
-				from {$table_prefix}capital as capital
+				from {$table_prefeix}capital as capital
 				where capital.is_trash = 0 and capital_received_date between '{$dateRange[0]}' and '{$dateRange[1]}'
 			) as getData
 			where account_id = '{$account_id}'
@@ -484,10 +476,6 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 
 /*************************** Journal Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
-
-    if( !current_user_can("journal_ledger.View") ) {
-        return _e("Sorry! You do not have permission to view journal ledger.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -509,16 +497,16 @@ if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
 				) - (
 						if(journal_records_outgoing_payment_amount_before_filtered_date is null, 0, journal_records_outgoing_payment_amount_before_filtered_date)
 				)
-			FROM {$table_prefix}journals as journals
+			FROM {$table_prefeix}journals as journals
 			left join ( select
 					journal_records_journal_id,
 					sum(journal_records_payment_amount) as journal_records_outgoing_payment_amount_before_filtered_date
-				from {$table_prefix}journal_records where is_trash = 0 and journal_records_payments_type = 'Outgoing' and date(journal_records_datetime) < '{$dateRange[0]}' group by journal_records_journal_id
+				from {$table_prefeix}journal_records where is_trash = 0 and journal_records_payments_type = 'Outgoing' and date(journal_records_datetime) < '{$dateRange[0]}' group by journal_records_journal_id
 			) as journal_records_Outgoing on journal_records_Outgoing.journal_records_journal_id = journals_id
 			left join ( select
 					journal_records_journal_id,
 					sum(journal_records_payment_amount) as journal_records_incoming_payment_amount_before_filtered_date
-				from {$table_prefix}journal_records where is_trash = 0 and journal_records_payments_type = 'Incoming' and date(journal_records_datetime) < '{$dateRange[0]}' group by journal_records_journal_id
+				from {$table_prefeix}journal_records where is_trash = 0 and journal_records_payments_type = 'Incoming' and date(journal_records_datetime) < '{$dateRange[0]}' group by journal_records_journal_id
 			) as journal_records_Incoming on journal_records_Incoming.journal_records_journal_id = journals_id
 			where journals_id  = '{$journal_id}'
 		");
@@ -542,7 +530,7 @@ if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
                     combine_description('Incoming Payment' , journal_records_narration) as description,
                     0 as debit,
                     journal_records_payment_amount as credit
-                from {$table_prefix}journal_records as journal_records_incoming
+                from {$table_prefeix}journal_records as journal_records_incoming
 				where journal_records_incoming.is_trash = 0 and journal_records_incoming.journal_records_payments_type = 'Incoming' and date(journal_records_incoming.journal_records_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' group by journal_records_incoming.journal_records_id
 				UNION ALL
                 SELECT
@@ -552,7 +540,7 @@ if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
                     combine_description('Outgoing Payment' , journal_records_narration) as description,
                     journal_records_payment_amount as debit,
                     0 as credit
-                from {$table_prefix}journal_records as journal_records_outgoing
+                from {$table_prefeix}journal_records as journal_records_outgoing
                 where journal_records_outgoing.is_trash = 0 and journal_records_outgoing.journal_records_payments_type = 'Outgoing' and date(journal_records_outgoing.journal_records_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' group by journal_records_outgoing.journal_records_id
 			) as get_data
 			where journals_id = '{$journal_id}'
@@ -590,17 +578,12 @@ if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
-
 }
 
 
 
 /*************************** Customer Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
-
-    if( !current_user_can("customer_ledger.View") ) {
-        return _e("Sorry! You do not have permission to view customer ledger.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -626,27 +609,27 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
                         if(total_payment_return_before_filtered_date is null, 0, total_payment_return_before_filtered_date)
 				)
 
-			FROM {$table_prefix}customers as customers
+			FROM {$table_prefeix}customers as customers
 			left join ( select
 					sales_customer_id,
 					sum(case when is_return = 0 then sales_grand_total end) as total_purchased_before_filtered_date,
                     sum(case when is_return = 1 then sales_grand_total end) as total_returned_before_filtered_date
-				from {$table_prefix}sales where is_trash = 0 and sales_status = 'Delivered' and sales_delivery_date < '{$dateRange[0]}' group by sales_customer_id
+				from {$table_prefeix}sales where is_trash = 0 and sales_status = 'Delivered' and sales_delivery_date < '{$dateRange[0]}' group by sales_customer_id
 			) as sales on sales_customer_id = customer_id
 			left join ( select
                     wastage_sale_customer,
                     sum(wastage_sale_grand_total) as total_wastage_purched_before_filtered_date
-                from {$table_prefix}wastage_sale where is_trash = 0 and wastage_sale_date < '{$dateRange[0]}' group by wastage_sale_customer
+                from {$table_prefeix}wastage_sale where is_trash = 0 and wastage_sale_date < '{$dateRange[0]}' group by wastage_sale_customer
             ) as wastage_sale on customer_id = wastage_sale_customer
 			left join ( select 
 					received_payments_from,
 					sum(received_payments_amount) + sum(received_payments_bonus) as total_payment_before_filtered_date
-				from {$table_prefix}received_payments where is_trash = 0 and date(received_payments_datetime) < '{$dateRange[0]}' group by received_payments_from
+				from {$table_prefeix}received_payments where is_trash = 0 and date(received_payments_datetime) < '{$dateRange[0]}' group by received_payments_from
 			) as payments on received_payments_from = customer_id
             left join ( select 
                     payments_return_customer_id,
                     sum(payments_return_amount) as total_payment_return_before_filtered_date
-                from {$table_prefix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_customer_id
+                from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_customer_id
             ) as payment_return on payments_return_customer_id = customer_id
 			where customer_id = '{$customer_id}'
 		");
@@ -669,7 +652,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 					combine_description( concat( if(is_exchange = 1, 'Product Exchange/ Return' , 'Product Purchase'), ' (', sales_reference, ')' ), sales_note) as description,
                     if(sales_grand_total > 0, sales_grand_total, 0) as debit,
                     if(sales_grand_total < 0, abs(sales_grand_total), 0) as credit
-                from {$table_prefix}sales
+                from {$table_prefeix}sales
 				where is_trash = 0 and is_return = 0 and sales_status = 'Delivered' and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by sales_id
 				UNION ALL
 				SELECT
@@ -679,7 +662,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 					combine_description('Wastage Purchase', wastage_sale_note) as description,
 					wastage_sale_grand_total as debit,
 					0 as credit
-				from {$table_prefix}wastage_sale
+				from {$table_prefeix}wastage_sale
 				where is_trash = 0 and wastage_sale_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by wastage_sale_id
                 UNION ALL
                 SELECT
@@ -689,7 +672,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 					combine_description( concat('Product Return', ' (', sales_reference, ')' ), sales_note) as description,
                     0 as debit,
                     sales_grand_total as credit
-                from {$table_prefix}sales
+                from {$table_prefeix}sales
 				where is_trash = 0 and is_return = 1 and sales_status = 'Delivered' and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by sales_id
                 UNION ALL
 				SELECT
@@ -699,7 +682,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 					combine_description('Payment return ', payments_return_description) as description,
 					payments_return_amount as debit,
 					0 as credit
-				from {$table_prefix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_id
+				from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_id
 				UNION ALL
 				SELECT
 					6 as sortby,
@@ -708,8 +691,8 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 					combine_description( concat(received_payments_type, if(accounts_name is null, '', concat(' in ', accounts_name) ) ), received_payments_details) as description,
 					0 as debit,
 					received_payments_amount as credit
-				from {$table_prefix}received_payments as received_payments
-                left join {$table_prefix}accounts on received_payments_accounts = accounts_id
+				from {$table_prefeix}received_payments as received_payments
+                left join {$table_prefeix}accounts on received_payments_accounts = accounts_id
                 where received_payments.is_trash = 0 and date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' group by received_payments_id
 				UNION ALL
 				SELECT
@@ -719,7 +702,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 					concat('Provide Bonus on ', received_payments_type) as description,
 					0 as debit,
 					received_payments_bonus as credit
-				from {$table_prefix}received_payments where is_trash = 0 and received_payments_bonus > 0 and date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' group by received_payments_id
+				from {$table_prefeix}received_payments where is_trash = 0 and received_payments_bonus > 0 and date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' group by received_payments_id
 				UNION ALL
 				SELECT
 					8 as sortby,
@@ -728,7 +711,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 					combine_description('Received Payments ', incomes_description) as description,
 					0 as debit,
 					incomes_amount as credit
-				from {$table_prefix}incomes where is_trash = 0 and incomes_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by incomes_id
+				from {$table_prefeix}incomes where is_trash = 0 and incomes_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by incomes_id
 			) as get_data
 			where customer_id = '{$customer_id}'
             order by ledger_date, sortby
@@ -770,10 +753,6 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 
 /*************************** Company Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
-
-    if( !current_user_can("company_ledger.View") ) {
-        return _e("Sorry! You do not have permission to view company ledger.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -798,31 +777,31 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 						if(total_pa_before_filtered_date is null, 0, total_pa_before_filtered_date) +
                         if(total_payment_return_before_filtered_date is null, 0, total_payment_return_before_filtered_date)
 				)
-			FROM {$table_prefix}companies as company
+			FROM {$table_prefeix}companies as company
 			left join (select
 					bills_company_id,
 					sum(bills_amount) as total_billed_before_filtered_date
-				from {$table_prefix}bills where is_trash = 0 and bills_date < '{$dateRange[0]}' group by bills_company_id
+				from {$table_prefeix}bills where is_trash = 0 and bills_date < '{$dateRange[0]}' group by bills_company_id
 			) as bills on bills_company_id = company_id
 			left join (select
 					payment_to_company,
 					sum(payment_amount) as total_payment_before_filtered_date
-				from {$table_prefix}payments where is_trash = 0 and payment_date < '{$dateRange[0]}' group by payment_to_company
+				from {$table_prefeix}payments where is_trash = 0 and payment_date < '{$dateRange[0]}' group by payment_to_company
 			) as payments on payments.payment_to_company = company_id
 			left join (select
 					payment_to_company,
 					sum(payment_amount) as total_direct_payment_before_filtered_date
-				from {$table_prefix}payments where is_trash = 0 and payment_type is null and payment_date < '{$dateRange[0]}' group by payment_to_company
+				from {$table_prefeix}payments where is_trash = 0 and payment_type is null and payment_date < '{$dateRange[0]}' group by payment_to_company
 			) as direct_payments on direct_payments.payment_to_company = company_id
 			left join (select
 					pa_company,
 					sum(pa_amount) as total_pa_before_filtered_date
-				from {$table_prefix}payment_adjustment where is_trash = 0 and pa_date < '{$dateRange[0]}' group by pa_company
+				from {$table_prefeix}payment_adjustment where is_trash = 0 and pa_date < '{$dateRange[0]}' group by pa_company
 			) as pa on pa_company = company_id
             left join (select
                     payments_return_company_id,
                     sum(payments_return_amount) as total_payment_return_before_filtered_date
-                from {$table_prefix}payments_return where is_trash = 0 and payments_return_type = 'Incoming' and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_company_id
+                from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Incoming' and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_company_id
             ) as payment_return on payments_return_company_id = company_id
 			where company_id = '{$company_id}'
 		");
@@ -847,11 +826,11 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 					combine_description('Bill', all_description) as description,
 					0 as debit,
 					bills_amount as credit
-				FROM {$table_prefix}bills
+				FROM {$table_prefeix}bills
                 left join ( select
                             bill_items_bill_id, 
                             group_concat(bill_items_note SEPARATOR ', ') as all_description 
-                        from {$table_prefix}bill_items 
+                        from {$table_prefeix}bill_items 
                         group by bill_items_bill_id 
                     ) as bill_items on bill_items_bill_id = bills_id
                 where is_trash = 0 and bills_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by bills_id
@@ -863,7 +842,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 					combine_description('Product purchase bill', purchase_note) as description,
 					0 as debit,
 					purchase_grand_total as credit
-				from {$table_prefix}purchases where is_trash = 0 and is_return = 0 and purchase_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by purchase_id
+				from {$table_prefeix}purchases where is_trash = 0 and is_return = 0 and purchase_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by purchase_id
 				UNION ALL
 				SELECT
 					4 as sortby,
@@ -872,7 +851,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 					combine_description('Product purchase return', purchase_note) as description,
 					purchase_grand_total as debit,
 					0 as credit
-				from {$table_prefix}purchases where is_trash = 0 and is_return = 1 and purchase_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by purchase_id
+				from {$table_prefeix}purchases where is_trash = 0 and is_return = 1 and purchase_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by purchase_id
 				UNION ALL
 				SELECT
 					5 as sortby,
@@ -881,11 +860,11 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 					combine_description('Bills', payment_item_description) as description,
 					0 as debit,
 					payment_amount as credit
-				from {$table_prefix}payments 
+				from {$table_prefeix}payments 
 				left join (select
 						payment_items_payments_id,
 						group_concat(payment_items_description) as payment_item_description
-					from {$table_prefix}payment_items group by payment_items_payments_id
+					from {$table_prefeix}payment_items group by payment_items_payments_id
 				) as payment_items_credit on payment_items_credit.payment_items_payments_id = payment_id
 				where is_trash = 0 and (payment_type is null or payment_type = 'Advance Adjustment') and payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payment_id
 				UNION ALL
@@ -896,11 +875,11 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 					combine_description( concat('Payments', ' (', payment_reference, ')'), payment_item_description) as description,
 					payment_amount as debit,
 					0 as credit
-				from {$table_prefix}payments 
+				from {$table_prefeix}payments 
 				left join (select
 						payment_items_payments_id,
 						group_concat(payment_items_description) as payment_item_description
-					from {$table_prefix}payment_items group by payment_items_payments_id
+					from {$table_prefeix}payment_items group by payment_items_payments_id
 				) as payment_items_debit on payment_items_debit.payment_items_payments_id = payment_id
 				where is_trash = 0 and payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payment_id
 				UNION ALL
@@ -911,7 +890,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 					combine_description('Payment Adjustment', pa_description) as description,
 					pa_amount as debit,
 					0 as credit
-				from {$table_prefix}payment_adjustment where is_trash = 0 and pa_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by pa_id
+				from {$table_prefeix}payment_adjustment where is_trash = 0 and pa_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by pa_id
                 UNION ALL
                 SELECT
                     8 as sortby,
@@ -920,7 +899,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
                     combine_description('Purchase Payment Return', payments_return_description) as description,
                     0 as debit,
                     payments_return_amount as credit
-                from {$table_prefix}payments_return where is_trash = 0 and payments_return_type = 'Incoming' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by company_id
+                from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Incoming' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by company_id
             ) as get_data
 			where company_id = '{$company_id}'
             order by ledger_date, sortby
@@ -965,10 +944,6 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 
 /*************************** Employee Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
-
-    if( !current_user_can("advance_payment_ledger.View") ) {
-        return _e("Sorry! You do not have permission to view advance payment ledger.");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -991,21 +966,21 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
 						if(total_payment_before_filtered_date is null, 0, total_payment_before_filtered_date) +
 						if(total_return_before_filtered_date is null, 0, total_return_before_filtered_date)
 				)
-			FROM {$table_prefix}employees as employees
+			FROM {$table_prefeix}employees as employees
 			left join (select
 					advance_payment_pay_to,
 					sum(advance_payment_amount) as total_advance_payment_before_filtered_date
-				from {$table_prefix}advance_payments where is_trash = 0 and advance_payment_date < '{$dateRange[0]}' group by advance_payment_pay_to
+				from {$table_prefeix}advance_payments where is_trash = 0 and advance_payment_date < '{$dateRange[0]}' group by advance_payment_pay_to
 			) as advance_payment on advance_payment_pay_to = emp_id
 			left join (select
 					payment_to_employee,
 					sum(payment_amount) as total_payment_before_filtered_date
-				from {$table_prefix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' and payment_date < '{$dateRange[0]}' group by payment_to_employee
+				from {$table_prefeix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' and payment_date < '{$dateRange[0]}' group by payment_to_employee
 			) as payment_adjustment on payment_to_employee = emp_id
 			left join (select
 					payments_return_emp_id,
 					sum(payments_return_amount) as total_return_before_filtered_date
-				from {$table_prefix}payments_return where is_trash = 0 and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_emp_id
+				from {$table_prefeix}payments_return where is_trash = 0 and date(payments_return_date) < '{$dateRange[0]}' group by payments_return_emp_id
 			) as payment_return on payments_return_emp_id = emp_id
 			where emp_id = '{$emp_id}'
 		");
@@ -1029,7 +1004,7 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
                     combine_description( 'Advance Payment', advance_payment_description) as description,
                     0 as debit,
                     advance_payment_amount as credit
-                from {$table_prefix}advance_payments
+                from {$table_prefeix}advance_payments
                 where is_trash = 0 and advance_payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by advance_payment_id
 				UNION ALL
 				SELECT
@@ -1039,14 +1014,14 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
 					concat('Adjusted on ', item_description),
 					payment_amount as debit,
 					0 as credit
-				from {$table_prefix}payments as payment
+				from {$table_prefeix}payments as payment
 				left join ( select
 						payment_items_category_id,
 						payment_items_payments_id,
 						payment_items_description,
 						group_concat(combine_description(payment_category_name, payment_items_description) SEPARATOR ', ') as item_description
-					from {$table_prefix}payment_items
-					left join {$table_prefix}payments_categories on payment_items_category_id = payment_category_id
+					from {$table_prefeix}payment_items
+					left join {$table_prefeix}payments_categories on payment_items_category_id = payment_category_id
 					group by payment_items_payments_id
 				) as payment_item on payment_items_payments_id = payment_id
 				where payment.is_trash = 0 and payment.payment_type = 'Advance Adjustment' and payment.payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by payment_id
@@ -1058,7 +1033,7 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
                     combine_description( 'Payment Return', payments_return_description) as description,
                     payments_return_amount as debit,
                     0 as credit
-                from {$table_prefix}payments_return
+                from {$table_prefeix}payments_return
                 where is_trash = 0 and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_id
 			) as get_data
 			where empl_id = '{$emp_id}'
@@ -1096,7 +1071,6 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
-    
 }
 
 ?>

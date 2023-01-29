@@ -5,7 +5,7 @@ $selectSale = easySelect(
   "sales",
   "*",
   array (
-    "left join {$table_prefix}customers on sales_customer_id = customer_id"
+    "left join {$table_prefeix}customers on sales_customer_id = customer_id"
   ),
   array (
     "sales_id"  => $_GET["id"]
@@ -26,7 +26,7 @@ $selectSalesItems = easySelectA(array(
   "table"   => "sale_items",
   "fields"  => "sale_item_price, sale_item_quantity, sale_item_unit, sale_item_discount, sale_item_subtotal, product_name",
   "join"    => array(
-    "left join {$table_prefix}products on sale_item_product_id = product_id"
+    "left join {$table_prefeix}products on sale_item_product_id = product_id"
   ),
   "where" => array(
     "is_bundle_item = 0 and sale_item_sales_id"  => $_GET["id"],

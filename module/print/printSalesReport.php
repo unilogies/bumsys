@@ -2,22 +2,13 @@
 
 <?php 
     $date =  isset($_GET["date"]) ? safe_input($_GET["date"]) : date("Y-m-d");
-    $selectSales = easySelectD("
-            select 
-                customer_id, 
-                customer_name,
-                product_id,
-                product_name,
-                round(sum(stock_item_qty), 2) as sale_item_quantity_sum, 
-                sum(stock_item_subtotal) as sale_item_subtotal_sum 
-        from {$table_prefix}product_stock as sale_item
-        inner join {$table_prefix}products on stock_product_id = product_id
-        inner join {$table_prefix}sales on stock_sales_id  = sales_id
-        inner join {$table_prefix}customers on sales_customer_id = customer_id
-        where stock_type = 'sale' and sale_item.is_trash = 0 and date(stock_item_add_on) = '{$date}' 
-        group by sales_customer_id, stock_product_id 
-        order by sales_customer_id, stock_product_id ASC
-    ");
+
+   $selectSales = easySelectD("
+     select customer_id, customer_name, product_id, product_code, product_name, round(sum(sale_item_quantity), 2) as sale_item_quantity_sum, sum(sale_item_subtotal) as sale_item_subtotal_sum from {$table_prefeix}sale_items as sale_item
+     inner join {$table_prefeix}customers on sale_item_customer_id = customer_id
+     inner join {$table_prefeix}products on sale_item_product_id = product_id
+     where sale_item.is_trash = 0 and date(sale_item_add_on) = '{$date}' group by sale_item_customer_id, sale_item_product_id order by sale_item_customer_id, sale_item_product_id ASC
+   ");
 
    $saleQnt = array();
    $salesTable = "";

@@ -3,7 +3,7 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            <?= __("Product Purchases"); ?>
+            <?= __("Product Purchases Return"); ?>
         </h1>
         <ol class="breadcrumb">
             <li><a href="#"><i class="fa fa-dashboard"></i> Purchase</a></li>
@@ -77,30 +77,258 @@
             border-radius: 10px;
             -webkit-box-shadow: inset 0 0 6px #337ab7;
         }
+    </style>
 
-        .image_preview:hover {
-            position: absolute;
-            z-index: 1;
-            height: 500px !important;
-            background: transparent;
+    <?php 
+
+      // Check if the biller is set
+      if(!isset($_SESSION["aid"])) {
+        
+        echo _e("You must set you as a biller to add purchase return");
+
+      } else if(isset($_GET["action"]) and $_GET["action"] == "addPurchaseReturn") {
+          
+        
+        $purchaseData = $_POST;
+
+        $productPurchasePrice = $purchaseData["productPurchasePrice"];
+        $productDiscount = $purchaseData["productPurchaseDiscount"];
+        $productQnt = $purchaseData["productQnt"];
+
+        // Calculate the Product purchase Grand Total amount
+        $PurchaseTotalAmount = 0;
+        $purchaseTotalItemDiscount = 0;
+        
+        foreach($productPurchasePrice as $key => $value) {
+          
+          $value = empty($value) ? 0 : $value;
+          $purchaseTotalItemDiscount += calculateDiscount($value, $productDiscount[$key]) * $productQnt[$key];
+          
+          $PurchaseTotalAmount += $productQnt[$key] * $value;
+
         }
 
-    </style>
+        $totalPurchasePrice = $PurchaseTotalAmount - $purchaseTotalItemDiscount;
+
+        $purchaseDiscount = calculateDiscount($totalPurchasePrice, $purchaseData["purchaseDiscountValue"]);
+
+        $tariffCharges = array_sum($purchaseData["tariffChargesAmount"]);
+        $shipping = empty($purchaseData["purchaseShipping"]) ? 0 : $purchaseData["purchaseShipping"];
+        $grandTotal = ($totalPurchasePrice + $tariffCharges + $shipping) -  $purchaseDiscount;
+        $paidAmount = empty($purchaseData["purchasePaidAmount"]) ? 0 : $purchaseData["purchasePaidAmount"];
+        
+        // Insert data into product_purchase table
+        $insertPurchase = easyInsert(
+          "product_purchase",
+          array (
+            "purchase_company_id"             => $purchaseData["purchaseCompany"],
+            "purchase_is_returned"            => 1,
+            "purchase_accounts_id"            => $_SESSION["aid"],
+            "purchase_warehouse_id"           => $purchaseData["purchaseWarehouse"],
+            "purchase_total_amount"           => $PurchaseTotalAmount,
+            "purchase_item_total_discount"    => $purchaseTotalItemDiscount,
+            "purchase_discount"               => $purchaseDiscount,
+            "purchase_tariff_charges"         => $tariffCharges,
+            "purchase_tariff_charges_details" => serialize($purchaseData["tariffChargesName"]),
+            "purchase_shipping"               => $shipping,
+            "purchase_grand_total"            => $grandTotal,
+            "purchase_paid_amount"            => $paidAmount,
+            "purchase_due_amount"             => $grandTotal > $paidAmount ? $grandTotal - $paidAmount : 0,
+            "purchase_change_amount"          => $grandTotal < $paidAmount ? $paidAmount - $grandTotal : 0,
+            "purchase_date"                   => $purchaseData["purchaseDate"],
+            "purchase_reference"              => empty($purchaseData["purchaseReference"]) ? " " : $purchaseData["purchaseReference"],
+            "purchase_description"            => $purchaseData["purchaseDescription"],
+            "purchase_add_by"                 => $_SESSION["uid"]
+          ),
+          array(),
+          true
+        );
+
+        // check if the purchase successfully inserted then got to next for adding purchase item
+        if($insertPurchase["status"] === "success") {
+
+            // Insert purchase item
+            foreach($purchaseData["productID"] as $key => $productId) {
+
+                // Calculate the discount
+                $productPurchaseDiscount = calculateDiscount($productPurchasePrice[$key], $productDiscount[$key]);
+
+                // Calculate the amount after discount
+                $itemAmoutnAfterDiscount = $productPurchasePrice[$key] - $productPurchaseDiscount;
+
+                $insertPurchaseItem = easyInsert(
+                    "product_purchase_items",
+                    array (
+                        "purchase_item_purchase_id"   => $insertPurchase["last_insert_id"],
+                        "purchase_item_is_returned"   => 1,
+                        "purchase_item_product_id"    => $productId, 
+                        "purchase_item_warehouse_id"  => $purchaseData["purchaseWarehouse"],
+                        "purchase_item_quantity"      => $productQnt[$key],
+                        "purchase_item_unit"          => $purchaseData["unitItem"][$key],
+                        "purchase_item_product_price" => $productPurchasePrice[$key],
+                        "purchase_product_discount"   => $productPurchaseDiscount,
+                        "purchase_item_total_price"   => $productQnt[$key] * $itemAmoutnAfterDiscount // Calculate the items total amount
+                    )
+                );
+
+                // Check if the product is bundle
+                // Then insert bundle Products items
+                if(product_type($productId)["is_bundle"]) {
+            
+                    // check if the bundle product sale price is changed by user
+                    $increasedRate = "0%";
+                    $decreasedRate = "0%";
+                    if( $purchaseData["productPurchasePrice"][$key] > $purchaseData["productMainPurchasePrice"][$key] ) { // If the price is Increased 
+            
+                        // Calculate the increased amount
+                        $increasedAmount = $purchaseData["productPurchasePrice"][$key] - $purchaseData["productMainPurchasePrice"][$key];
+                        
+                        // Calculate the increased purcentage
+                        $increasedRate = ( $increasedAmount * 100 ) / $purchaseData["productMainPurchasePrice"][$key] ;
+            
+                    } else if( $purchaseData["productPurchasePrice"][$key] < $purchaseData["productMainPurchasePrice"][$key] ) { // If the price is decrased
+            
+                        // Calculate the decreased amount 
+                        $decreasedAmount = $purchaseData["productMainPurchasePrice"][$key] - $purchaseData["productPurchasePrice"][$key];
+                        
+                        // Calculate the decreased purcentage
+                        $decreasedRate = ( $decreasedAmount * 100 ) / $purchaseData["productMainPurchasePrice"][$key] ;
+            
+                    }
+
+                    $selectBundleProducts = easySelectA(array(
+                        "table"     => "bg_product_items as bg_product_items",
+                        "fields"    => "bg_item_product_id, bg_product_unit_qnt, bg_product_unit, puv_purchase_price",
+                        "join"      => array(
+                            "left join {$table_prefeix}product_unit_variants as puv on puv.puv_product_id = bg_item_product_id and puv.puv_name = bg_product_items.bg_product_unit"
+                        ),
+                        "where"     => array(
+                            "bg_product_id" => $productId
+                        )
+                    ));
+
+                    foreach($selectBundleProducts["data"] as $bpKey => $bp) {
+
+                        // Store the Bundle Product Item Purchase Price
+                        $bpItemPurchasePrice = $bp["puv_purchase_price"];
+
+                        // Check if increased is not 0%
+                        if( $increasedRate != "0%" ) {
+
+                            // Increase the price if it was increased in Bundle price by user
+                            $bpItemPurchasePrice += calculateDiscount($bpItemPurchasePrice, $increasedRate . "%");
+
+                        } else if( $decreasedRate != "0%" ) {
+
+                            // Decreased the price if it was increased in Bundle price by user
+                            $bpItemPurchasePrice -= calculateDiscount($bpItemPurchasePrice, $decreasedRate  . "%");
+
+                        } 
+
+
+                        // Calculate the Bundle item quantity
+                        $bpItemQnt = $purchaseData["productQnt"][$key] * $bp["bg_product_unit_qnt"];
+
+                        // In bundle item, the discount takes from bundle product not from the item product
+                        $bpItemDiscountAmount = calculateDiscount( $bpItemPurchasePrice, $purchaseData["productPurchaseDiscount"][$key] );
+
+                        $bpItemSubTotal = ( $bpItemPurchasePrice - $bpItemDiscountAmount) * $bpItemQnt;
+
+                        easyInsert(
+                            "product_purchase_items",
+                            array (
+                                "purchase_item_purchase_id"   => $insertPurchase["last_insert_id"],
+                                "purchase_item_is_returned"   => 1,
+                                "purchase_item_product_id"    => $bp["bg_item_product_id"], 
+                                "purchase_item_warehouse_id"  => $purchaseData["purchaseWarehouse"],
+                                "purchase_item_quantity"      => $bpItemQnt,
+                                "purchase_item_unit"          => $bp["bg_product_unit"],
+                                "purchase_item_product_price" => $bpItemPurchasePrice,
+                                "purchase_product_discount"   => $bpItemDiscountAmount,
+                                "purchase_item_total_price"   => $bpItemSubTotal,
+                                "is_bundle_item"              => 1
+                            )
+                        );
+
+                    }
+
+                } 
+
+            }
+
+            // if paid amount grater then zero in product purchase
+            // then ad to expenses
+            if($paidAmount > 0) {
+
+                 // Payment reference for BILL
+                $paymentReferences = payment_reference("bill");
+
+                // Insert the Bill Payment
+                $insertPurchasePayment = easyInsert (
+                    "payments",
+                    array (
+                        "payment_date"              => $purchaseData["purchaseDate"],
+                        "payment_to_company"        => $purchaseData["purchaseCompany"],
+                        "payment_status"            => "Complete",
+                        "payment_amount"            => $paidAmount,
+                        "payment_from"              => $_SESSION["aid"],
+                        "payment_description"       => "Payment Made on Product Purchase",
+                        "payment_method"            => $purchaseData["purchasePaymentMethod"],
+                        "payment_reference"         => $paymentReferences,
+                        "payment_made_by"           => $_SESSION["uid"]
+                    ),
+                    array(),
+                    true
+                );
+
+                if(isset($insertPurchasePayment["status"]) and $insertPurchasePayment["status"] === "success" ) {
+
+                    // Insert payment items
+                    easyInsert(
+                        "payment_items",
+                        array (
+                            "payment_items_payments_id" => $insertPurchasePayment["last_insert_id"],
+                            "payment_items_date"        => $purchaseData["purchaseDate"],
+                            "payment_items_type"        => "Bill",
+                            "payment_items_description" => "",
+                            "payment_items_company"     => $purchaseData["purchaseCompany"],
+                            "payment_items_amount"      => $paidAmount,
+                            "payment_items_accounts"    => $_SESSION["aid"],
+                            "payment_items_made_by"     => $_SESSION["uid"]
+                        )
+                    );
+                    
+                    // Update Accounts Balance
+                    updateAccountBalance($_SESSION["aid"]);
+  
+                }
+
+            }
+
+            $rdrTo = full_website_address() . "/stock-management/purchase-return-list/?action=addPurchaseReturn";
+            redirect($rdrTo);
+
+        }
+
+      }
+
+    ?>
 
     <!-- Main content -->
     <section class="content container-fluid">
         <div class="box box-default">
 
             <div class="box-header with-border">
-                <h3 class="box-title"><?= __("Add Purchase"); ?></h3>
+                <h3 class="box-title"><?= __("Add Purchase Return"); ?></h3>
             </div> <!-- box box-default -->
 
             <div class="box-body">
 
                 <!-- Form start -->
-                <form method="post" id="inlineForm" role="form" action="<?php echo full_website_address(); ?>/xhr/?module=stock-management&page=newPurchase" enctype="multipart/form-data">
+                <form method="post" id="productPurchaseReturn" role="form" action="<?php echo full_website_address(); ?>/stock-management/new-purchase-return/?action=addPurchaseReturn" enctype="multipart/form-data">
 
                     <div class="row">
+
 
                         <div class="form-group col-sm-3 required">
                             <label for="purchaseDate"><?= __("Purchase Date:"); ?></label>
@@ -118,13 +346,12 @@
                                 <option value=""><?= __("Select Company"); ?>....</option>
                             </select>
                         </div>
+
                         <div class="form-group col-sm-3">
-                            <label for="purchaseStatus"><?= __("Status:"); ?></label>
-                            <select name="purchaseStatus" id="purchaseStatus" class="form-control">
-                                <option value="Received">Received</option>
-                                <option value="Ordered">Ordered</option>
-                            </select>
+                            <label for="purchaseReference"><?= __("Reference:"); ?></label>
+                            <input type="text" name="purchaseReference" id="purchaseReference" class="form-control">
                         </div>
+                        
                         <div class="form-group col-sm-3">
 
                             <label for="purchaseWarehouse"><?= __("Warehouse:"); ?></label>
@@ -141,47 +368,12 @@
                                     $warehouses = $selectWarehouse["data"];
 
                                     foreach($warehouses as $warehouse) {
-                                        $selected = $_SESSION["wid"] == $warehouse['warehouse_id'] ? "selected" : "";
-                                        echo "<option {$selected} value='{$warehouse['warehouse_id']}'>{$warehouse['warehouse_name']}</option>";
+                                    echo "<option value='{$warehouse['warehouse_id']}'>{$warehouse['warehouse_name']}</option>";
                                     }
 
                                 ?>
                             </select>
                         </div>
-                        <div class="form-group col-sm-3">
-                            <label for="purchaseReference"><?= __("Reference:"); ?></label>
-                            <input type="text" name="purchaseReference" id="purchaseReference" class="form-control">
-                        </div>
-                
-
-                        <div class="imageContainer">
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label for=""><?= __("Bill/ Receipt Attachment:"); ?></label>
-                                    <div class="input-group">
-                                        <span class="input-group-btn">
-                                            <span class="btn btn-default btn-file">
-                                                <?= __("Select photo"); ?> <input type="file" name="purchaseBillAttachment" class="imageToUpload">
-                                            </span>
-                                        </span>
-                                        <input type="text" class="form-control imageNameShow" readonly>
-                                    </div>
-                            
-                                </div>
-                            </div>
-                            
-                            <div style="margin-bottom: 10px;" class="form-group col-md-6">
-                                <div style="height: 64px; text-align: center; overflow: hidden;" class="image_preview">
-                                    <div class="photoErrorMessage"></div>
-                                    <img style="margin: auto;" class="previewing" width="100%" height="auto" src="" />
-                                </div>
-                            </div>
-
-                        </div>
-
-                        
-                        
-                        
 
 
                         <!-- Full Column -->
@@ -192,10 +384,9 @@
                             <table id="productTable" class="tableBodyScroll table table-bordered table-striped table-hover">
                                 <thead>
                                     <tr class="bg-primary">
-                                        <th class="col-md-4 text-center"><?= __("Product Name"); ?></th>
-                                        <th class="col-md-2 text-center"><?= __("Batch No"); ?></th>
+                                        <th class="col-md-4 text-center"><?= __("Product Name (Product Code)"); ?></th>
                                         <th class="col-md-1 text-center"><?= __("Quantity"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Unit"); ?></th>
+                                        <th style="width: 12%; !important" class="text-center"><?= __("Unit"); ?></th>
                                         <th class="col-md-1 text-center"><?= __("Price"); ?></th>
                                         <th class="col-md-1 text-center"><?= __("Discount"); ?></th>
                                         <th class="text-center"><?= __("Subtotal"); ?></th>
@@ -218,9 +409,7 @@
 
                                     <div class="form-group">
                                         <div class="input-group">
-                                            <select name="selectProduct" id="selectProduct" class="form-control pull-left select2Ajax" 
-                                                select2-minimum-input-length="1" 
-                                                select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=productList" style="width: 100%;">
+                                            <select name="selectProduct" id="selectProduct" class="form-control pull-left select2Ajax" select2-minimum-input-length="1" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=productList" style="width: 100%;">
                                                 <option value=""><?= __("Select Product"); ?>....</option>
                                             </select>
 
@@ -250,7 +439,41 @@
                                                     <!-- Product Filter -->
                                                     <div class="row">
 
-                                                        <?php load_product_filters(); ?>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <select name="productCategory" id="productCategory" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address(); ?>/info/?module=select2&page=productCategoryList">
+                                                                    <option value=""><?= __("All Category"); ?></option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <select name="productBrand" id="productBrand" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address(); ?>/info/?module=select2&page=productBrandList">
+                                                                    <option value=""><?= __("All Brand"); ?></option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <select style="width:100%;" name="productYears" id="productYears" class="form-control select2">
+                                                                    <option value=""><?= __("All Year"); ?></option>
+                                                                    <?php 
+
+                                                                        $selectProductYear = easySelectA(array(
+                                                                        "table"   => "products",
+                                                                        "fields"  => "product_year",
+                                                                        "groupby" => "product_year"
+                                                                        ))["data"];
+                                                                        
+                                                                        foreach($selectProductYear as $key => $value) {
+                                                                        echo "<option value='{$value['product_year']}'>{$value['product_year']}</option>";
+                                                                        }
+                                                                    ?>
+                                                                </select>
+                                                            </div>
+                                                        </div>
 
                                                     </div>
                                                     <!-- /Product Filter -->
@@ -389,7 +612,7 @@
                                         <div class="form-group row">
                                             <label class="col-md-4" for="purchaseNetTotal"><?= __("Net Total"); ?></label>
                                             <div class="col-md-8">
-                                                <input disabled type="number" name="purchaseNetTotal" id="purchaseNetTotal" class="form-control" step="any">
+                                                <input disabled type="number" name="purchaseNetTotal" id="purchaseNetTotal" class="form-control">
                                             </div>
                                         </div>
                                         <div class="form-group row">
@@ -402,13 +625,13 @@
                                         <div class="form-group row">
                                             <label class="col-md-4" for="purchaseGrandTotal"><?= __("Grand Total"); ?></label>
                                             <div class="col-md-8">
-                                                <input disabled type="number" name="purchaseGrandTotal" id="purchaseGrandTotal" class="form-control" step="any">
+                                                <input disabled type="number" name="purchaseGrandTotal" id="purchaseGrandTotal" class="form-control">
                                             </div>
                                         </div>
-                                        <div class="form-group required row">
+                                        <div class="form-group row">
                                             <label class="col-md-4" for="purchasePaidAmount"><?= __("Paid Amount"); ?></label>
                                             <div class="col-md-8">
-                                                <input type="number" onclick="this.select();" name="purchasePaidAmount" id="purchasePaidAmount" class="form-control" step="any" required>
+                                                <input type="number" onclick="this.select();" name="purchasePaidAmount" id="purchasePaidAmount" class="form-control" step="any">
                                             </div>
                                         </div>
                                         <div class="form-group row">
@@ -425,38 +648,16 @@
                                                 </select>
                                             </div>
                                         </div>
-
-                                        <div id="hiddenItem" style="display: none;">
-                                            <div class="form-group row">
-                                                <label class="col-md-4" for="purchasePaymentAttachment"><?= __("Attachment"); ?></label>
-                                                <div class="col-md-8">
-                                                    <input type="file" name="purchasePaymentAttachment" id="purchasePaymentAttachment" class="form-control">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <label class="col-md-4" for="purchasePaymentChequeNo"><?= __("Cheque No"); ?></label>
-                                                <div class="col-md-8">
-                                                    <input type="text" name="purchasePaymentChequeNo" id="purchasePaymentChequeNo" class="form-control">
-                                                </div>
-                                            </div>
-                                            <div class="form-group row">
-                                                <label class="col-md-4" for="purchasePaymentChequeDate"><?= __("Cheque Date:"); ?></label>
-                                                <div class="col-md-8">
-                                                    <input type="text" name="purchasePaymentChequeDate" id="purchasePaymentChequeDate" value="" class="form-control datePicker">
-                                                </div>
-                                            </div>
-                                        </div>
-
                                         <div class="form-group row">
                                             <label class="col-md-4" for="purchaseChangeAmount">Change</label>
                                             <div class="col-md-8">
-                                                <input disabled type="number" name="purchaseChangeAmount" id="purchaseChangeAmount" class="form-control" step="any">
+                                                <input disabled type="number" name="purchaseChangeAmount" id="purchaseChangeAmount" class="form-control">
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <label class="col-md-4" for="purchaseDueAmount">Due</label>
                                             <div class="col-md-8">
-                                                <input disabled type="number" name="purchaseDueAmount" id="purchaseDueAmount" class="form-control" step="any">
+                                                <input disabled type="number" name="purchaseDueAmount" id="purchaseDueAmount" class="form-control">
                                             </div>
                                         </div>
                                         <div class="form-group row">
@@ -482,7 +683,7 @@
                     </div><!-- row-->
 
                     <div class="box-footer">
-                        <button data-toggle="modal" data-target="#finalizePurchase" type="button" class="btn btn-primary"><i class="fa fa-shopping-cart"></i> Purchase</button>
+                        <button data-toggle="modal" data-target="#finalizePurchase" type="button" class="btn btn-primary"><i class="fa fa-shopping-cart"></i> Add Purchase Return</button>
                     </div>
 
                 </form> <!-- Form End -->
@@ -503,27 +704,8 @@
    /* Browse Product while the modal open */
    $("#browseProduct").on("show.bs.modal", function(e) {
 
-        //BMS.PRODUCT.showProduct();
-        BMS.PRODUCT.showProduct({
-            category: $("#productCategoryFilter").val(), 
-            brand: $("#productBrandFilter").val(), 
-            edition: $("#productEditionFilter").val(),
-            generic: $("#productGenericFilter").val(),
-            author: $("#productAuthorFilter").val(),
-        });
+        BMS.PRODUCT.showProduct();
 
-    });
-
-    $(document).on("change", "#purchasePaymentMethod", function() {
-        if(this.value == "Cheque") {
-            
-            $("#hiddenItem").css("display", "block");
-
-        } else {
-
-            $("#hiddenItem").css("display", "none");
-
-        }
     });
 
 </script>

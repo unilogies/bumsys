@@ -4,7 +4,7 @@
 $selectJournalRecord = easySelectA(array(
   "table" => "journal_records",
   "join"  => array(
-    "left join {$table_prefix}journals on journals_id = journal_records_journal_id"
+    "left join {$table_prefeix}journals on journals_id = journal_records_journal_id"
   ),
   "where" => array(
     "journal_records_id"  => $_GET["id"]

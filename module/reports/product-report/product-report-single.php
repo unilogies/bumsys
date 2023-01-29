@@ -11,7 +11,7 @@ $selectVariableProduct = easySelectA(array(
             SELECT 
                 product_parent_id,
                 group_concat(product_id) as child_product
-            FROM {$table_prefix}products
+            FROM {$table_prefeix}products
             where is_trash = 0
             group by product_parent_id
         ) as child_product on child_product.product_parent_id = product_id"
@@ -57,7 +57,7 @@ $getProductDetails = easySelectA(array(
                     sum(case when stock_type = 'sale-return' then stock_item_qty end ) as return_qnt,
                     sum(case when stock_type = 'specimen-copy' then stock_item_qty end ) as specimen_copy_qnt,
                     sum(case when stock_type = 'specimen-copy-return' then stock_item_qty end ) as specimen_copy_return_qnt
-                from {$table_prefix}product_stock
+                from {$table_prefeix}product_stock
                 where is_trash = 0 and stock_product_id {$product_filter}
         ) as product_stock on stock_product_id {$product_filter}"
     ),
@@ -190,9 +190,9 @@ $getProductDetails = easySelectA(array(
                                                                     customer_id,
                                                                     customer_name, 
                                                                     sum(stock_item_qty) as purchased_qnt 
-                                                                from {$table_prefix}customers
-                                                                left join {$table_prefix}sales on sales_customer_id = customer_id
-                                                                left join {$table_prefix}product_stock as product_stock on stock_sales_id = sales_id
+                                                                from {$table_prefeix}customers
+                                                                left join {$table_prefeix}sales on sales_customer_id = customer_id
+                                                                left join {$table_prefeix}product_stock as product_stock on stock_sales_id = sales_id
                                                                 where product_stock.is_trash = 0 and product_stock.stock_product_id {$product_filter} 
                                                                 group by sales_customer_id 
                                                                 order by purchased_qnt DESC 
@@ -249,7 +249,7 @@ $last30DaysProductDetails = easySelectD("
                 stock_product_id, 
                 stock_entry_date, 
                 sum(stock_item_qty) as sales_quantity 
-            from {$table_prefix}product_stock where is_trash = 0 and stock_type = 'sale' and stock_product_id {$product_filter} 
+            from {$table_prefeix}product_stock where is_trash = 0 and stock_type = 'sale' and stock_product_id {$product_filter} 
             group by stock_entry_date 
         ) as get_sales_data on stock_entry_date = db_date
     where db_date BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) and DATE(NOW())  
@@ -272,7 +272,7 @@ $salesByMonth = easySelectD("
         MONTHNAME(db_date) as sales_month, 
         if(stock_item_qty is null, 0, sum(stock_item_qty)) as sold_by_month 
     from time_dimension
-    left join {$table_prefix}product_stock as product_stock on stock_entry_date = db_date
+    left join {$table_prefeix}product_stock as product_stock on stock_entry_date = db_date
     where product_stock.is_trash = 0 and 
     year(db_date) = year(CURRENT_DATE) and 
     stock_type = 'sale' and 

@@ -86,10 +86,6 @@ if(isset($_GET['page']) and $_GET['page'] == "payLoan") {
 /************************** Pay New Loan **********************/
 if(isset($_GET['page']) and $_GET['page'] == "payNewLoan") {
 
-    if( !current_user_can("loan.Add") ) {
-        return _e("Sorry! you do not have permission to pay new loan");
-    }
-
     $accounts_balance = accounts_balance($_POST["loanPayingFromAccounts"]);
 
     if(empty($_POST["loanBorrower"]))  {
@@ -141,10 +137,6 @@ if(isset($_GET['page']) and $_GET['page'] == "payNewLoan") {
 
 /*************************** Loan List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "loanList") {
-
-    if( !current_user_can("loan.View") ) {
-        return _e("Sorry! you do not have permission to view loan list");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -189,14 +181,14 @@ if(isset($_GET['page']) and $_GET['page'] == "loanList") {
             if(paid_loan is null, 0, paid_loan) as paid_loan,
             (loan_amount - if(paid_loan is null, 0, paid_loan)) as due_loan,
             loan_pay_on
-        from {$table_prefix}loan as loan
-        left join {$table_prefix}accounts on loan_paying_from = accounts_id
+        from {$table_prefeix}loan as loan
+        left join {$table_prefeix}accounts on loan_paying_from = accounts_id
         left join (select 
                 loan_ids, 
                 sum(loan_installment_paying_amount) as paid_loan 
-            from {$table_prefix}loan_installment where is_trash = 0 group by loan_ids
+            from {$table_prefeix}loan_installment where is_trash = 0 group by loan_ids
         ) as loan_installment on loan_id = loan_ids
-        left join {$table_prefix}employees on loan_borrower = emp_id
+        left join {$table_prefeix}employees on loan_borrower = emp_id
         where loan.is_trash = 0 and emp_firstname like '{$search}%' or emp_PIN = '{$search}'
         order by 
             {$columns[$requestData['order'][0]['column']]} {$orderBy}
@@ -250,10 +242,6 @@ if(isset($_GET['page']) and $_GET['page'] == "loanList") {
 
 /************************** Pay Loan **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editLoan") {
-
-    if( !current_user_can("loan.Edit") ) {
-        return _e("Sorry! you do not have permission to edit loan");
-    }
   
     // Include the modal header
     modal_header("Edit Loan", full_website_address() . "/xhr/?module=loan-management&page=updateLoan");
@@ -263,8 +251,8 @@ if(isset($_GET['page']) and $_GET['page'] == "editLoan") {
     $selectLoan = easySelectD(
         "SELECT
             *
-        from {$table_prefix}loan as loan
-        left join {$table_prefix}employees on loan_borrower = emp_id
+        from {$table_prefeix}loan as loan
+        left join {$table_prefeix}employees on loan_borrower = emp_id
         where loan.is_trash = 0 and loan_id = {$loan_id}
         "
     )["data"][0];
@@ -370,10 +358,6 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteLoan") {
 /************************** Pay New Loan **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateLoan") {
 
-    if( !current_user_can("loan.Edit") ) {
-        return _e("Sorry! you do not have permission to edit loan");
-    }
-
     $accounts_balance = accounts_balance($_POST["loanPayingFromAccounts"]);
 
     // Update account balance with current loan ammount
@@ -439,10 +423,6 @@ if(isset($_GET['page']) and $_GET['page'] == "updateLoan") {
 
 /*************************** Loans Installment List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "loanInstallmentList") {
-
-    if( !current_user_can("loan_installment.View") ) {
-        return _e("Sorry! you do not have permission to view loan installment list");
-    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -488,9 +468,9 @@ if(isset($_GET['page']) and $_GET['page'] == "loanInstallmentList") {
             loan_installment_paying_amount,
             loan_installment_description,
             loan_installment_paying_date
-        from {$table_prefix}loan_installment as loan_installment
-        left join {$table_prefix}accounts on loan_installment_receiving_accounts = accounts_id
-        left join {$table_prefix}employees on loan_installment_provider = emp_id
+        from {$table_prefeix}loan_installment as loan_installment
+        left join {$table_prefeix}accounts on loan_installment_receiving_accounts = accounts_id
+        left join {$table_prefeix}employees on loan_installment_provider = emp_id
         where loan_installment.is_trash = 0 and ( emp_firstname like '{$search}%' or emp_PIN = '{$search}')
         order by 
             {$columns[$requestData['order'][0]['column']]} {$orderBy}
@@ -527,8 +507,7 @@ if(isset($_GET['page']) and $_GET['page'] == "loanInstallmentList") {
     );
     
     // Encode in Json Formate
-    echo json_encode($jsonData);
-
+    echo json_encode($jsonData); 
 }
 
 
@@ -559,7 +538,6 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteLoanInstallment") {
             "title": "'. __("The loan installment has been deleted successfully.") .'"
         }';
     } 
-
 }
 
 
@@ -706,12 +684,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addInstallment") {
 }
 
 
-/************************** Add Loan installment **********************/
+/************************** Pay New Loan **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewInstallment") {
-
-    if( !current_user_can("loan_installment.Add") ) {
-        return _e("Sorry! you do not have permission to add loan installment");
-    }
 
     if(empty($_POST["loanBorrower"]))  {
         return _e("Please select installment provider");
@@ -731,15 +705,15 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewInstallment") {
             loan_id, loan_amount, loan_installment_amount, 
             if(thisMonthInstallmentPayingStatus is null, 0, 1) as thisMonthInstallmentPayingStatus,
             if(loan_paid_amount is null, 0, loan_paid_amount) as loan_paid_amount
-        from {$table_prefix}loan as loan
+        from {$table_prefeix}loan as loan
         left join (select 
                 loan_ids, 
                 sum(loan_installment_paying_amount) as loan_paid_amount 
-            from {$table_prefix}loan_installment where is_trash = 0 group by loan_ids
+            from {$table_prefeix}loan_installment where is_trash = 0 group by loan_ids
         ) as totalPaidAmount on loan_id = totalPaidAmount.loan_ids
         left join (select 
                 loan_ids, 1 as thisMonthInstallmentPayingStatus
-            from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
+            from {$table_prefeix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
         ) as thisMonthStatus on loan_id = thisMonthStatus.loan_ids
         where loan.is_trash = 0 and loan_borrower = {$emp_id} and loan_installment_starting_from <= '{$year}-{$month}-01'
         and ( loan_paid_amount is null or loan_paid_amount < loan_amount)" 

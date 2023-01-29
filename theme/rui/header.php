@@ -15,41 +15,33 @@
     <!-- Include all Header JS -->
     <script src="<?php echo full_website_address(); ?>/js/?q=head&v=2.1.3"></script>
 
-
     <script>
         /* store the website url in javascript variable */
         var full_website_address = "<?php echo full_website_address(); ?>";
 
         /* Store the CSRF Token */
         var xCsrfToken = '<?php echo isset($_SESSION["csrf_token"]) ? $_SESSION["csrf_token"] : ""; ?>';
-
-        /** Disable Pace on websocket */
-        window.paceOptions = {
-            ajax: {
-                trackWebSockets: false
-            }
-        };
     </script>
 
 </head>
 
 <?php
 
-$selectLoggedUser = easySelect(
-    "employees",
-    "emp_firstname, emp_lastname, emp_positions, emp_photo",
-    array(),
-    array(
-        "emp_id" => $_COOKIE["eid"]
-    )
-);
+    $selectLoggedUser = easySelect(
+        "employees",
+        "emp_firstname, emp_lastname, emp_positions, emp_photo",
+        array(),
+        array(
+            "emp_id" => $_COOKIE["eid"]
+        )
+    );
 
+    
+    $LoggedUser = $selectLoggedUser["data"][0];
 
-$LoggedUser = $selectLoggedUser["data"][0];
+    $empPhotoUrl = empty($LoggedUser['emp_photo']) ? full_website_address() . "/assets/images/defaultUserPic.png" : full_website_address() . "/images/?for=employees&id=" . $_COOKIE["eid"] . "&v=" . strlen($LoggedUser['emp_photo']);
 
-$empPhotoUrl = empty($LoggedUser['emp_photo']) ? full_website_address() . "/assets/images/defaultUserPic.png" : full_website_address() . "/images/?for=employees&id=" . $_COOKIE["eid"] . "&v=" . strlen($LoggedUser['emp_photo']);
-
-$empFullName = $LoggedUser["emp_firstname"] . " " . $LoggedUser["emp_lastname"];
+    $empFullName = $LoggedUser["emp_firstname"] . " " . $LoggedUser["emp_lastname"];
 
 ?>
 
@@ -76,105 +68,47 @@ $empFullName = $LoggedUser["emp_firstname"] . " " . $LoggedUser["emp_lastname"];
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
 
-                        <!-- Messages: style can be found in dropdown.less-->
-                        <li class="dropdown messages-menu">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-envelope-o"></i>
-                                <span class="label label-success">4</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="header">You have 4 messages</li>
-                                <li>
-                                    <!-- inner menu: contains the actual data -->
-                                    <ul class="menu">
-
-                                        <?php 
-
-                                            $selectChat = easySelectA(array(
-                                                "table"     => "chat_users",
-                                                "fields"    => "emp_firstname, emp_lastname, user_emp_id, chat_user_id",
-                                                "join"      => array(
-                                                    "left join {$table_prefix}users on user_id = chat_user_id",
-                                                    "left join {$table_prefix}employees on emp_id = user_emp_id"
-                                                ),
-                                                "where"     => array(
-                                                    "chat_user_id != {$_SESSION['uid']}"
-                                                ),
-                                                "limit"     => array(
-                                                    "start" => 0,
-                                                    "length" => 5
-                                                )
-                                            ));
-
-                                            if($selectChat !== false) {
-
-                                                foreach($selectChat["data"] as $item ) {
-                                                    echo "<li>
-                                                            <a onclick='BMS.CHAT.showChatBox(event, {$item["chat_user_id"]})' href='#'>
-                                                                <div class='pull-left'>
-                                                                    <img src='". full_website_address() ."/images/?for=employees&id={$item["user_emp_id"]}'class='img-circle'>
-                                                                </div>
-                                                                <h4>
-                                                                    {$item["emp_firstname"]} {$item["emp_lastname"]}
-                                                                    <small><i class='fa fa-clock-o'></i> 5 mins</small>
-                                                                </h4>
-                                                                <p>Why not buy a new awesome theme?</p>
-                                                            </a>
-                                                        </li>";
-                                                }
-
-                                            }
-
-                                        ?>
-                                        
-
-                                    </ul>
-                                </li>
-                                <li class="footer"><a href="#">See All Messages</a></li>
-                            </ul>
-                        </li>
-
                         <!-- Notifications: style can be found in dropdown.less -->
                         <li class="dropdown notifications-menu">
 
-                            <?php
-                            $selectUnsolvedCase = easySelectA(array(
-                                "table"     => "cases",
-                                "fields"    => "count(*) totalUnsolvedCase",
-                                "where"     => array(
-                                    "is_trash = 0 and case_status not in('Solved', 'Closed')"
-                                )
-                            ));
+                            <?php 
+                                $selectUnsolvedCase = easySelectA(array(
+                                    "table"     => "cases",
+                                    "fields"    => "count(*) totalUnsolvedCase",
+                                    "where"     => array(
+                                        "is_trash = 0 and case_status not in('Solved', 'Closed')"
+                                    )
+                                ));
+                                
 
-
-                            $totalUnsolvedCase = 0;
-                            if ($selectUnsolvedCase !== false) {
-                                $totalUnsolvedCase = $selectUnsolvedCase["data"][0]["totalUnsolvedCase"];
-                            }
+                                $totalUnsolvedCase = 0;
+                                if($selectUnsolvedCase !== false) {
+                                    $totalUnsolvedCase = $selectUnsolvedCase["data"][0]["totalUnsolvedCase"];
+                                }
                             ?>
 
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                 <i class="fa fa-bell-o"></i>
-                                <?php
-                                if ($totalUnsolvedCase > 0) {
-                                    echo '<span class="label label-warning">' . $totalUnsolvedCase . '</span>';
-                                }
+                                <?php 
+                                    if( $totalUnsolvedCase > 0 ) {
+                                        echo '<span class="label label-warning">'. $totalUnsolvedCase .'</span>';
+                                    }
                                 ?>
-
+                                
                             </a>
                             <ul class="dropdown-menu">
                                 <li class="header">You have <?php echo $totalUnsolvedCase; ?> notifications</li>
                                 <li>
                                     <!-- inner menu: contains the actual data -->
                                     <ul class="menu">
-
+  
                                         <li>
                                             <a href="<?php echo full_website_address() ?>/customer-support/case-list/">
-                                                <i class="fa fa-warning text-yellow"></i>
+                                                <i class="fa fa-warning text-yellow"></i> 
                                                 You have total <?php echo $totalUnsolvedCase; ?> unsolved cases.
                                             </a>
                                         </li>
-
+                        
                                     </ul>
                                 </li>
                                 <li class="footer"><a href="#">View all</a></li>

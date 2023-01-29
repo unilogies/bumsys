@@ -109,8 +109,8 @@
                                 round(purchase_grand_total, 2) as purchase_grand_total, round(purchase_paid_amount, 2) as purchase_paid_amount, purchase_payment_method, round(purchase_change, 2) as purchase_change, round(purchase_due, 2) as purchase_due, 
                                 purchase_total_item, round(purchase_quantity, 2) as purchase_quantity, purchase_note",
                             "join"      => array(
-                                "left join {$table_prefix}companies on company_id = purchase_company_id",
-                                "left join {$table_prefix}warehouses on warehouse_id = purchase_warehouse_id"
+                                "left join {$table_prefeix}companies on company_id = purchase_company_id",
+                                "left join {$table_prefeix}warehouses on warehouse_id = purchase_warehouse_id"
                             ),
                             "where"     => array(
                                 "purchase_id"   => $_GET["id"]
@@ -233,7 +233,7 @@
                                             "table"     => "product_stock",
                                             "fields"    => "product_name, product_unit, stock_product_id, stock_batch_id, round(stock_item_qty, 2) as stock_item_qty, round(stock_item_price, 2) as stock_item_price, round(stock_item_discount, 2) as stock_item_discount, round(stock_item_subtotal, 2) as stock_item_subtotal",
                                             "join"      => array(
-                                                "left join {$table_prefix}products on product_id = stock_product_id"
+                                                "left join {$table_prefeix}products on product_id = stock_product_id"
                                             ),
                                             "where"     => array(
                                                 "stock_purchase_id" => $_GET["id"]
