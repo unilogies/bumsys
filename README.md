@@ -68,6 +68,9 @@ Please feel free to mail us when you found any big security issue: talk@bumsys.o
 ## Thanks
 Thanks to all contributor and security researcher
 - @krizzsk  
+- @ctflearner  
+- @bruhbey  
+- @leorac  
 - @kmkalam24  
 
 Thank you.
