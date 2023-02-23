@@ -99,7 +99,9 @@ $maxWidth = isset($_GET["paperWidth"]) ? safe_entities($_GET["paperWidth"]) ."px
         } 
 
         if(isset($_GET["page"]) and !empty($_GET["page"])) {
-            $printPage = DIR_MODULE . "print/{$_GET['page']}.php";
+
+            
+            $printPage = DIR_MODULE . "print/". basename("{$_GET['page']}.php");
 
             if(file_exists($printPage)) {
                 require $printPage;

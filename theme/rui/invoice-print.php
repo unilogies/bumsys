@@ -105,7 +105,7 @@ if( isset($_GET["paperWidth"]) and !empty($_GET["paperWidth"]) ) {
         if (isset($_GET["invoiceType"]) and !empty($_GET["invoiceType"])) {
 
 
-            $invoicePage = DIR_MODULE . "invoice/{$_GET['invoiceType']}.php";
+            $invoicePage = DIR_MODULE . "invoice/". basename("{$_GET['page']}.php");
 
             if (file_exists($invoicePage)) {
                 require $invoicePage;
