@@ -1,19 +1,6 @@
 <?php
 
-/* These are not required. Now commenting. Will check later
-if(!access_is_permitted()) {
-  require ERROR_PAGE . "501.php";
-  exit();
-}
-
-if(is_login() !== true) {
-  $rdr_to = full_website_address()."/login/";
-  header("location: {$rdr_to}");
-  exit();
-}
-*/
-
-$maxWidth = isset($_GET["paperWidth"]) ? safe_entities($_GET["paperWidth"]) ."px" : "100%";
+$maxWidth = isset($_GET["paperWidth"]) ? safe_entities($_GET["paperWidth"]) ."px" : get_options("invoiceWidth");
 
 ?>
 
@@ -99,29 +86,30 @@ $maxWidth = isset($_GET["paperWidth"]) ? safe_entities($_GET["paperWidth"]) ."px
 
   </style>
 </head>
+<body>
+    <div id="wrapper">
 
-  <div id="wrapper">
+        <?php 
 
-    <?php 
-      // Print the msg if exitst
-      if(isset($_GET["msg"])) {
-        echo "<div class='no-print'>
-                <div class='alert alert-success'>". safe_entities($_GET['msg']) ."</div>
-              </div>";
-      } 
+        // Print the msg if exitst
+        if(isset($_GET["msg"])) {
+            echo "<div class='no-print'>
+                    <div class='alert alert-success'>". safe_entities($_GET['msg']) ."</div>
+                </div>";
+        } 
 
-      if(isset($_GET["page"]) and !empty($_GET["page"])) {
-        $printPage = DIR_MODULE . "print/{$_GET['page']}.php";
+        if(isset($_GET["page"]) and !empty($_GET["page"])) {
+            $printPage = DIR_MODULE . "print/{$_GET['page']}.php";
 
-        if(file_exists($printPage)) {
-          require $printPage;
+            if(file_exists($printPage)) {
+                require $printPage;
+            }
+
         }
 
-      }
+        ?>
 
-    ?>
-
-  </div>
+    </div>
 
 </body>
 </html>

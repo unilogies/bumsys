@@ -1,19 +1,27 @@
 <?php
 
-/* These are not required. Now commenting. Will check later
-if (!access_is_permitted()) {
-    require ERROR_PAGE . "501.php";
-    exit();
+$selectShop = easySelect(
+    "shops",
+    "*",
+    array(),
+    array(
+        "shop_id" => $_SESSION["sid"]
+    )
+)['data'][0];
+
+$print_type = $selectShop["shop_invoice_type"];
+
+$maxWidth = get_options("invoiceWidth");
+if( isset($_GET["paperWidth"]) and !empty($_GET["paperWidth"]) ) {
+
+    $maxWidth = safe_entities($_GET["paperWidth"]);
+
+} else if( $print_type === "details" and $_GET["invoiceType"] === "posSale" ) {
+    
+    $maxWidth = "100%";
+
 }
 
-if (is_login() !== true) {
-    $rdr_to = full_website_address() . "/login/";
-    header("location: {$rdr_to}");
-    exit();
-}
-*/
-
-$maxWidth = isset($_GET["paperWidth"]) ? $_GET["paperWidth"] : get_options("invoiceWidth");
 
 ?>
 
@@ -55,7 +63,7 @@ $maxWidth = isset($_GET["paperWidth"]) ? $_GET["paperWidth"] : get_options("invo
 
 
             body * {
-                font-size: "<?php echo get_options("printerType") === "normal" ? "14px" : "11px"; ?>";
+                font-size: "<?php echo get_options("invoiceType") === "pos" ? "11px" : "14px"; ?>";
             }
 
             /*
@@ -95,6 +103,8 @@ $maxWidth = isset($_GET["paperWidth"]) ? $_GET["paperWidth"] : get_options("invo
         }
 
         if (isset($_GET["invoiceType"]) and !empty($_GET["invoiceType"])) {
+
+
             $invoicePage = DIR_MODULE . "invoice/{$_GET['invoiceType']}.php";
 
             if (file_exists($invoicePage)) {
