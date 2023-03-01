@@ -105,7 +105,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentCategoryList") {
             "payments_categories as payments_category",
             "payment_category_id, payment_category_name, payment_category_shop_id, shop_name",
             array (
-                "left join {$table_prefeix}shops on payment_category_shop_id = shop_id"
+                "left join {$table_prefix}shops on payment_category_shop_id = shop_id"
             ),
             array (
                 "payments_category.is_trash = 0 and payment_category_name LIKE" => "%".$requestData['search']['value'] . "%"
@@ -127,7 +127,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentCategoryList") {
             "payments_categories as payments_category",
             "payment_category_id, payment_category_name, payment_category_shop_id, shop_name",
             array (
-                "left join {$table_prefeix}shops on payment_category_shop_id = shop_id"
+                "left join {$table_prefix}shops on payment_category_shop_id = shop_id"
             ),
             array("payments_category.is_trash = 0"),
             array (
@@ -219,7 +219,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editPaymentCategory") {
         "table"     => "payments_categories",
         "fields"    => "payment_category_name, payment_category_shop_id, shop_name",
         "join"      => array(
-            "left join {$table_prefeix}shops on shop_id = payment_category_shop_id"
+            "left join {$table_prefix}shops on shop_id = payment_category_shop_id"
         ),
         "where"     => array(
             "payment_category_id"   => $_GET["id"],
@@ -901,10 +901,10 @@ if(isset($_GET['page']) and $_GET['page'] == "expensesList") {
             "payments as payment",
             "payment_id, payment_reference, payment_status, if(item_description is not null AND item_description != '', item_description, combine_description(payment_description, item_description)) as payment_description, company_name, emp_firstname, emp_lastname, emp_PIN, accounts_name, payment_date, payment_amount, payment_from, payment_method",
             array (
-                "left join {$table_prefeix}accounts on payment_from = accounts_id",
-                "left join {$table_prefeix}companies on payment_to_company = company_id",
-                "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+                "left join {$table_prefix}accounts on payment_from = accounts_id",
+                "left join {$table_prefix}companies on payment_to_company = company_id",
+                "left join {$table_prefix}employees on payment_to_employee = emp_id",
+                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
             ),
             array (
                 "payment.is_trash = 0 and (company_name LIKE" => $requestData['search']['value'] . "%",
@@ -936,10 +936,10 @@ if(isset($_GET['page']) and $_GET['page'] == "expensesList") {
             "payments as payment",
             "payment_id, payment_reference, payment_status, if(item_description is not null AND item_description != '', item_description, combine_description(payment_description, item_description)) as payment_description, company_name, emp_firstname, emp_lastname, emp_PIN, accounts_name, payment_date, payment_amount, payment_from, payment_method",
             array (
-                "left join {$table_prefeix}accounts on payment_from = accounts_id",
-                "left join {$table_prefeix}companies on payment_to_company = company_id",
-                "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+                "left join {$table_prefix}accounts on payment_from = accounts_id",
+                "left join {$table_prefix}companies on payment_to_company = company_id",
+                "left join {$table_prefix}employees on payment_to_employee = emp_id",
+                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
             ),
             array (
               "payment.is_trash = 0",
@@ -971,10 +971,10 @@ if(isset($_GET['page']) and $_GET['page'] == "expensesList") {
           "payments as payment",
           "payment_id, payment_reference, payment_status, if(item_description is not null AND item_description != '', item_description, combine_description(payment_description, item_description)) as payment_description, item_description, company_name, emp_firstname, emp_lastname, emp_PIN, accounts_name, payment_date, payment_amount, payment_from, payment_method",
           array (
-            "left join {$table_prefeix}accounts on payment_from = accounts_id",
-            "left join {$table_prefeix}companies on payment_to_company = company_id",
-            "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-            "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+            "left join {$table_prefix}accounts on payment_from = accounts_id",
+            "left join {$table_prefix}companies on payment_to_company = company_id",
+            "left join {$table_prefix}employees on payment_to_employee = emp_id",
+            "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
           ),
           array("payment.is_trash = 0"),
           array (
@@ -1100,7 +1100,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePayment") {
 
             $getPurchasePaidAmount = easySelectD("SELECT 
                         sum(payment_amount) as payment_amount 
-                    from {$table_prefeix}payments 
+                    from {$table_prefix}payments 
                     where is_trash = 0 and payment_purchase_id = '{$deletedPaymentData["payment_purchase_id"]}' 
                     group by payment_purchase_id"
             );
@@ -1110,7 +1110,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePayment") {
             }
 
             // Get purchase grand total
-            $purchaseGrandTotal = easySelectD("SELECT purchase_grand_total from {$table_prefeix}purchases where purchase_id = {$deletedPaymentData["payment_purchase_id"]}")["data"][0]["purchase_grand_total"];
+            $purchaseGrandTotal = easySelectD("SELECT purchase_grand_total from {$table_prefix}purchases where purchase_id = {$deletedPaymentData["payment_purchase_id"]}")["data"][0]["purchase_grand_total"];
 
             $purchaseDue = $purchaseGrandTotal - $totalPurchasePayment;
 
@@ -1197,10 +1197,10 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentsReturnList") {
             "table"     => "payments_return as payments_return",
             "fields"    => "payments_return_id, payments_return_date, payments_return_type, emp_firstname, emp_lastname, emp_PIN, accounts_name, customer_name, company_name, round(payments_return_amount, 2) as payments_return_amount, payments_return_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on payments_return_emp_id = emp_id",
-                "left join {$table_prefeix}companies on company_id = payments_return_company_id",
-                "left join {$table_prefeix}customers on customer_id = payments_return_customer_id",
-                "left join {$table_prefeix}accounts on payments_return_accounts = accounts_id"
+                "left join {$table_prefix}employees on payments_return_emp_id = emp_id",
+                "left join {$table_prefix}companies on company_id = payments_return_company_id",
+                "left join {$table_prefix}customers on customer_id = payments_return_customer_id",
+                "left join {$table_prefix}accounts on payments_return_accounts = accounts_id"
             ),
             "where" => array(
                 "payments_return.is_trash=0 AND (",
@@ -1230,10 +1230,10 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentsReturnList") {
             "table"     => "payments_return as payments_return",
             "fields"    => "payments_return_id, payments_return_date, payments_return_type, emp_firstname, emp_lastname, emp_PIN, accounts_name, customer_name, company_name, round(payments_return_amount, 2) as payments_return_amount, payments_return_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on payments_return_emp_id = emp_id",
-                "left join {$table_prefeix}companies on company_id = payments_return_company_id",
-                "left join {$table_prefeix}customers on customer_id = payments_return_customer_id",
-                "left join {$table_prefeix}accounts on payments_return_accounts = accounts_id"
+                "left join {$table_prefix}employees on payments_return_emp_id = emp_id",
+                "left join {$table_prefix}companies on company_id = payments_return_company_id",
+                "left join {$table_prefix}customers on customer_id = payments_return_customer_id",
+                "left join {$table_prefix}accounts on payments_return_accounts = accounts_id"
             ),
             "where" => array(
                 "payments_return.is_trash=0"
@@ -1507,15 +1507,15 @@ if(isset($_GET['page']) and $_GET['page'] == "addMonthlySalary") {
                 loan_id, loan_amount, loan_installment_amount, 
                 if(thisMonthInstallmentPayingStatus is null, 0, 1) as thisMonthInstallmentPayingStatus,
                 if(loan_paid_amount is null, 0, loan_paid_amount) as loan_paid_amount
-            from {$table_prefeix}loan as loan
+            from {$table_prefix}loan as loan
             left join (select 
                     loan_ids, 
                     sum(loan_installment_paying_amount) as loan_paid_amount 
-                from {$table_prefeix}loan_installment where is_trash = 0 group by loan_ids
+                from {$table_prefix}loan_installment where is_trash = 0 group by loan_ids
             ) as totalPaidAmount on loan_id = totalPaidAmount.loan_ids
             left join (select 
                     loan_ids, 1 as thisMonthInstallmentPayingStatus
-                from {$table_prefeix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
+                from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
             ) as thisMonthStatus on loan_id = thisMonthStatus.loan_ids
             where loan.is_trash = 0 and loan_borrower = {$emp_id} and loan_installment_starting_from <= '{$year}-{$month}-01'
             and ( loan_paid_amount is null or loan_paid_amount < loan_amount)" 
@@ -1646,7 +1646,7 @@ if(isset($_GET['page']) and $_GET['page'] == "salaryList") {
             "salaries as salary",
             "salary_id, salary_month, emp_firstname, emp_lastname, emp_PIN, salary_type, salary_amount, salary_description",
             array (
-              "left join {$table_prefeix}employees on salary_emp_id = emp_id"
+              "left join {$table_prefix}employees on salary_emp_id = emp_id"
             ),
             array (
                 "salary.is_trash = 0",
@@ -1674,7 +1674,7 @@ if(isset($_GET['page']) and $_GET['page'] == "salaryList") {
             "salaries as salary",
             "salary_id, emp_PIN, salary_month, emp_firstname, emp_lastname, emp_PIN, salary_type, salary_amount, salary_description",
             array (
-              "left join {$table_prefeix}employees on salary_emp_id = emp_id"
+              "left join {$table_prefix}employees on salary_emp_id = emp_id"
             ),
             array (
               "salary.is_trash = 0 and ( emp_firstname LIKE '". $requestData["columns"][2]['search']['value'] ."%' ",
@@ -1701,7 +1701,7 @@ if(isset($_GET['page']) and $_GET['page'] == "salaryList") {
             "salaries as salary",
             "salary_id, salary_month, emp_firstname, emp_lastname, emp_PIN, salary_type, salary_amount, salary_description",
             array (
-            "left join {$table_prefeix}employees on salary_emp_id = emp_id"
+            "left join {$table_prefix}employees on salary_emp_id = emp_id"
             ),
             array("salary.is_trash=0"),
             array (
@@ -1800,7 +1800,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editMonthlySalary") {
         "salaries",
         "*",
         array (
-            "left join {$table_prefeix}employees on salary_emp_id = emp_id"
+            "left join {$table_prefix}employees on salary_emp_id = emp_id"
         ),
         array (
             "salary_id"     => $_GET["id"]
@@ -2071,16 +2071,16 @@ if(isset($_GET['page']) and $_GET['page'] == "advanceSalaryList") {
         from 
             (select advance_salary_paying_from, advance_salary_pay_to,
                 sum(advance_salary_amount) as advance_salary_amount 
-            from {$table_prefeix}advance_salary group by advance_salary_pay_to) as {$table_prefeix}advance_salary
-        inner join {$table_prefeix}accounts on advance_salary_paying_from = accounts_id
+            from {$table_prefix}advance_salary group by advance_salary_pay_to) as {$table_prefix}advance_salary
+        inner join {$table_prefix}accounts on advance_salary_paying_from = accounts_id
         left join 
             (select 
                 advance_salary_adjustment_for, 
                 sum(advance_salary_adjustment_amount) as advance_salary_adjustment_amount 
-            from {$table_prefeix}advance_salary_adjustment group by advance_salary_adjustment_for) as {$table_prefeix}advance_salary_adjustment 
+            from {$table_prefix}advance_salary_adjustment group by advance_salary_adjustment_for) as {$table_prefix}advance_salary_adjustment 
             on advance_salary_pay_to = advance_salary_adjustment_for
         left join 
-            {$table_prefeix}employees 
+            {$table_prefix}employees 
             on advance_salary_pay_to = emp_id
         where 
             emp_firstname like '{$search}%' 
@@ -2397,8 +2397,8 @@ if(isset($_GET['page']) and $_GET['page'] == "billsList") {
             "bills as bills",
             "bills_id, bills_date, bills_reference, bills_company_id, company_name, bills_amount, all_description",
             array (
-                "left join {$table_prefeix}companies on bills_company_id = company_id",
-                "left join ( select bill_items_bill_id, group_concat(bill_items_note SEPARATOR ', ') as all_description from {$table_prefeix}bill_items group by bill_items_bill_id ) as bill_items on bill_items_bill_id = bills_id"
+                "left join {$table_prefix}companies on bills_company_id = company_id",
+                "left join ( select bill_items_bill_id, group_concat(bill_items_note SEPARATOR ', ') as all_description from {$table_prefix}bill_items group by bill_items_bill_id ) as bill_items on bill_items_bill_id = bills_id"
             ),
             array (
                 "bills.is_trash = 0 and company_name LIKE" => $requestData['search']['value'] . "%"
@@ -2420,8 +2420,8 @@ if(isset($_GET['page']) and $_GET['page'] == "billsList") {
             "bills as bills",
             "bills_id, bills_date, bills_reference, bills_company_id, company_name, bills_amount, all_description",
             array (
-                "left join {$table_prefeix}companies on bills_company_id = company_id",
-                "left join ( select bill_items_bill_id, group_concat(bill_items_note SEPARATOR ', ') as all_description from {$table_prefeix}bill_items group by bill_items_bill_id ) as bill_items on bill_items_bill_id = bills_id"
+                "left join {$table_prefix}companies on bills_company_id = company_id",
+                "left join ( select bill_items_bill_id, group_concat(bill_items_note SEPARATOR ', ') as all_description from {$table_prefix}bill_items group by bill_items_bill_id ) as bill_items on bill_items_bill_id = bills_id"
             ),
             array("bills.is_trash = 0"),
             array (
@@ -2521,7 +2521,7 @@ if(isset($_GET['page']) and $_GET['page'] == "companyBillDetails") {
         "bill_items",
         "bill_items_category, payment_category_name, round(bill_items_amount, 2) as bill_items_amount, bill_items_note",
         array (
-            "left join {$table_prefeix}payments_categories on bill_items_category = payment_category_id"
+            "left join {$table_prefix}payments_categories on bill_items_category = payment_category_id"
         ),
         array (
             "bill_items_bill_id"     => $_GET["bill_id"]
@@ -3002,9 +3002,9 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentOverview") {
             "employees",
             "emp_id, emp_firstname, emp_lastname, emp_PIN, if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount, if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount",
             array (
-                "left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments where is_trash = 0 and advance_payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id",
-                "left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where is_trash = 0 and payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id",
-                "left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return where is_trash = 0 and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id "
+                "left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments where is_trash = 0 and advance_payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id",
+                "left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where is_trash = 0 and payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id",
+                "left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return where is_trash = 0 and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id "
             ),
             array (
                 "advance_payment_amount_sum > 0",
@@ -3029,9 +3029,9 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentOverview") {
             "employees",
             "emp_id, emp_firstname, emp_lastname, emp_PIN, if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount, if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount",
             array (
-                "left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id",
-                "left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id",
-                "left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id "
+                "left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id",
+                "left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id",
+                "left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id "
             ),
             array (
                 "advance_payment_amount_sum > 0"
@@ -3115,8 +3115,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentList") {
             "table"     => "advance_payments as advance_payment",
             "fields"    => "advance_payment_id, advance_payment_date, advance_payment_reference, emp_firstname, emp_lastname, emp_PIN, accounts_name, advance_payment_amount, advance_payment_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on emp_id = advance_payment_pay_to",
-                "left join {$table_prefeix}accounts on accounts_id = advance_payment_pay_from"
+                "left join {$table_prefix}employees on emp_id = advance_payment_pay_to",
+                "left join {$table_prefix}accounts on accounts_id = advance_payment_pay_from"
             ),
             "where" => array(
                 "advance_payment.is_trash=0",
@@ -3144,8 +3144,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentList") {
             "table"     => "advance_payments as advance_payment",
             "fields"    => "advance_payment_id, advance_payment_date, advance_payment_reference, emp_firstname, emp_lastname, emp_PIN, accounts_name, advance_payment_amount, advance_payment_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on advance_payment_pay_to = emp_id",
-                "left join {$table_prefeix}accounts on advance_payment_pay_from = accounts_id"
+                "left join {$table_prefix}employees on advance_payment_pay_to = emp_id",
+                "left join {$table_prefix}accounts on advance_payment_pay_from = accounts_id"
             ),
             "where" => array(
                 "advance_payment.is_trash=0"
@@ -3259,7 +3259,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editAdvancePayment") {
         "table"     => "advance_payments",
         "fields"    => "advance_payment_id, advance_payment_date, advance_payment_reference, advance_payment_pay_to, emp_firstname, emp_lastname, advance_payment_pay_from, advance_payment_amount, advance_payment_description, advance_payment_payment_method",
         "join"      => array(
-            "left join {$table_prefeix}employees on advance_payment_pay_to = emp_id"
+            "left join {$table_prefix}employees on advance_payment_pay_to = emp_id"
         ),
         "where"     => array(
             "advance_payment_id" => $_GET["id"]
@@ -3649,10 +3649,10 @@ if(isset($_GET['page']) and $_GET['page'] == "adjustAdvancePaymentSubmit") {
         select emp_id,
             if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount,
             if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount
-        from {$table_prefeix}employees
-        left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
-        left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
-        left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
+        from {$table_prefix}employees
+        left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
+        left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
+        left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
         where emp_id = " . safe_input($_POST['advancePaymentAdjustEmployee'])
     )["data"][0];
 
@@ -3926,10 +3926,10 @@ if(isset($_GET['page']) and $_GET['page'] == "returnAdvancePaymentSubmit") {
         select emp_id,
             if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount,
             if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount
-        from {$table_prefeix}employees
-        left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefeix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
-        left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
-        left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefeix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
+        from {$table_prefix}employees
+        left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
+        left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
+        left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
             where emp_id = {$emp_id}"
     )["data"][0];
 
@@ -3997,8 +3997,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentReturnList") {
             "table"     => "payments_return as payments_return",
             "fields"    => "payments_return_id, payments_return_date, emp_firstname, emp_lastname, emp_PIN, accounts_name, payments_return_amount, payments_return_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on payments_return_emp_id = emp_id",
-                "left join {$table_prefeix}accounts on payments_return_accounts = accounts_id"
+                "left join {$table_prefix}employees on payments_return_emp_id = emp_id",
+                "left join {$table_prefix}accounts on payments_return_accounts = accounts_id"
             ),
             "where" => array(
                 "payments_return.is_trash=0 and emp_firstname like" => "%".$requestData['search']['value'] . "%",
@@ -4022,8 +4022,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentReturnList") {
             "table"     => "payments_return as payments_return",
             "fields"    => "payments_return_id, payments_return_date, emp_firstname, emp_lastname, emp_PIN, accounts_name, payments_return_amount, payments_return_description",
             "join"      => array(
-                "left join {$table_prefeix}employees on payments_return_emp_id = emp_id",
-                "left join {$table_prefeix}accounts on payments_return_accounts = accounts_id"
+                "left join {$table_prefix}employees on payments_return_emp_id = emp_id",
+                "left join {$table_prefix}accounts on payments_return_accounts = accounts_id"
             ),
             "where" => array(
                 "payments_return.is_trash=0"
@@ -4104,14 +4104,14 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePaymentReturn") {
         if($selectDeletedPaymentReturn["payments_return_sales_id"] !== NULL or $selectDeletedPaymentReturn["payments_return_sales_id"] > 0 ) {
 
             $totalReturnAmount = 0;
-            $getReturnAmount = easySelectD("SELECT sum(payments_return_amount) as totalReturnAmount FROM {$table_prefeix}payments_return where is_trash = 0 and payments_return_sales_id = {$selectDeletedPaymentReturn["payments_return_sales_id"]} group by payments_return_sales_id");
+            $getReturnAmount = easySelectD("SELECT sum(payments_return_amount) as totalReturnAmount FROM {$table_prefix}payments_return where is_trash = 0 and payments_return_sales_id = {$selectDeletedPaymentReturn["payments_return_sales_id"]} group by payments_return_sales_id");
 
             if($getReturnAmount !== false) {
                 $totalReturnAmount = $getReturnAmount["data"][0]["totalReturnAmount"];
             }
 
             // Select sales
-            $selectSales = easySelectD("SELECT sales_grand_total, is_return from {$table_prefeix}sales where sales_id = {$selectDeletedPaymentReturn["payments_return_sales_id"]} ")["data"][0];
+            $selectSales = easySelectD("SELECT sales_grand_total, is_return from {$table_prefix}sales where sales_id = {$selectDeletedPaymentReturn["payments_return_sales_id"]} ")["data"][0];
 
  
             // Generate the payment status
@@ -4146,12 +4146,12 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePaymentReturn") {
 
 
             $totalPurchaseReturnPayment = 0;
-            $getPurchaseReturnAmount = easySelectD("SELECT sum(payments_return_amount) as totalReturnAmount FROM {$table_prefeix}payments_return where is_trash = 0 and payments_return_purchase_id = {$selectDeletedPaymentReturn["payments_return_purchase_id"]} group by payments_return_sales_id");
+            $getPurchaseReturnAmount = easySelectD("SELECT sum(payments_return_amount) as totalReturnAmount FROM {$table_prefix}payments_return where is_trash = 0 and payments_return_purchase_id = {$selectDeletedPaymentReturn["payments_return_purchase_id"]} group by payments_return_sales_id");
             if($getPurchaseReturnAmount !== false) {
                 $totalPurchaseReturnPayment = $getPurchaseReturnAmount["data"][0]["totalReturnAmount"];
             }
 
-            $purchaseReturnGrandTotal = easySelectD("SELECT purchase_grand_total from {$table_prefeix}purchases where purchase_id = {$selectDeletedPaymentReturn["payments_return_purchase_id"]}")["data"][0]["purchase_grand_total"];
+            $purchaseReturnGrandTotal = easySelectD("SELECT purchase_grand_total from {$table_prefix}purchases where purchase_id = {$selectDeletedPaymentReturn["payments_return_purchase_id"]}")["data"][0]["purchase_grand_total"];
 
 
             $purchasePaymentStatus = "due";
@@ -4294,7 +4294,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentAdjustmentList") {
         $getData = easySelectA(array(
             "table"    => "payment_adjustment as payment_adjustment",
             "join"     => array(
-                "left join {$table_prefeix}companies on pa_company = company_id"
+                "left join {$table_prefix}companies on pa_company = company_id"
             ),
             "where"     => array(
                 "payment_adjustment.is_trash = 0 and company_name like " => $requestData['search']['value'] . "%",
@@ -4316,7 +4316,7 @@ if(isset($_GET['page']) and $_GET['page'] == "paymentAdjustmentList") {
         $getData = easySelectA(array(
             "table"    => "payment_adjustment as payment_adjustment",
             "join"     => array(
-                "left join {$table_prefeix}companies on pa_company = company_id"
+                "left join {$table_prefix}companies on pa_company = company_id"
             ),
             "where"     => array(
                 "payment_adjustment.is_trash = 0"
@@ -4401,7 +4401,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editPaymentAdjustment") {
             "pa_id" => $_GET["id"]
         ),
         "join"  => array(
-            "left join {$table_prefeix}companies on pa_company = company_id"
+            "left join {$table_prefix}companies on pa_company = company_id"
         )
     ))["data"][0];
     

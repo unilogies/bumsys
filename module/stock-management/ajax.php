@@ -163,8 +163,8 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchase") {
                                 bg_product_qnt
                                 ",
                 "join"      => array(
-                    "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id",
-                    "left join {$table_prefeix}products as sub_product on sub_product.product_id = bg_item_product_id"
+                    "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
+                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
                     "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -485,8 +485,8 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
                                 bg_product_qnt
                                 ",
                 "join"      => array(
-                    "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id",
-                    "left join {$table_prefeix}products as sub_product on sub_product.product_id = bg_item_product_id"
+                    "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
+                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
                     "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -600,8 +600,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
                     round(purchase_product_discount, 2) as purchase_product_discount, round(purchase_discount, 2) as purchase_discount, round(purchase_shipping, 2) as purchase_shipping, 
                     round(purchase_grand_total, 2) as purchase_grand_total, round(purchase_paid_amount, 2) as purchase_paid_amount, round(purchase_due, 2) as purchase_due",
             array (
-                "left join {$table_prefeix}companies on company_id = purchase_company_id",
-                "left join {$table_prefeix}shops on shop_id = purchase_shop_id"
+                "left join {$table_prefix}companies on company_id = purchase_company_id",
+                "left join {$table_prefix}shops on shop_id = purchase_shop_id"
             ),
             array (
                 "product_purchase.is_return = 0 and product_purchase.is_trash = 0 and (",
@@ -632,8 +632,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
             round(purchase_product_discount, 2) as purchase_product_discount, round(purchase_discount, 2) as purchase_discount, round(purchase_shipping, 2) as purchase_shipping, 
             round(purchase_grand_total, 2) as purchase_grand_total, round(purchase_paid_amount, 2) as purchase_paid_amount, round(purchase_due, 2) as purchase_due",
             array (
-            "left join {$table_prefeix}companies on company_id = purchase_company_id",
-            "left join {$table_prefeix}shops on shop_id = purchase_shop_id"
+            "left join {$table_prefix}companies on company_id = purchase_company_id",
+            "left join {$table_prefix}shops on shop_id = purchase_shop_id"
             ),
             array("product_purchase.is_trash = 0 and product_purchase.is_return = 0 and purchase_shop_id like '{$shopId}'"),
             array (
@@ -1067,8 +1067,8 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
                                 bg_product_qnt
                                 ",
                 "join"      => array(
-                    "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id",
-                    "left join {$table_prefeix}products as sub_product on sub_product.product_id = bg_item_product_id"
+                    "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
+                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
                     "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -1234,8 +1234,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseReturnList") {
                     round(purchase_product_discount, 2) as purchase_product_discount, round(purchase_discount, 2) as purchase_discount, round(purchase_shipping, 2) as purchase_shipping, 
                     round(purchase_grand_total, 2) as purchase_grand_total, round(purchase_paid_amount, 2) as purchase_paid_amount, round(purchase_due, 2) as purchase_due",
             array (
-                "left join {$table_prefeix}companies on company_id = purchase_company_id",
-                "left join {$table_prefeix}shops on shop_id = purchase_shop_id"
+                "left join {$table_prefix}companies on company_id = purchase_company_id",
+                "left join {$table_prefix}shops on shop_id = purchase_shop_id"
             ),
             array (
                 "product_purchase.is_return = 1 and product_purchase.is_trash = 0 and (",
@@ -1266,8 +1266,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseReturnList") {
             round(purchase_product_discount, 2) as purchase_product_discount, round(purchase_discount, 2) as purchase_discount, round(purchase_shipping, 2) as purchase_shipping, 
             round(purchase_grand_total, 2) as purchase_grand_total, round(purchase_paid_amount, 2) as purchase_paid_amount, round(purchase_due, 2) as purchase_due",
             array (
-            "left join {$table_prefeix}companies on company_id = purchase_company_id",
-            "left join {$table_prefeix}shops on shop_id = purchase_shop_id"
+            "left join {$table_prefix}companies on company_id = purchase_company_id",
+            "left join {$table_prefix}shops on shop_id = purchase_shop_id"
             ),
             array("product_purchase.is_trash = 0 and product_purchase.is_return = 1 and purchase_shop_id like '{$shopId}'"),
             array (
@@ -1389,7 +1389,7 @@ if(isset($_GET['page']) and $_GET['page'] == "viewPurchasedProduct") {
       "product_stock",
       "stock_product_id, product_name, product_unit, stock_item_qty",
       array (
-        "left join {$table_prefeix}products on product_id = stock_product_id"
+        "left join {$table_prefix}products on product_id = stock_product_id"
       ),
       array (
           "is_bundle_item = 0 and stock_purchase_id" => $_GET["id"]
@@ -1528,7 +1528,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newReturn") {
         $salesGrandTotal = 0;
         $salesChanges = 0;
 
-        $insertSaleReturnItems = "INSERT INTO {$table_prefeix}product_stock(
+        $insertSaleReturnItems = "INSERT INTO {$table_prefix}product_stock(
             stock_type,
             stock_entry_date,
             stock_sales_id,
@@ -1586,7 +1586,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newReturn") {
                                 bg_product_qnt
                                 ",
                 "join"      => array(
-                    "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id"
+                    "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id"
                 ),
                 "where"     => array(
                     "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -1826,7 +1826,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockTransfer") {
 
     if($insertTransfer["status"] === "success") {
 
-        $insertStockTransferItems = "INSERT INTO {$table_prefeix}product_stock(
+        $insertStockTransferItems = "INSERT INTO {$table_prefix}product_stock(
             stock_type,
             stock_entry_date,
             stock_transfer_id,
@@ -1896,8 +1896,8 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockTransfer") {
                                 bg_product_qnt
                                 ",
                 "join"      => array(
-                    "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id",
-                    "left join {$table_prefeix}products as sub_product on sub_product.product_id = bg_item_product_id"
+                    "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
+                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
                     "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -2020,8 +2020,8 @@ if(isset($_GET['page']) and $_GET['page'] == "stockTransferList") {
                         stock_transfer_reject_note, stock_transfer_grand_total, stock_transfer_remarks, warehouseFrom.warehouse_name as warehouseFromName, 
                         stock_transfer_to_warehouse, warehouseTo.warehouse_name as warehouseToName",
             "join"    => array(
-            "left join {$table_prefeix}warehouses as warehouseFrom on warehouseFrom.warehouse_id = stock_transfer_from_warehouse",
-            "left join {$table_prefeix}warehouses as warehouseTo on warehouseTo.warehouse_id = stock_transfer_to_warehouse"
+            "left join {$table_prefix}warehouses as warehouseFrom on warehouseFrom.warehouse_id = stock_transfer_from_warehouse",
+            "left join {$table_prefix}warehouses as warehouseTo on warehouseTo.warehouse_id = stock_transfer_to_warehouse"
             ),
             "where" => array (
             "stock_transfer.is_trash = 0 and stock_transfer_reference LIKE" => $requestData['search']['value'] . "%",
@@ -2046,8 +2046,8 @@ if(isset($_GET['page']) and $_GET['page'] == "stockTransferList") {
                     stock_transfer_reject_note, stock_transfer_grand_total, stock_transfer_remarks, warehouseFrom.warehouse_name as warehouseFromName, 
                     stock_transfer_to_warehouse, warehouseTo.warehouse_name as warehouseToName",
         "join"    => array(
-            "left join {$table_prefeix}warehouses as warehouseFrom on warehouseFrom.warehouse_id = stock_transfer_from_warehouse",
-            "left join {$table_prefeix}warehouses as warehouseTo on warehouseTo.warehouse_id = stock_transfer_to_warehouse"
+            "left join {$table_prefix}warehouses as warehouseFrom on warehouseFrom.warehouse_id = stock_transfer_from_warehouse",
+            "left join {$table_prefix}warehouses as warehouseTo on warehouseTo.warehouse_id = stock_transfer_to_warehouse"
         ),
         "where" => array(
             "stock_transfer.is_trash = 0"
@@ -2160,8 +2160,8 @@ if(isset($_GET['page']) and $_GET['page'] == "viewTransferedProduct") {
         "fields"  => "round(stock_item_qty, 2) as stock_item_qty, 
                         round(stock_item_discount, 2) as stock_item_discount, product_unit, round(stock_item_subtotal, 2) as stock_item_subtotal, product_name, if(batch_number is null, '', concat('(', batch_number, ')') ) as batch_number",
         "join"    => array(
-        "left join {$table_prefeix}products on stock_product_id = product_id",
-        "left join {$table_prefeix}product_batches as product_batches on stock_product_id = product_batches.product_id and stock_batch_id = batch_id"
+        "left join {$table_prefix}products on stock_product_id = product_id",
+        "left join {$table_prefix}product_batches as product_batches on stock_product_id = product_batches.product_id and stock_batch_id = batch_id"
         ),
         "where" => array(
         "is_bundle_item = 0 and stock_type = 'transfer-out' and stock_transfer_id"  => $_GET["id"],
@@ -2405,7 +2405,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productWarehouseList") {
             "table"   => "warehouses as warehouse",
             "fields"  => "warehouse_id, warehouse_name, shop_name, warehouse_contacts, warehouse_location",
             "join"      => array(
-                "left join {$table_prefeix}shops on shop_id = warehouse_shop"
+                "left join {$table_prefix}shops on shop_id = warehouse_shop"
             ),
             "where"   => array(
                 "warehouse.is_trash = 0 and warehouse_name LIKE" => $requestData['search']['value'] . "%",
@@ -2429,7 +2429,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productWarehouseList") {
             "table"   => "warehouses as warehouse",
             "fields"  => "warehouse_id, warehouse_name, shop_name, warehouse_contacts, warehouse_location",
             "join"      => array(
-                "left join {$table_prefeix}shops on shop_id = warehouse_shop"
+                "left join {$table_prefix}shops on shop_id = warehouse_shop"
             ),
             "where"   => array(
                 "warehouse.is_trash = 0"
@@ -2510,7 +2510,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editWarehouse") {
         "table"     => "warehouses",
         "fields"    => "warehouse_name, warehouse_shop, shop_name, warehouse_contacts, warehouse_location",
         "join"      => array(
-            "left join {$table_prefeix}shops on shop_id = warehouse_shop"
+            "left join {$table_prefix}shops on shop_id = warehouse_shop"
         ),
         "where"     => array(
             "warehouse_id" => $_GET['id']
@@ -2622,9 +2622,9 @@ if(isset($_GET['page']) and $_GET['page'] == "ProductReturnList") {
             "sales as sales",
             "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on customer_id = sales_customer_id",
-                "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
-                "left join {$table_prefeix}districts on district_id = customer_district"
+                "left join {$table_prefix}customers on customer_id = sales_customer_id",
+                "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
+                "left join {$table_prefix}districts on district_id = customer_district"
             ),
             array (
                 "sales.is_trash = 0 and sales.is_return = 1 and sales.sales_delivery_date is not null",
@@ -2654,9 +2654,9 @@ if(isset($_GET['page']) and $_GET['page'] == "ProductReturnList") {
             "sales as sales",
             "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on customer_id = sales_customer_id",
-                "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
-                "left join {$table_prefeix}districts on district_id = customer_district"
+                "left join {$table_prefix}customers on customer_id = sales_customer_id",
+                "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
+                "left join {$table_prefix}districts on district_id = customer_district"
             ),
             array (
               "sales.is_trash = 0 and sales.is_return = 1 and sales.sales_delivery_date is not null",
@@ -2681,9 +2681,9 @@ if(isset($_GET['page']) and $_GET['page'] == "ProductReturnList") {
           "sales as sales",
           "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
           array (
-            "left join {$table_prefeix}customers on customer_id = sales_customer_id",
-            "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
-            "left join {$table_prefeix}districts on district_id = customer_district"
+            "left join {$table_prefix}customers on customer_id = sales_customer_id",
+            "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
+            "left join {$table_prefix}districts on district_id = customer_district"
           ),
           array (
             "sales.is_trash = 0 and sales.is_return = 1 and sales.sales_delivery_date is not null",
@@ -2921,7 +2921,7 @@ if(isset($_GET['page']) and $_GET['page'] == "batchList") {
             "table"     => "product_batches as product_batches",
             "fields"    => "batch_id, concat(product_name, ' ', if(product_group is null, '', product_group) ) as product_name, batch_number, date(batch_expiry_date) as batch_expiry_date, batch_description",
             "join"      => array(
-                "left join {$table_prefeix}products as products on products.product_id = product_batches.product_id"
+                "left join {$table_prefix}products as products on products.product_id = product_batches.product_id"
             ),
             "where"     => array(
                 "product_batches.is_trash = 0 and ( product_name LIKE" => $requestData['search']['value'] . "%",
@@ -2945,7 +2945,7 @@ if(isset($_GET['page']) and $_GET['page'] == "batchList") {
             "table"     => "product_batches as product_batches",
             "fields"    => "batch_id, concat(product_name, ' ', if(product_group is null, '', product_group) ) as product_name, batch_number, date(batch_expiry_date) as batch_expiry_date, batch_description",
             "join"      => array(
-                "left join {$table_prefeix}products as products on products.product_id = product_batches.product_id"
+                "left join {$table_prefix}products as products on products.product_id = product_batches.product_id"
             ),
             "where"     => array(
                 "product_batches.is_trash = 0"
@@ -3050,7 +3050,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockEntry") {
 
     if( isset($insertStockEntry["status"]) and $insertStockEntry["status"] === "success") {
 
-        $insertStockEntryItems = "INSERT INTO {$table_prefeix}product_stock(
+        $insertStockEntryItems = "INSERT INTO {$table_prefix}product_stock(
             stock_type,
             stock_entry_date,
             stock_se_id,
@@ -3107,8 +3107,8 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockEntry") {
                                     bg_product_qnt
                                     ",
                     "join"      => array(
-                        "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id",
-                        "left join {$table_prefeix}products as sub_product on sub_product.product_id = bg_item_product_id"
+                        "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
+                        "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
                     ),
                     "where"     => array(
                         "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -3200,7 +3200,7 @@ if(isset($_GET['page']) and $_GET['page'] == "stockEntryList") {
             "table"     => "stock_entries as stock_entries",
             "fields"    => "se_id, se_date, se_type, warehouse_name, se_note",
             "join"      => array(
-                "left join {$table_prefeix}warehouses on warehouse_id = se_warehouse_id"
+                "left join {$table_prefix}warehouses on warehouse_id = se_warehouse_id"
             ),
             "where"     => array(
                 "stock_entries.is_trash = 0 AND (",
@@ -3225,7 +3225,7 @@ if(isset($_GET['page']) and $_GET['page'] == "stockEntryList") {
             "table"     => "stock_entries as stock_entries",
             "fields"    => "se_id, se_date, se_type, warehouse_name, se_note",
             "join"      => array(
-                "left join {$table_prefeix}warehouses on warehouse_id = se_warehouse_id"
+                "left join {$table_prefix}warehouses on warehouse_id = se_warehouse_id"
             ),
             "where"     => array(
                 "stock_entries.is_trash = 0"
@@ -3292,7 +3292,7 @@ if(isset($_GET['page']) and $_GET['page'] == "viewStockEntryProduct") {
         "product_stock as product_stock",
         "stock_product_id, product_name, product_unit, stock_item_qty",
         array (
-          "left join {$table_prefeix}products on product_id = stock_product_id"
+          "left join {$table_prefix}products on product_id = stock_product_id"
         ),
         array (
             "product_stock.is_trash = 0 and is_bundle_item = 0 and stock_se_id" => $_GET["id"]

@@ -5,8 +5,8 @@ $selectStockTransfer = easySelectA(array(
   "table"   => "stock_transfer as stock_transfer",
   "fields"  => "stock_transfer_id, stock_transfer_date, combine_description(stock_transfer_id, stock_transfer_reference) as stock_transfer_reference, stock_transfer_grand_total, stock_transfer_remarks, warehouseFrom.warehouse_name as warehouseFromName, warehouseTo.warehouse_name as warehouseToName",
   "join"    => array(
-    "left join {$table_prefeix}warehouses as warehouseFrom on warehouseFrom.warehouse_id = stock_transfer_from_warehouse",
-    "left join {$table_prefeix}warehouses as warehouseTo on warehouseTo.warehouse_id = stock_transfer_to_warehouse"
+    "left join {$table_prefix}warehouses as warehouseFrom on warehouseFrom.warehouse_id = stock_transfer_from_warehouse",
+    "left join {$table_prefix}warehouses as warehouseTo on warehouseTo.warehouse_id = stock_transfer_to_warehouse"
   ),
   "where" => array(
     "stock_transfer.stock_transfer_id"  => $_GET["id"]
@@ -27,8 +27,8 @@ $stockTransferItems = easySelectA(array(
     "fields"  => "round(stock_item_price, 2) as stock_item_price, round(stock_item_qty, 2) as stock_item_qty, 
                     round(stock_item_discount, 2) as stock_item_discount, round(stock_item_subtotal, 2) as stock_item_subtotal, product_name, if(batch_number is null, '', concat('(', batch_number, ')') ) as batch_number",
     "join"    => array(
-      "left join {$table_prefeix}products on stock_product_id = product_id",
-      "left join {$table_prefeix}product_batches as product_batches on stock_product_id = product_batches.product_id and stock_batch_id = batch_id"
+      "left join {$table_prefix}products on stock_product_id = product_id",
+      "left join {$table_prefix}product_batches as product_batches on stock_product_id = product_batches.product_id and stock_batch_id = batch_id"
     ),
     "where" => array(
       "is_bundle_item = 0 and stock_type = 'transfer-out' and stock_transfer_id"  => $_GET["id"],

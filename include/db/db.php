@@ -31,6 +31,6 @@ mysqli_report(MYSQLI_REPORT_OFF);
 $conn->get_all_error = array();
 
 // Table Prefix variable
-$table_prefeix = TABLE_PREFIX;
+$table_prefix = TABLE_PREFIX;
 
 ?>

@@ -105,8 +105,8 @@ if(isset($_GET['page']) and $_GET['page'] == "journalList") {
             "journals",
             "journals_id, journals_date, journals_name, journals_opening_balance, if(journal_incoming_payment is null, 0, journal_incoming_payment) as journal_incoming_payment_sum, if(journal_outgoing_payment is null, 0, journal_outgoing_payment) as journal_outgoing_payment_sum",
             array (
-                "left join ( select journal_records_journal_id, sum(journal_records_payment_amount) as journal_incoming_payment from {$table_prefeix}journal_records where journal_records_payments_type = 'Incoming' group by journal_records_journal_id ) as journal_incoming_records on journal_incoming_records.journal_records_journal_id = journals_id",
-                "left join ( select journal_records_journal_id, sum(journal_records_payment_amount) as journal_outgoing_payment from {$table_prefeix}journal_records where journal_records_payments_type = 'Outgoing' group by journal_records_journal_id ) as journal_outgoing_records on journal_outgoing_records.journal_records_journal_id = journals_id"
+                "left join ( select journal_records_journal_id, sum(journal_records_payment_amount) as journal_incoming_payment from {$table_prefix}journal_records where journal_records_payments_type = 'Incoming' group by journal_records_journal_id ) as journal_incoming_records on journal_incoming_records.journal_records_journal_id = journals_id",
+                "left join ( select journal_records_journal_id, sum(journal_records_payment_amount) as journal_outgoing_payment from {$table_prefix}journal_records where journal_records_payments_type = 'Outgoing' group by journal_records_journal_id ) as journal_outgoing_records on journal_outgoing_records.journal_records_journal_id = journals_id"
             ),
             array (
                 "journals_name LIKE" => $requestData['search']['value'] . "%"
@@ -128,8 +128,8 @@ if(isset($_GET['page']) and $_GET['page'] == "journalList") {
             "journals",
             "journals_id, journals_date, journals_name, journals_opening_balance, if(journal_incoming_payment is null, 0, journal_incoming_payment) as journal_incoming_payment_sum, if(journal_outgoing_payment is null, 0, journal_outgoing_payment) as journal_outgoing_payment_sum",
             array (
-                "left join ( select journal_records_journal_id, sum(journal_records_payment_amount) as journal_incoming_payment from {$table_prefeix}journal_records where journal_records_payments_type = 'Incoming' group by journal_records_journal_id ) as journal_incoming_records on journal_incoming_records.journal_records_journal_id = journals_id",
-                "left join ( select journal_records_journal_id, sum(journal_records_payment_amount) as journal_outgoing_payment from {$table_prefeix}journal_records where journal_records_payments_type = 'Outgoing' group by journal_records_journal_id ) as journal_outgoing_records on journal_outgoing_records.journal_records_journal_id = journals_id"
+                "left join ( select journal_records_journal_id, sum(journal_records_payment_amount) as journal_incoming_payment from {$table_prefix}journal_records where journal_records_payments_type = 'Incoming' group by journal_records_journal_id ) as journal_incoming_records on journal_incoming_records.journal_records_journal_id = journals_id",
+                "left join ( select journal_records_journal_id, sum(journal_records_payment_amount) as journal_outgoing_payment from {$table_prefix}journal_records where journal_records_payments_type = 'Outgoing' group by journal_records_journal_id ) as journal_outgoing_records on journal_outgoing_records.journal_records_journal_id = journals_id"
             ),
             array(),
             array (
@@ -455,8 +455,8 @@ if(isset($_GET['page']) and $_GET['page'] == "journalRecordList") {
             "journal_records as journal_records",
             "journal_records_id, journal_records_datetime, journal_records_reference, journal_records_journal_id, journals_name, journal_records_accounts, accounts_name, journal_records_payments_type, journal_records_payment_amount, journal_records_narration",
             array (
-                "left join {$table_prefeix}journals on journals_id = journal_records_journal_id",
-                "left join {$table_prefeix}accounts on accounts_id = journal_records_accounts"
+                "left join {$table_prefix}journals on journals_id = journal_records_journal_id",
+                "left join {$table_prefix}accounts on accounts_id = journal_records_accounts"
             ),
             array (
                 "journal_records.is_trash = 0", 
@@ -481,8 +481,8 @@ if(isset($_GET['page']) and $_GET['page'] == "journalRecordList") {
             "journal_records as journal_records ",
             "journal_records_id, journal_records_datetime, journal_records_reference, journal_records_journal_id, journals_name, journal_records_accounts, accounts_name, journal_records_payments_type, journal_records_payment_amount, journal_records_narration",
             array (
-                "left join {$table_prefeix}journals on journals_id = journal_records_journal_id",
-                "left join {$table_prefeix}accounts on accounts_id = journal_records_accounts"
+                "left join {$table_prefix}journals on journals_id = journal_records_journal_id",
+                "left join {$table_prefix}accounts on accounts_id = journal_records_accounts"
             ),
             array("journal_records.is_trash = 0"),
             array (
@@ -550,7 +550,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editJournalRecord") {
         "journal_records as journal_records",
         "*",
         array(
-            "left join {$table_prefeix}journals on journal_records_journal_id  = journals_id "
+            "left join {$table_prefix}journals on journal_records_journal_id  = journals_id "
         ),
         array(
             "journal_records_id" => $_GET['id'],
@@ -636,7 +636,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateJournalRecord") {
         "journal_records as journal_records",
         "*",
         array(
-            "left join {$table_prefeix}journals on journal_records_journal_id  = journals_id "
+            "left join {$table_prefix}journals on journal_records_journal_id  = journals_id "
         ),
         array(
             "journal_records_id" => $_POST['journal_record_id'],

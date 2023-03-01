@@ -426,7 +426,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productListForPos") {
                         {$warehouseFilter}
                         group by vp_id
             ) as pbs on pbs.vp_id = product.product_id",
-            "left join {$table_prefeix}product_brands on brand_id = product_brand_id"
+            "left join {$table_prefix}product_brands on brand_id = product_brand_id"
         ),
         "where"     => array (
             "product.is_trash = 0 and is_disabled = 0 and product_parent_id is null {$searchQuery}"
@@ -486,7 +486,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productList") {
                         from product_base_stock
                         group by vp_id
             ) as pbs on pbs.vp_id = product.product_id",
-            "left join {$table_prefeix}product_brands on brand_id = product_brand_id"
+            "left join {$table_prefix}product_brands on brand_id = product_brand_id"
         ),
         "where"     => array (
             "product.is_trash = 0 and is_disabled = 0 and product_parent_id is null {$searchQuery}"
@@ -571,8 +571,8 @@ if(isset($_GET['page']) and $_GET['page'] == "customerList") {
         "table"     => "customers as customer",
         "fields"    => "customer_id, customer_name, upazila_name, district_name",
         "join"      => array(
-            "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-            "left join {$table_prefeix}districts on customer_district = district_id"
+            "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+            "left join {$table_prefix}districts on customer_district = district_id"
         ),
         "where"     => array(
             "customer.is_trash = 0",
@@ -723,8 +723,8 @@ if(isset($_GET['page']) and $_GET['page'] == "instituteList") {
             " and institute_upazila"   => isset($_GET["upazila_id"]) ? $_GET["upazila_id"] : ""
         ),
         "join"  => array(
-            "left join {$table_prefeix}upazilas on institute_upazila = upazila_id",
-            "left join {$table_prefeix}districts on upazila_district_id = district_id"
+            "left join {$table_prefix}upazilas on institute_upazila = upazila_id",
+            "left join {$table_prefix}districts on upazila_district_id = district_id"
         )
     ));
 
@@ -883,7 +883,7 @@ if(isset($_GET['page']) and $_GET['page'] == "personList") {
         "table" => "persons as person",
         "fields"    => "person_id, person_full_name, institute_name",
         "join"  => array(
-            "left join {$table_prefeix}institute on person_institute = institute_id"
+            "left join {$table_prefix}institute on person_institute = institute_id"
         ),
         "where" => array(
             "person.is_trash = 0 and ( person_full_name LIKE '%". $personSearch ."%'",
@@ -1094,7 +1094,7 @@ if(isset($_GET['page']) and $_GET['page'] == "userList") {
         "table"   => "users as users",
         "fields"  => "user_id, emp_PIN, emp_firstname, emp_lastname, emp_positions",
         "join"    => array(
-            "left join {$table_prefeix}employees on emp_id = user_emp_id"
+            "left join {$table_prefix}employees on emp_id = user_emp_id"
         ),
         "where"   => array(
             "users.is_trash = 0 and emp_firstname LIKE '%". safe_input($search) ."%'",

@@ -125,7 +125,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeList") {
             "employees as employee",
             "emp_id, emp_PIN, emp_department_id, emp_firstname, emp_lastname, emp_type, emp_nature, emp_positions, emp_contact_number, emp_emergency_contact_number, emp_join_date, emp_salary, emp_photo, dep_name",
             array(
-                "left join {$table_prefeix}emp_department on emp_department_id = dep_id"
+                "left join {$table_prefix}emp_department on emp_department_id = dep_id"
             ),
             array (
                 "employee.is_trash = 0 and (emp_PIN" => $requestData['search']['value'],
@@ -181,7 +181,7 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeList") {
             "table"     => "employees as employee",
             "fields"    => "emp_id, emp_PIN, emp_department_id, emp_firstname, emp_lastname, emp_type, emp_nature, emp_positions, emp_contact_number, emp_emergency_contact_number, emp_join_date, emp_salary, emp_photo, dep_name",
             "join"      => array(
-                "left join {$table_prefeix}emp_department on emp_department_id = dep_id"
+                "left join {$table_prefix}emp_department on emp_department_id = dep_id"
             ),
             "where"     => array(
                 "employee.is_trash = 0",
@@ -747,8 +747,8 @@ if(isset($_GET['page']) and $_GET['page'] == "userList") {
           "users as user",
           "user_id, user_emp_id, user_group_id, emp_firstname, emp_lastname, emp_photo, group_name, user_status, user_locked_reason, emp_positions",
           array(
-              "left join {$table_prefeix}employees on user_emp_id = emp_id",
-              "left join {$table_prefeix}user_group on user_group_id = group_id"
+              "left join {$table_prefix}employees on user_emp_id = emp_id",
+              "left join {$table_prefix}user_group on user_group_id = group_id"
           ),
           array (
               "user.is_trash = 0 and emp_firstname LIKE" => $requestData['search']['value'] . "%",
@@ -772,8 +772,8 @@ if(isset($_GET['page']) and $_GET['page'] == "userList") {
           "users as user",
           "user_id, user_emp_id, user_group_id, emp_firstname, emp_lastname, emp_photo, group_name, user_status, user_locked_reason, emp_positions",
           array(
-              "left join {$table_prefeix}employees on user_emp_id = emp_id",
-              "left join {$table_prefeix}user_group on user_group_id = group_id"
+              "left join {$table_prefix}employees on user_emp_id = emp_id",
+              "left join {$table_prefix}user_group on user_group_id = group_id"
           ),
           array("user.is_trash = 0"),
           array (
@@ -1171,7 +1171,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editProfile") {
     "table"   => "users",
     "fields"  => "emp_firstname, emp_lastname, user_pass, user_language",
     "join"    => array(
-      "left join {$table_prefeix}employees on user_emp_id = emp_id"
+      "left join {$table_prefix}employees on user_emp_id = emp_id"
     ),
     "where"   => array(
       "user_id" => $_GET["id"]
@@ -1330,7 +1330,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newBiller") {
               "users as user",
               "user_id, emp_PIN, emp_firstname, emp_lastname",
               array (
-                "left join {$table_prefeix}employees on user_emp_id = emp_id"
+                "left join {$table_prefix}employees on user_emp_id = emp_id"
               ),
               array("user.is_trash = 0")
             );
@@ -1480,10 +1480,10 @@ if(isset($_GET['page']) and $_GET['page'] == "billerList") {
           "billers as biller",
           "biller_user_id, biller_shop_id, biller_accounts_id, accounts_name, emp_id, emp_firstname, emp_lastname, emp_positions, emp_photo, emp_contact_number, emp_email, shop_name, shop_city, shop_state",
           array(
-              "left join {$table_prefeix}users on biller_user_id = user_id",  
-              "left join {$table_prefeix}shops on biller_shop_id = shop_id",
-              "left join {$table_prefeix}accounts on biller_accounts_id = accounts_id",
-              "left join {$table_prefeix}employees on user_emp_id = emp_id"
+              "left join {$table_prefix}users on biller_user_id = user_id",  
+              "left join {$table_prefix}shops on biller_shop_id = shop_id",
+              "left join {$table_prefix}accounts on biller_accounts_id = accounts_id",
+              "left join {$table_prefix}employees on user_emp_id = emp_id"
           ),
           array (
               "biller.is_trash = 0 and emp_firstname LIKE" => $requestData['search']['value'] . "%",
@@ -1508,11 +1508,11 @@ if(isset($_GET['page']) and $_GET['page'] == "billerList") {
           "billers as biller",
           "biller_user_id, biller_shop_id, biller_accounts_id, accounts_name, emp_id, emp_firstname, emp_lastname, emp_positions, emp_photo, emp_contact_number, emp_email, warehouse_name, shop_name, shop_city, shop_state",
           array(
-              "left join {$table_prefeix}users on biller_user_id = user_id",  
-              "left join {$table_prefeix}shops on biller_shop_id = shop_id",
-              "left join {$table_prefeix}accounts on biller_accounts_id = accounts_id",
-              "left join {$table_prefeix}warehouses on biller_warehouse_id = warehouse_id",
-              "left join {$table_prefeix}employees on user_emp_id = emp_id"
+              "left join {$table_prefix}users on biller_user_id = user_id",  
+              "left join {$table_prefix}shops on biller_shop_id = shop_id",
+              "left join {$table_prefix}accounts on biller_accounts_id = accounts_id",
+              "left join {$table_prefix}warehouses on biller_warehouse_id = warehouse_id",
+              "left join {$table_prefix}employees on user_emp_id = emp_id"
           ),
           array("biller.is_trash = 0"),
           array (
@@ -1598,7 +1598,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editBiller") {
               "users as user",
               "user_id, emp_PIN, emp_firstname, emp_lastname",
               array (
-                "left join {$table_prefeix}employees on user_emp_id = emp_id"
+                "left join {$table_prefix}employees on user_emp_id = emp_id"
               ),
               array("user.is_trash = 0")
             );
@@ -1994,8 +1994,8 @@ if(isset($_GET['page']) and $_GET['page'] == "customerList") {
           "customers as customer",
           "customer_id, customer_name, district_name, division_name, customer_phone, customer_email, customer_website, customer_address",
           array (
-            "left join {$table_prefeix}districts on customer_district = district_id",
-            "left join {$table_prefeix}divisions on customer_division = division_id",
+            "left join {$table_prefix}districts on customer_district = district_id",
+            "left join {$table_prefix}divisions on customer_division = division_id",
           ),
           array (
               "customer.is_trash = 0 and customer_name LIKE" => $requestData['search']['value'] . "%",
@@ -2022,8 +2022,8 @@ if(isset($_GET['page']) and $_GET['page'] == "customerList") {
           "customers as customer",
           "customer_id, customer_name, district_name, division_name, customer_phone, customer_email, customer_website, customer_address",
           array (
-            "left join {$table_prefeix}districts on customer_district = district_id",
-            "left join {$table_prefeix}divisions on customer_division = division_id",
+            "left join {$table_prefix}districts on customer_district = district_id",
+            "left join {$table_prefix}divisions on customer_division = division_id",
           ),
           array("customer.is_trash = 0"),
           array (
@@ -2116,9 +2116,9 @@ if(isset($_GET['page']) and $_GET['page'] == "editCustomer") {
       "customer_name, customer_name_in_local_len, round(customer_opening_balance, 2) as customer_opening_balance, division_id, division_name, district_id, district_name, upazila_id, upazila_name,
       customer_postal_code, customer_address, customer_phone, customer_email, customer_website, customer_shipping_rate, customer_discount, send_notif, customer_type",
       array (
-        "left join {$table_prefeix}districts on customer_district = district_id",
-        "left join {$table_prefeix}divisions on customer_division = division_id",
-        "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
+        "left join {$table_prefix}districts on customer_district = district_id",
+        "left join {$table_prefix}divisions on customer_division = division_id",
+        "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
       ),
       array(
           "customer_id" => $_GET['id']

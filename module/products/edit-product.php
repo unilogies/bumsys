@@ -10,8 +10,8 @@ if(!empty($_GET["pid"]) ) {
                         round(product_purchase_price, 2) as product_purchase_price, round(product_sale_price, 2) as product_sale_price, product_initial_stock, has_expiry_date, 
                         product_weight, product_width, product_height, product_alert_qnt, product_description, maintain_stock, is_disabled",
         "join"      => array(
-            "left join {$table_prefeix}product_category on product_category_id = category_id",
-            "left join {$table_prefeix}product_brands on brand_id = product_brand_id"
+            "left join {$table_prefix}product_category on product_category_id = category_id",
+            "left join {$table_prefix}product_brands on brand_id = product_brand_id"
         ),
         "where"     => array(
             "product_id"    => $_GET["pid"]
@@ -413,7 +413,7 @@ if(!empty($_GET["pid"]) ) {
                                             "table"     => "bg_product_items",
                                             "fields"    => "bg_item_product_id, product_name, product_unit, round(bg_product_price, 2) as bg_product_price, round(bg_product_qnt, 2) as bg_product_qnt",
                                             "join"      => array(
-                                                "left join {$table_prefeix}products on product_id = bg_item_product_id"
+                                                "left join {$table_prefix}products on product_id = bg_item_product_id"
                                             ),
                                             "where"     => array(
                                                 "is_raw_materials = 0 and bg_product_id"     => $_GET["pid"]
@@ -564,7 +564,7 @@ if(!empty($_GET["pid"]) ) {
                                             ],
                                             "groupby"   => "product_attributes.pa_name",
                                             "join"  => [
-                                                "inner join {$table_prefeix}product_variations as product_variations on product_variations.pa_name = product_attributes.pa_name"
+                                                "inner join {$table_prefix}product_variations as product_variations on product_variations.pa_name = product_attributes.pa_name"
                                             ]
                                         ]);
 

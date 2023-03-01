@@ -112,7 +112,7 @@
                                             "fields"    => "stock_product_id, product_name, product_unit, stock_batch_id, has_expiry_date, product_generic, round(stock_item_price, 2) as stock_item_price, round(stock_item_qty, 2) as stock_item_qty,
                                                             round(stock_item_discount, 2) as stock_item_discount, round(stock_item_subtotal, 2) as stock_item_subtotal, stock_item_description",
                                             "join"      => array(
-                                                "left join {$table_prefeix}products on product_id = stock_product_id"
+                                                "left join {$table_prefix}products on product_id = stock_product_id"
                                             ),
                                             "where"     => array(
                                                 "is_bundle_item = 0 and stock_sales_id"    => $_GET["edit"]
@@ -495,7 +495,7 @@
                                                                         "table"     => "received_payments as received_payments",
                                                                         "fields"    => "received_payments_method, received_payments_accounts, accounts_name, round(received_payments_amount, 2) as received_payments_amount, received_payments_reference",
                                                                         "join"      => array(
-                                                                            "left join {$table_prefeix}accounts on received_payments_accounts = accounts_id"
+                                                                            "left join {$table_prefix}accounts on received_payments_accounts = accounts_id"
                                                                         ),
                                                                         "where"     => array(
                                                                             "received_payments.is_trash = 0 and received_payments_sales_id"    => $_GET["edit"]

@@ -41,7 +41,7 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
         "table"   => "users as user",
         "fields"  => "user_id, user_emp_id, user_pass, user_language, user_email, user_name, user_status, user_homepage, user_locked_reason, biller_shop_id, biller_accounts_id, biller_warehouse_id",
         "join"    => array(
-            "left join {$table_prefeix}billers on biller_user_id = user_id"
+            "left join {$table_prefix}billers on biller_user_id = user_id"
         ),
         "where"   => array(
             "user.is_trash = 0 and ( user_email" => $_POST["user-email"],
@@ -86,7 +86,7 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
             $failedAttemptInLastFiveMinuteForUser = easySelectD("
                 SELECT 
                     COUNT(*) AS totalAttempt 
-                FROM {$table_prefeix}login_attempts
+                FROM {$table_prefix}login_attempts
                 WHERE attempt_user_id = '{$selectUser["data"][0]["user_id"]}' and attempt_time >= NOW() - INTERVAL 5 MINUTE
             ")["data"][0]["totalAttempt"];
 
@@ -113,7 +113,7 @@ if(isset($_POST["user-email"]) or isset($_POST["user-password"])) {
          $failedAttemptInLastFiveMinuteForHost = easySelectD("
             SELECT 
                 COUNT(*) AS totalAttempt 
-            FROM {$table_prefeix}login_attempts
+            FROM {$table_prefix}login_attempts
             WHERE attempt_ipaddr = '{$get_user_ip}' and attempt_time >= NOW() - INTERVAL 5 MINUTE
         ")["data"][0]["totalAttempt"];
 

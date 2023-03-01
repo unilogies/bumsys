@@ -61,13 +61,13 @@ if(isset($_GET['page']) and $_GET['page'] == "productDetails") {
                             END) as t,  
                             meta_key as mk, meta_value as mv",
             "join"      => array(
-                "left join {$table_prefeix}products as child_products on parent_product.product_id = child_products.product_parent_id",
+                "left join {$table_prefix}products as child_products on parent_product.product_id = child_products.product_parent_id",
                 "inner join ( select 
                         product_id,
                         meta_type,
                         meta_key, 
                         meta_value 
-                    from {$table_prefeix}product_meta 
+                    from {$table_prefix}product_meta 
                 ) as product_meta on product_meta.product_id = parent_product.product_id or product_meta.product_id = child_products.product_id"
             ),
             "where"     => array(
@@ -91,7 +91,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productDetails") {
             "table"     => "bg_product_items as bg_product_items",
             "fields"    => "bg_item_product_id, product_name, round(product_purchase_price, 2) as product_purchase_price, product_unit, bg_product_qnt, 0 as product_discount",
             "join"      => array(
-                "left join {$table_prefeix}products as products on products.product_id = bg_item_product_id"
+                "left join {$table_prefix}products as products on products.product_id = bg_item_product_id"
             ),
             "where"     => array(
                 "is_raw_materials = 0 and bg_product_id" => $product_id
@@ -248,13 +248,13 @@ if(isset($_GET['page']) and $_GET['page'] == "productDetailsForPos") {
                             END) as t,  
                             meta_key as mk, meta_value as mv",
             "join"      => array(
-                "left join {$table_prefeix}products as child_products on parent_product.product_id = child_products.product_parent_id",
+                "left join {$table_prefix}products as child_products on parent_product.product_id = child_products.product_parent_id",
                 "inner join ( select 
                         product_id,
                         meta_type,
                         meta_key, 
                         meta_value 
-                    from {$table_prefeix}product_meta 
+                    from {$table_prefix}product_meta 
                 ) as product_meta on product_meta.product_id = parent_product.product_id or product_meta.product_id = child_products.product_id"
             ),
             "where"     => array(
@@ -291,7 +291,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productDetailsForPos") {
                             has_batch
                             ",
             "join"      => array(
-                "left join {$table_prefeix}products as sub_product on sub_product.product_id = bg_item_product_id",
+                "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id",
                 "left join ( select 
                                 vp_id,
                                 if(batch_id is not null, 1, 0) as has_batch, /** Checking the product if set has expriy date and there also have batch entry*/
@@ -491,13 +491,13 @@ if(isset($_GET['page']) and $_GET['page'] == "productDetailsForReturn") {
                             END) as t,  
                             meta_key as mk, meta_value as mv",
             "join"      => array(
-                "left join {$table_prefeix}products as child_products on parent_product.product_id = child_products.product_parent_id",
+                "left join {$table_prefix}products as child_products on parent_product.product_id = child_products.product_parent_id",
                 "inner join ( select 
                         product_id,
                         meta_type,
                         meta_key, 
                         meta_value 
-                    from {$table_prefeix}product_meta 
+                    from {$table_prefix}product_meta 
                 ) as product_meta on product_meta.product_id = parent_product.product_id or product_meta.product_id = child_products.product_id"
             ),
             "where"     => array(
@@ -532,8 +532,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productDetailsForReturn") {
                         stock_product_id,
                         sum(case when stock_type = 'sale' then stock_item_qty end ) as sale_item_quantity,
                         sum(case when stock_type = 'sale-return' then stock_item_qty end ) as returns_products_quantity
-                    from {$table_prefeix}product_stock as product_stock
-                    left join {$table_prefeix}sales on stock_sales_id = sales_id
+                    from {$table_prefix}product_stock as product_stock
+                    left join {$table_prefix}sales on stock_sales_id = sales_id
                     where stock_product_id = {$product_id} and sales_customer_id = {$customer_id} and product_stock.is_trash = 0
                     group by stock_product_id
                 ) as stock on stock_product_id = product_id",
@@ -595,7 +595,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productList") {
             "left join ( select 
                     stock_product_id, 
                     if(stock_item_qty is null, 0, sum(stock_item_qty)) as totalSoldQnt 
-                from {$table_prefeix}product_stock 
+                from {$table_prefix}product_stock 
                 where is_trash = 0 and stock_type = 'sale' 
                 group by stock_product_id 
             ) as sale_items on stock_product_id = product_id"
@@ -668,14 +668,14 @@ if(isset($_GET['page']) and $_GET['page'] == "getEmpSalaryData") {
             emp_id, emp_firstname, emp_lastname, emp_positions, round(emp_payable_salary, 2) as emp_payable_salary, round(emp_payable_overtime, 2) as emp_payable_overtime, round(emp_payable_bonus, 2) as emp_payable_bonus,
             loan_amount, loan_installment_amount, loan_id, 
             if(loan_installment_paid_amount is null, 0, loan_installment_paid_amount) as loan_installment_paid_amount
-        from {$table_prefeix}employees
+        from {$table_prefix}employees
         left join (select 
                 loan_id, loan_borrower, loan_amount, loan_installment_amount 
-            from {$table_prefeix}loan where is_trash = 0 group by loan_id
+            from {$table_prefix}loan where is_trash = 0 group by loan_id
         ) as loan on emp_id = loan_borrower
         left join (select 
                 loan_ids, sum(loan_installment_paying_amount) as loan_installment_paid_amount 
-            from {$table_prefeix}loan_installment where is_trash = 0 group by loan_ids
+            from {$table_prefix}loan_installment where is_trash = 0 group by loan_ids
         ) as loan_installment on loan_id = loan_ids
         where emp_id = {$emp_id}
         order by loan_id 
@@ -700,29 +700,29 @@ if(isset($_GET['page']) and $_GET['page'] == "getCustomerPaymentInfo") {
             if(received_payments_amount is null, 0, round(received_payments_amount, 2)) as total_received_payments,
             if(payments_return_amount is null, 0, round(payments_return_amount, 2)) as total_payment_return,
             if(received_payments_bonus is null, 0, round(received_payments_bonus, 2)) as total_given_bonus
-        from {$table_prefeix}customers
+        from {$table_prefix}customers
         left join ( select
                 sales_customer_id,
                 sum(sales_grand_total) as sales_grand_total,
                 sum(sales_shipping) as sales_shipping,
                 sum(sales_due) as sales_due
-            from {$table_prefeix}sales where is_return = 0 and is_trash = 0 and sales_status = 'Delivered' group by sales_customer_id
+            from {$table_prefix}sales where is_return = 0 and is_trash = 0 and sales_status = 'Delivered' group by sales_customer_id
         ) as sales on customer_id = sales.sales_customer_id
         left join ( select 
                 sales_customer_id, 
                 sum(sales_grand_total) as returns_grand_total 
-            from {$table_prefeix}sales where is_return = 1 and is_trash = 0 and sales_status = 'Delivered' group by sales_customer_id
+            from {$table_prefix}sales where is_return = 1 and is_trash = 0 and sales_status = 'Delivered' group by sales_customer_id
         ) as product_returns on customer_id = product_returns.sales_customer_id
         left join ( select 
                 received_payments_from, 
                 sum(received_payments_amount) as received_payments_amount, 
                 sum(received_payments_bonus) as received_payments_bonus 
-            from {$table_prefeix}received_payments where is_trash = 0 group by received_payments_from
+            from {$table_prefix}received_payments where is_trash = 0 group by received_payments_from
         ) as received_payments on customer_id = received_payments_from
         left join ( select
                 payments_return_customer_id,
                 sum(payments_return_amount) as payments_return_amount
-            from {$table_prefeix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' group by payments_return_customer_id
+            from {$table_prefix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' group by payments_return_customer_id
         ) as payment_return on customer_id = payments_return_customer_id
         where customer_id = {$customer_id}"
     )["data"][0];
@@ -756,8 +756,8 @@ if(isset($_GET['page']) and $_GET['page'] == "getCustomerStatementInfo") {
             if(returns_grand_total is null, 0, returns_grand_total) as total_product_returns,
             if(discounts_amount is null, 0, discounts_amount) as special_discounts_amount,
             if(payments_return_amount is null, 0, payments_return_amount) as payments_return_amount
-        from {$table_prefeix}customers
-        left join {$table_prefeix}districts on district_id = customer_district
+        from {$table_prefix}customers
+        left join {$table_prefix}districts on district_id = customer_district
         left join ( select 
                 sales_customer_id,  
                 sum(case when is_return = 0 then sales_total_amount end) as sales_total_amount,
@@ -765,12 +765,12 @@ if(isset($_GET['page']) and $_GET['page'] == "getCustomerStatementInfo") {
                 sum(case when is_return = 0 then sales_product_discount end) as sales_product_discount,
                 sum(case when is_return = 0 then sales_discount end) as sales_discount,
                 sum(case when is_return = 1 then sales_grand_total end) as returns_grand_total
-            from {$table_prefeix}sales where is_trash = 0 and sales_status = 'Delivered' and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by sales_customer_id
+            from {$table_prefix}sales where is_trash = 0 and sales_status = 'Delivered' and sales_delivery_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by sales_customer_id
             ) as sales on customer_id = sales_customer_id
         left join ( select
                     wastage_sale_customer,
                     sum(wastage_sale_grand_total) as wastage_sale_grand_total
-                from {$table_prefeix}wastage_sale where is_trash = 0 and wastage_sale_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by wastage_sale_customer
+                from {$table_prefix}wastage_sale where is_trash = 0 and wastage_sale_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by wastage_sale_customer
             ) as wastage_sale on customer_id = wastage_sale_customer
         left join ( select 
                         received_payments_from, 
@@ -778,21 +778,21 @@ if(isset($_GET['page']) and $_GET['page'] == "getCustomerStatementInfo") {
                         sum(case when received_payments_type = 'Advance Collection' then received_payments_amount end) as advance_payments_amount, 
                         sum(case when received_payments_type = 'Sales Payments' or received_payments_type = 'Wastage Sales Payments' then received_payments_amount end) as sales_payments_amount, 
                         sum(received_payments_bonus) as received_payments_bonus 
-                    from {$table_prefeix}received_payments 
+                    from {$table_prefix}received_payments 
                     where is_trash = 0 and received_payments_type != 'Discounts' and date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' 
                     group by received_payments_from
                 ) as received_payments on customer_id = received_payments.received_payments_from
         left join ( select 
                 received_payments_from, 
                 sum(received_payments_amount) as discounts_amount 
-            from {$table_prefeix}received_payments 
+            from {$table_prefix}received_payments 
             where is_trash = 0 and received_payments_type = 'Discounts' and date(received_payments_datetime) between '{$dateRange[0]}' and '{$dateRange[1]}' 
             group by received_payments_from
         ) as given_discounts on customer_id = given_discounts.received_payments_from
         left join (select
                 payments_return_customer_id,
                 sum(payments_return_amount) as payments_return_amount
-            from {$table_prefeix}payments_return
+            from {$table_prefix}payments_return
             where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' 
             group by payments_return_customer_id
         ) as payment_return on customer_id = payments_return_customer_id
@@ -811,27 +811,27 @@ if(isset($_GET['page']) and $_GET['page'] == "getCustomerStatementInfo") {
                         if(total_payment_return_before_filtered_date is null, 0, total_payment_return_before_filtered_date)
 				) as previous_balance
 
-			FROM {$table_prefeix}customers as customers
+			FROM {$table_prefix}customers as customers
 			left join ( select
 					sales_customer_id,
 					sum(case when is_return = 0 then sales_grand_total end) as total_purchased_before_filtered_date,
                     sum(case when is_return = 1 then sales_due end) as total_returned_before_filtered_date
-				from {$table_prefeix}sales where is_trash = 0 and sales_status = 'Delivered' and sales_delivery_date < '{$dateRange[0]}' group by sales_customer_id
+				from {$table_prefix}sales where is_trash = 0 and sales_status = 'Delivered' and sales_delivery_date < '{$dateRange[0]}' group by sales_customer_id
 			) as sales on sales_customer_id = customer_id
             left join ( select
                     wastage_sale_customer,
                     sum(wastage_sale_grand_total) as total_wastage_purched_before_filtered_date
-                from {$table_prefeix}wastage_sale where is_trash = 0 and wastage_sale_date < '{$dateRange[0]}' group by wastage_sale_customer
+                from {$table_prefix}wastage_sale where is_trash = 0 and wastage_sale_date < '{$dateRange[0]}' group by wastage_sale_customer
             ) as wastage_sale on wastage_sale_customer = customer_id
 			left join ( select 
 					received_payments_from,
 					sum(received_payments_amount) + sum(received_payments_bonus) as total_payment_before_filtered_date
-				from {$table_prefeix}received_payments where is_trash = 0 and date(received_payments_datetime) < '{$dateRange[0]}' group by received_payments_from
+				from {$table_prefix}received_payments where is_trash = 0 and date(received_payments_datetime) < '{$dateRange[0]}' group by received_payments_from
 			) as payments on received_payments_from = customer_id
             left join (select
                     payments_return_customer_id,
                     sum(payments_return_amount) as total_payment_return_before_filtered_date
-                from {$table_prefeix}payments_return
+                from {$table_prefix}payments_return
                 where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) < '{$dateRange[0]}'
                 group by payments_return_customer_id
             ) as payment_return on customer_id = payments_return_customer_id
@@ -853,16 +853,16 @@ if(isset($_GET['page']) and $_GET['page'] == "getEmpLoanLoanData") {
             loan_id, loan_amount, loan_installment_amount, 
             if(thisMonthInstallmentPayingStatus is null, 0, 1) as thisMonthInstallmentPayingStatus, 
             if(loan_paid_amount is null, 0, loan_paid_amount) as loan_paid_amount 
-        from {$table_prefeix}loan as loan
+        from {$table_prefix}loan as loan
         left join (select 
                 loan_ids, 
                 sum(loan_installment_paying_amount) as loan_paid_amount 
-            from {$table_prefeix}loan_installment where is_trash = 0 group by loan_ids
+            from {$table_prefix}loan_installment where is_trash = 0 group by loan_ids
         ) as totalPaidAmount on loan_id = totalPaidAmount.loan_ids
         left join (select 
                 loan_ids, 
                 1 as thisMonthInstallmentPayingStatus
-            from {$table_prefeix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
+            from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
         ) as thisMonthStatus on loan_id = thisMonthStatus.loan_ids
         where loan.is_trash = 0 and loan_borrower = {$emp_id} and loan_installment_starting_from <= '{$year}-{$month}-01'
         and ( loan_paid_amount is null or loan_paid_amount < loan_amount)" 
@@ -926,21 +926,21 @@ if(isset($_GET['page']) and $_GET['page'] == "getEmployeeAdvancePaymentsData") {
         select emp_id, emp_firstname, emp_lastname,
             if(advance_payment_amount_sum is null, 0, advance_payment_amount_sum) as advance_paid_amount,
             if(payments_return_amount_sum is null, 0, payments_return_amount_sum) + if(payment_amount_sum is null, 0, payment_amount_sum) as advance_adjust_amount
-        from {$table_prefeix}employees
+        from {$table_prefix}employees
         left join ( select 
                 advance_payment_pay_to, 
                 sum(advance_payment_amount) as advance_payment_amount_sum 
-            from {$table_prefeix}advance_payments where is_trash = 0 group by advance_payment_pay_to 
+            from {$table_prefix}advance_payments where is_trash = 0 group by advance_payment_pay_to 
         ) as get_advance_payments on advance_payment_pay_to = emp_id
         left join ( select 
                 payment_to_employee, 
                 sum(payment_amount) as payment_amount_sum 
-            from {$table_prefeix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee 
+            from {$table_prefix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee 
         ) as get_payments on payment_to_employee = emp_id
         left join ( select 
                 payments_return_emp_id, 
                 sum(payments_return_amount) as payments_return_amount_sum 
-            from {$table_prefeix}payments_return where is_trash = 0 group by payments_return_emp_id 
+            from {$table_prefix}payments_return where is_trash = 0 group by payments_return_emp_id 
         ) as get_advance_return on payments_return_emp_id = emp_id
         where emp_id = {$emp_id}"
     )["data"][0];
@@ -965,29 +965,29 @@ if(isset($_GET['page']) and $_GET['page'] == "getCompanyDueBillDetails") {
                 if(purchase_return_grand_total is null, 0, purchase_return_grand_total)
             ) as payment_amount_sum,
             if(adjustment_amount is null, 0, round(adjustment_amount, 2)) as adjustment_amount_sum
-        from {$table_prefeix}companies
+        from {$table_prefix}companies
         left join ( select 
                 bills_company_id, 
                 sum(bills_amount) as bills_amount_sum 
-            from {$table_prefeix}bills where is_trash = 0 group by bills_company_id 
+            from {$table_prefix}bills where is_trash = 0 group by bills_company_id 
         ) as get_company_bills on bills_company_id = company_id 
         left join ( select
                 payment_to_company, 
                 sum(payment_amount) as payment_amount_sum 
-            from {$table_prefeix}payments where is_trash = 0 and ( payment_type = 'Due Bill' or payment_type = 'Bill' ) group by payment_to_company 
+            from {$table_prefix}payments where is_trash = 0 and ( payment_type = 'Due Bill' or payment_type = 'Bill' ) group by payment_to_company 
         ) as get_company_payment on payment_to_company = company_id
         left join (
             select
                 pa_company,
                 sum(pa_amount) as adjustment_amount
-            from {$table_prefeix}payment_adjustment where is_trash = 0 group by pa_company
+            from {$table_prefix}payment_adjustment where is_trash = 0 group by pa_company
         ) as payment_adjustment on pa_company = company_id
         left join (
             select
                 purchase_company_id,
                 sum(CASE WHEN is_return = 0 then purchase_grand_total end) as purchase_grand_total,
                 sum(CASE WHEN is_return = 1 then purchase_due end) as purchase_return_grand_total
-            from {$table_prefeix}purchases where is_trash = 0 group by purchase_company_id
+            from {$table_prefix}purchases where is_trash = 0 group by purchase_company_id
         ) as purchaseBill on purchaseBill.purchase_company_id = company_id
         where company_id = {$company_id}"
     )["data"][0];
@@ -1014,7 +1014,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getProductComparision") {
                 SELECT 
                     product_parent_id,
                     group_concat(product_id) as child_product
-                FROM {$table_prefeix}products
+                FROM {$table_prefix}products
                 where is_trash = 0
                 group by product_parent_id
             ) as child_product on child_product.product_parent_id = product_id"
@@ -1273,7 +1273,7 @@ if(isset($_GET['page']) and $_GET['page'] == "customerPurchaseList") {
         "table"     => "sales",
         "fields"    => "sales_id as id, sales_status, DATE_FORMAT(sales_delivery_date, '%b %d, %Y') as date, sales_reference as ref, round(sales_grand_total, 2) as total, sales_payment_status as pay_status, shop_name as shop",
         "join"      => array(
-            "left join {$table_prefeix}shops on sales_shop_id = shop_id"
+            "left join {$table_prefix}shops on sales_shop_id = shop_id"
         ),
         "where"     => array(
             "sales_customer_id" => $_GET["cid"],
@@ -1303,8 +1303,8 @@ if(isset($_GET['page']) and $_GET['page'] == "customerPurchaseProductList") {
         "table"     => "product_stock",
         "fields"    => "stock_product_id as pid, product_name as pn, product_unit as pu, has_expiry_date as hed, product_generic as pg, if(stock_batch_id is null, '', stock_batch_id) as batch, round(stock_item_price, 2) as stock_item_price, round(stock_item_qty, 2) as stock_item_qty, round(stock_item_discount, 2) as stock_item_discount, round(stock_item_subtotal, 2) as stock_item_subtotal",
         "join"      => array(
-            "left join {$table_prefeix}products on stock_product_id = product_id",
-            "left join {$table_prefeix}product_batches on stock_batch_id = batch_id"
+            "left join {$table_prefix}products on stock_product_id = product_id",
+            "left join {$table_prefix}product_batches on stock_batch_id = batch_id"
         ),
         "where"     => array(
             "stock_item_qty > 0 and stock_sales_id " => $_GET["saleid"]
@@ -1501,7 +1501,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productVisualList") {
             "left join (select
                     stock_product_id,
                     sum(stock_item_qty) as main_sold_qty
-                from {$table_prefeix}product_stock
+                from {$table_prefix}product_stock
                 where is_trash = 0 and stock_type = 'sale'
                 group by stock_product_id
             ) as sold on stock_product_id = product.product_id",
@@ -1513,7 +1513,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productVisualList") {
                     group_concat(product_id) as child_products,
                     sum(stock_in) as child_stock_in,
                     sum(sold_qty) as child_sold_qty
-                FROM {$table_prefeix}products as childProductJoin
+                FROM {$table_prefix}products as childProductJoin
 
                 left join (select 
                         product_id,
@@ -1525,7 +1525,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productVisualList") {
                 left join (select
                         stock_product_id,
                         sum(stock_item_qty) as sold_qty
-                    from {$table_prefeix}product_stock
+                    from {$table_prefix}product_stock
                     where is_trash = 0 and stock_type = 'sale'
                     group by stock_product_id
                 ) as sold on stock_product_id = childProductJoin.product_id
@@ -1543,7 +1543,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productVisualList") {
                     product_edition,
                     sum(edition_stock_in) as edition_stock_in,
                     sum(edition_sold_qty) as edition_sold_qty
-                FROM {$table_prefeix}products as sameEditionProduct
+                FROM {$table_prefix}products as sameEditionProduct
     
                 left join (select 
                         product_id,
@@ -1555,7 +1555,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productVisualList") {
                 left join (select
                         stock_product_id,
                         sum(stock_item_qty) as edition_sold_qty
-                    from {$table_prefeix}product_stock
+                    from {$table_prefix}product_stock
                     where is_trash = 0 and stock_type = 'sale'
                     group by stock_product_id
                 ) as sold on stock_product_id = sameEditionProduct.product_id
@@ -1635,7 +1635,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getChildProductData") {
                     sum(case when stock_type = 'transfer-out' then stock_item_qty end) as transfer_out_qty,
                     sum(case when stock_type = 'specimen-copy' then stock_item_qty end) as specimen_copy_qty,
                     sum(case when stock_type = 'specimen-copy-return' then stock_item_qty end) as specimen_copy_return_qty
-                from {$table_prefeix}product_stock
+                from {$table_prefix}product_stock
                 where is_trash = 0 and stock_warehouse_id $warehouse_filter
                 group by stock_product_id
             ) as product_stock on stock_product_id = product_id",
@@ -1649,8 +1649,8 @@ if(isset($_GET['page']) and $_GET['page'] == "getChildProductData") {
                 group by vp_id
             ) as base_stock on base_stock.vp_id = product.product_id",
 
-            "left join {$table_prefeix}product_category on product_category_id = category_id",
-            "left join {$table_prefeix}product_brands on product_brand_id = brand_id",
+            "left join {$table_prefix}product_category on product_category_id = category_id",
+            "left join {$table_prefix}product_brands on product_brand_id = brand_id",
         ),
         "where"     => array(
             "product.is_trash = 0 and product.product_parent_id" => $_GET["pid"]
@@ -1729,7 +1729,7 @@ if(isset($_GET['page']) and $_GET['page'] == "salesOverviewChartData") {
                 SELECT 
                     sales_delivery_date, 
                     sum(sales_quantity) as sales_quantity 
-                FROM {$table_prefeix}sales 
+                FROM {$table_prefix}sales 
                 WHERE is_trash = 0
                 GROUP BY sales_delivery_date
             ) AS sales on sales_delivery_date = db_date
@@ -1779,7 +1779,7 @@ if(isset($_GET['page']) and $_GET['page'] == "salesOverviewChartData") {
                 SELECT 
                     sales_delivery_date, 
                     sum(sales_quantity) as sales_quantity 
-                FROM {$table_prefeix}sales 
+                FROM {$table_prefix}sales 
                 WHERE is_trash = 0
                 GROUP BY sales_delivery_date
             ) AS sales on sales_delivery_date = db_date

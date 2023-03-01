@@ -200,7 +200,7 @@
                         "table"     => "bg_product_items as bg_product_items",
                         "fields"    => "bg_item_product_id, bg_product_unit_qnt, bg_product_unit, puv_purchase_price",
                         "join"      => array(
-                            "left join {$table_prefeix}product_unit_variants as puv on puv.puv_product_id = bg_item_product_id and puv.puv_name = bg_product_items.bg_product_unit"
+                            "left join {$table_prefix}product_unit_variants as puv on puv.puv_product_id = bg_item_product_id and puv.puv_name = bg_product_items.bg_product_unit"
                         ),
                         "where"     => array(
                             "bg_product_id" => $productId

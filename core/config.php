@@ -25,6 +25,7 @@
 define('ACTIVE_THEME', 'rui');
 define('TABLE_PREFIX', 'bms_');
 define('AUTO_LOGOUT_TIME', 300); // in Second. Default is five minutes
+define('VERSION', '2.0.2');
 
 // Directory Configuration
 define('DIR_CORE', DIR_BASE . 'core/');

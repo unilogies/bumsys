@@ -46,7 +46,7 @@ runQuery("SELECT
         CASE WHEN option_name = 'decimalPlaces' THEN @decimalPlace:= option_value END, 
         CASE WHEN option_name = 'mysqlTimeFormat' THEN @mysqlTimeFormat:= option_value END,
         CASE WHEN option_name = 'mysqlDateFormat' THEN @mysqlDateFormat:= option_value END
-    FROM ro_options WHERE option_name in('decimalPlaces', 'mysqlDateFormat', 'mysqlTimeFormat');
+    FROM {$table_prefix}options WHERE option_name in('decimalPlaces', 'mysqlDateFormat', 'mysqlTimeFormat');
 ");
 
 // Get the page slug

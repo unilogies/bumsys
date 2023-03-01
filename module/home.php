@@ -21,7 +21,7 @@
 					<div class="small-box bg-green">
 						<div class="inner">
 							<h3><?php 
-							$selectSoldQnt =  easySelectD("SELECT if(sum(sales_quantity) is null, 0, sum(sales_quantity)) as totalSales FROM {$table_prefeix}sales where YEAR(sales_delivery_date) = YEAR(CURRENT_DATE) and is_trash = 0 group by YEAR(sales_delivery_date)");
+							$selectSoldQnt =  easySelectD("SELECT if(sum(sales_quantity) is null, 0, sum(sales_quantity)) as totalSales FROM {$table_prefix}sales where YEAR(sales_delivery_date) = YEAR(CURRENT_DATE) and is_trash = 0 group by YEAR(sales_delivery_date)");
 							
 							$soldQnt = 0;
 							if($selectSoldQnt !== false) {
@@ -45,7 +45,7 @@
 					<!-- small box -->
 					<div class="small-box bg-aqua">
 						<div class="inner">
-						<h3><?php echo __(easySelectD("SELECT count(DISTINCT sales_customer_id) as totalCustomer FROM {$table_prefeix}sales")["data"][0]["totalCustomer"]); ?></h3>
+						<h3><?php echo __(easySelectD("SELECT count(DISTINCT sales_customer_id) as totalCustomer FROM {$table_prefix}sales")["data"][0]["totalCustomer"]); ?></h3>
 
 							<p><?= __("Total Customers"); ?></p>
 						</div>
@@ -60,7 +60,7 @@
 					<!-- small box -->
 					<div class="small-box bg-yellow">
 						<div class="inner">
-							<h3><?php echo __(easySelectD("SELECT count(product_id) as totalProduct FROM {$table_prefeix}products")["data"][0]["totalProduct"]); ?></h3>
+							<h3><?php echo __(easySelectD("SELECT count(product_id) as totalProduct FROM {$table_prefix}products")["data"][0]["totalProduct"]); ?></h3>
 
 							<p><?= __("Total Products"); ?></p>
 						</div>
@@ -119,7 +119,7 @@
 											"table"   => "product_stock as product_stock",
 											"fields"  => "product_name, product_unit, sum(stock_item_qty) as totalItemQnt",
 											"join"    => array(
-												"left join {$table_prefeix}products on stock_product_id = product_id"
+												"left join {$table_prefix}products on stock_product_id = product_id"
 											),
 											"where"   => array(
 													"product_stock.is_trash = 0 and stock_type"  => 'sale',
@@ -187,7 +187,7 @@
                                                                         round(sum(base_stock_in), 2) as base_stock_in,
                                                                         base_qty
                                                                     FROM product_base_stock as pbs -- Product Base Stock
-                                                                    left join {$table_prefeix}products as product on product.product_id = pbs.vp_id
+                                                                    left join {$table_prefix}products as product on product.product_id = pbs.vp_id
                                                                     where batch_id is null or date(batch_expiry_date) > curdate()
                                                                     GROUP BY pbs.vp_id
                                                                     order by base_stock_in ASC

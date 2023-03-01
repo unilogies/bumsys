@@ -94,10 +94,10 @@ if(isset($_GET['page']) and $_GET['page'] == "productCategoryList") {
           "product_category",
           "category_id, category_name, shop_name",
           array(
-              "left join {$table_prefeix}shops on category_shop_id = shop_id"
+              "left join {$table_prefix}shops on category_shop_id = shop_id"
           ),
           array (
-              "{$table_prefeix}product_category.is_trash = 0 and category_name LIKE" => $requestData['search']['value'] . "%",
+              "{$table_prefix}product_category.is_trash = 0 and category_name LIKE" => $requestData['search']['value'] . "%",
               " OR shop_name LIKE" => $requestData['search']['value'] . "%"
           ),
           array (
@@ -117,9 +117,9 @@ if(isset($_GET['page']) and $_GET['page'] == "productCategoryList") {
           "product_category",
           "category_id, category_name, shop_name",
           array(
-              "left join {$table_prefeix}shops on category_shop_id = shop_id"
+              "left join {$table_prefix}shops on category_shop_id = shop_id"
           ),
-          array("{$table_prefeix}product_category.is_trash = 0"),
+          array("{$table_prefix}product_category.is_trash = 0"),
           array (
               $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
           ),
@@ -195,7 +195,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editCategory") {
     "product_category",
     "category_id, category_name, shop_id, shop_name",
     array(
-        "left join {$table_prefeix}shops on category_shop_id = shop_id"
+        "left join {$table_prefix}shops on category_shop_id = shop_id"
     ),
     array(
         "category_id" => $_GET['id']
@@ -380,7 +380,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
         if( $_POST["productType"] === "Grouped" or $_POST["productType"] === "Bundle" ) {
 
             // Insert Bundle/ Sub product
-            $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
+            $insertSubProduct = "INSERT INTO {$table_prefix}bg_product_items(
                 bg_product_id,
                 bg_item_product_id,
                 bg_product_price,
@@ -403,7 +403,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
         }
 
         // Insert intital stock
-        $initalStockEntry = "INSERT INTO {$table_prefeix}product_stock (
+        $initalStockEntry = "INSERT INTO {$table_prefix}product_stock (
             stock_type,
             stock_entry_date,
             stock_warehouse_id,
@@ -452,7 +452,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
             }
 
             // Insert variable product
-            $insertVariableProduct = "INSERT INTO {$table_prefeix}products(
+            $insertVariableProduct = "INSERT INTO {$table_prefix}products(
                 product_code,
                 product_name,
                 product_group,
@@ -484,7 +484,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
 
 
             // Product meta
-            $productMeta = "INSERT INTO {$table_prefeix}product_meta(
+            $productMeta = "INSERT INTO {$table_prefix}product_meta(
                 product_id,
                 meta_type,
                 meta_key,
@@ -565,7 +565,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
                 //         // Then multiply the bgProductQnt with unit base qty
                 //         if(isset($_POST["product_variation"]["Units"][$vKey] ) ) {
 
-                //             $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefeix}product_units where unit_name = '". $_POST["product_variation"]["Units"][$vKey] ."' )";
+                //             $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefix}product_units where unit_name = '". $_POST["product_variation"]["Units"][$vKey] ."' )";
 
                 //         } else {
                             
@@ -574,7 +574,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
                 //         }
 
                 //         $insertSubProduct .= "(
-                //             (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                //             (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                 //             '{$bgProductId}',
                 //             '". $_POST["bgProductSalePrice"][$pkey] ."',
                 //             {$bgProductQty}
@@ -594,7 +594,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
                         'initial',
                         '". date("Y-m-d") ."'
                         '{$_SESSION["wid"]}',
-                        (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                        (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                         '{$variationPurchasePirce}',
                         '". safe_input($_POST["productVariationIntitalStock"][$vKey]) ."',
                         '". safe_input($_POST["productVariationIntitalStock"][$vKey]) * $variationPurchasePirce ."',
@@ -611,7 +611,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newProduct") {
 
                     $productMeta .= "
                     (
-                        (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                        (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                         'Variation',
                         '". $attributeName ."',
                         '". $variationName ."'
@@ -750,7 +750,7 @@ if(isset($_GET['page']) and $_GET['page'] == "attachSubProduct") {
 
 
             // Insert Bundle/ Sub product
-            $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
+            $insertSubProduct = "INSERT INTO {$table_prefix}bg_product_items(
                 bg_product_id,
                 bg_item_product_id,
                 bg_product_price,
@@ -764,7 +764,7 @@ if(isset($_GET['page']) and $_GET['page'] == "attachSubProduct") {
                 // Then multiply the bgProductQnt with unit base qty
                 if( !empty($product['product_unit']) ) {
 
-                    $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefeix}product_units where unit_name = '{$product['product_unit']}' )";
+                    $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefix}product_units where unit_name = '{$product['product_unit']}' )";
 
                 } else {
                     
@@ -951,7 +951,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
 
             // Insert Bundle/ Grouped product
-            $insertSubProduct = "INSERT INTO {$table_prefeix}bg_product_items(
+            $insertSubProduct = "INSERT INTO {$table_prefix}bg_product_items(
                 bg_product_id,
                 bg_item_product_id,
                 bg_product_price,
@@ -1092,7 +1092,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
             }
 
             // Insert variable product
-            $insertVariableProduct = "INSERT INTO {$table_prefeix}products(
+            $insertVariableProduct = "INSERT INTO {$table_prefix}products(
                 product_code,
                 product_name,
                 product_group,
@@ -1123,7 +1123,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
             ) VALUES ";
 
             // Product meta
-            $productMeta = "INSERT INTO {$table_prefeix}product_meta(
+            $productMeta = "INSERT INTO {$table_prefix}product_meta(
                 product_id,
                 meta_type,
                 meta_key,
@@ -1132,7 +1132,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
 
             // Insert intital stock
-            $initalStockEntry = "INSERT INTO {$table_prefeix}product_stock (
+            $initalStockEntry = "INSERT INTO {$table_prefix}product_stock (
                 stock_type,
                 stock_entry_date,
                 stock_warehouse_id,
@@ -1213,7 +1213,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
                         'initial',
                         '". date("Y-m-d") ."',
                         '{$_SESSION["wid"]}',
-                        (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                        (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                         '{$variationPurchasePirce}',
                         '". safe_input($_POST["productVariationIntitalStock"][$vKey]) ."',
                         '". safe_input($_POST["productVariationIntitalStock"][$vKey]) * $variationPurchasePirce ."',
@@ -1230,7 +1230,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateProduct") {
 
                     $productMeta .= "
                     (
-                        (select product_id from {$table_prefeix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
+                        (select product_id from {$table_prefix}products where product_code = '". safe_input($_POST["productVariationCode"][$vKey]) ."'),
                         'Variation',
                         '". $attributeName ."',
                         '". $variationName ."'
@@ -1368,7 +1368,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productList") {
             "product_id, product_code, product_name, product_type, product_group, product_generic, product_description, round(product_purchase_price, 2) as product_purchase_price, 
             round(product_sale_price, 2) as product_sale_price, category_name, product_edition, has_sub_product",
             array (
-            "left join {$table_prefeix}product_category on product_category_id = category_id"
+            "left join {$table_prefix}product_category on product_category_id = category_id"
             ),
             array (
                 "product.is_trash = 0 and {$productEditionFilter} and (product_code LIKE '". safe_input($requestData['search']['value']) ."%' ",
@@ -1395,7 +1395,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productList") {
             "product_id, product_code, product_name, product_group, product_generic, product_type, product_description, round(product_purchase_price, 2) as product_purchase_price, 
             round(product_sale_price, 2) as product_sale_price, category_name, product_edition, has_sub_product",
             array (
-                "left join {$table_prefeix}product_category on product_category_id = category_id"
+                "left join {$table_prefix}product_category on product_category_id = category_id"
             ),
             array("product.is_trash = 0 and product_type != 'Child'"),
             array (
@@ -1626,12 +1626,12 @@ if(isset($_GET['page']) and $_GET['page'] == "itemUnitList") {
 
   $search = $requestData["search"]["value"];
   $getData = easySelectD("
-      SELECT unit_id, unit_name, short_name, unit_description, equal_unit_qnt, equal_unit_name FROM `{$table_prefeix}product_units` unit1
+      SELECT unit_id, unit_name, short_name, unit_description, equal_unit_qnt, equal_unit_name FROM `{$table_prefix}product_units` unit1
           left join (
               select 
                   unit_id as id,
                   unit_name as equal_unit_name
-              from {$table_prefeix}product_units
+              from {$table_prefix}product_units
           ) unit2 on unit1.equal_unit_id = unit2.id
       where is_trash=0 and unit_name like '{$search}%'
       order by {$columns[$requestData['order'][0]['column']]} {$requestData['order'][0]['dir']}
@@ -1704,12 +1704,12 @@ if(isset($_GET['page']) and $_GET['page'] == "editUnit") {
   $unit_id = safe_input($_GET['id']);
 
   $selectItemUnit = easySelectD("
-      SELECT unit_id, equal_unit_id, unit_name, short_name, unit_description, equal_unit_qnt, equal_unit_name FROM `{$table_prefeix}product_units` unit1
+      SELECT unit_id, equal_unit_id, unit_name, short_name, unit_description, equal_unit_qnt, equal_unit_name FROM `{$table_prefix}product_units` unit1
           left join (
               select 
                   unit_id as id,
                   unit_name as equal_unit_name
-              from {$table_prefeix}product_units
+              from {$table_prefix}product_units
           ) unit2 on unit1.equal_unit_id = unit2.id
       where is_trash=0 and unit_id = '{$unit_id}'
   ");
@@ -2643,7 +2643,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productAttributeList") {
         "attributes.is_trash = 0 and attributes.pa_name LIKE" => $requestData['search']['value'] . "%"
       ),
       "join"    => array(
-          "left join {$table_prefeix}product_variations as variations on variations.pa_name = attributes.pa_name"
+          "left join {$table_prefix}product_variations as variations on variations.pa_name = attributes.pa_name"
       ),
       "groupby" => "attributes.pa_name",
       "orderby" => array(

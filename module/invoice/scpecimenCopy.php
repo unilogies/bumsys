@@ -5,7 +5,7 @@ $selectSC = easySelectA(array(
     "table"     => "specimen_copies",
     "fields"    => "sc_id, sc_type, sc_date, emp_firstname, emp_lastname, emp_working_area, emp_contact_number",
     "join"      => array(
-        "left join {$table_prefeix}employees on sc_employee_id = emp_id",
+        "left join {$table_prefix}employees on sc_employee_id = emp_id",
     ),
     "where"     => array(
         "sc_id"     => empty($_GET["id"]) ? 0 : $_GET["id"]
@@ -24,7 +24,7 @@ $selectSCItem = easySelectA(array(
     "table"   => "product_stock",
     "fields"  => "stock_item_qty, product_name",
     "join"    => array(
-      "left join {$table_prefeix}products on stock_product_id = product_id"
+      "left join {$table_prefix}products on stock_product_id = product_id"
     ),
     "where" => array(
       "is_bundle_item = 0 and stock_sc_id"  => $_GET["id"],

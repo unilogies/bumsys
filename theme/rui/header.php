@@ -63,7 +63,7 @@ $empFullName = $LoggedUser["emp_firstname"] . " " . $LoggedUser["emp_lastname"];
                 <!-- mini logo for sidebar mini 50x50 pixels -->
                 <span class="logo-mini"><img src="<?php echo full_website_address() . "/assets/images/logo.png" ?>" alt="Royal Live"></span>
                 <!-- logo for regular state and mobile devices -->
-                <span class="logo-lg"><b>BuM</b>Sys</span>
+                <span class="logo-lg"><b>Bum</b>Sys</span>
             </a>
 
             <!-- Header Navbar -->
@@ -75,64 +75,6 @@ $empFullName = $LoggedUser["emp_firstname"] . " " . $LoggedUser["emp_lastname"];
                 <!-- Navbar Right Menu -->
                 <div class="navbar-custom-menu">
                     <ul class="nav navbar-nav">
-
-                        <!-- Messages: style can be found in dropdown.less-->
-                        <li class="dropdown messages-menu">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <i class="fa fa-envelope-o"></i>
-                                <span class="label label-success">4</span>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li class="header">You have 4 messages</li>
-                                <li>
-                                    <!-- inner menu: contains the actual data -->
-                                    <ul class="menu">
-
-                                        <?php 
-
-                                            $selectChat = easySelectA(array(
-                                                "table"     => "chat_users",
-                                                "fields"    => "emp_firstname, emp_lastname, user_emp_id, chat_user_id",
-                                                "join"      => array(
-                                                    "left join {$table_prefix}users on user_id = chat_user_id",
-                                                    "left join {$table_prefix}employees on emp_id = user_emp_id"
-                                                ),
-                                                "where"     => array(
-                                                    "chat_user_id != {$_SESSION['uid']}"
-                                                ),
-                                                "limit"     => array(
-                                                    "start" => 0,
-                                                    "length" => 5
-                                                )
-                                            ));
-
-                                            if($selectChat !== false) {
-
-                                                foreach($selectChat["data"] as $item ) {
-                                                    echo "<li>
-                                                            <a onclick='BMS.CHAT.showChatBox(event, {$item["chat_user_id"]})' href='#'>
-                                                                <div class='pull-left'>
-                                                                    <img src='". full_website_address() ."/images/?for=employees&id={$item["user_emp_id"]}'class='img-circle'>
-                                                                </div>
-                                                                <h4>
-                                                                    {$item["emp_firstname"]} {$item["emp_lastname"]}
-                                                                    <small><i class='fa fa-clock-o'></i> 5 mins</small>
-                                                                </h4>
-                                                                <p>Why not buy a new awesome theme?</p>
-                                                            </a>
-                                                        </li>";
-                                                }
-
-                                            }
-
-                                        ?>
-                                        
-
-                                    </ul>
-                                </li>
-                                <li class="footer"><a href="#">See All Messages</a></li>
-                            </ul>
-                        </li>
 
                         <!-- Notifications: style can be found in dropdown.less -->
                         <li class="dropdown notifications-menu">

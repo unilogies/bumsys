@@ -43,9 +43,9 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
             "sales as sales",
             "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on customer_id = sales_customer_id",
-                "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
-                "left join {$table_prefeix}districts on district_id = customer_district"
+                "left join {$table_prefix}customers on customer_id = sales_customer_id",
+                "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
+                "left join {$table_prefix}districts on district_id = customer_district"
             ),
             array (
                 "sales.is_trash = 0 and sales.is_return = 0 and sales.sales_delivery_date is not null and sales_shop_id" => $_SESSION["sid"],
@@ -77,9 +77,9 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
             sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, 
             sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on customer_id = sales_customer_id",
-                "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
-                "left join {$table_prefeix}districts on district_id = customer_district"
+                "left join {$table_prefix}customers on customer_id = sales_customer_id",
+                "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
+                "left join {$table_prefix}districts on district_id = customer_district"
             ),
             array (
               "sales.is_trash = 0 and sales.is_return = 0 and sales.sales_delivery_date is not null and sales_shop_id" => $_SESSION["sid"],
@@ -106,9 +106,9 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
           "sales as sales",
           "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
           array (
-            "left join {$table_prefeix}customers on customer_id = sales_customer_id",
-            "left join {$table_prefeix}upazilas on upazila_id = customer_upazila",
-            "left join {$table_prefeix}districts on district_id = customer_district"
+            "left join {$table_prefix}customers on customer_id = sales_customer_id",
+            "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
+            "left join {$table_prefix}districts on district_id = customer_district"
           ),
           array (
             "sales.is_trash = 0 and sales.is_return = 0 and sales.sales_delivery_date is not null and sales_shop_id" => $_SESSION["sid"],
@@ -710,9 +710,9 @@ if(isset($_GET['page']) and $_GET['page'] == "shopExpensesList") {
             "payments as payment",
             "payment_id, if(item_description is not null, item_description, combine_description(payment_description, item_description)) as payment_description, payment_reference, company_name, emp_firstname, emp_lastname, payment_date, payment_amount, payment_from, payment_method",
             array (
-                "left join {$table_prefeix}companies on payment_to_company = company_id",
-                "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+                "left join {$table_prefix}companies on payment_to_company = company_id",
+                "left join {$table_prefix}employees on payment_to_employee = emp_id",
+                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
             ),
             array (
                 "payment.is_trash = 0 and payment_from"  => $_SESSION["aid"],
@@ -738,9 +738,9 @@ if(isset($_GET['page']) and $_GET['page'] == "shopExpensesList") {
             "payments as payment",
             "payment_id, if(item_description is not null, item_description, combine_description(payment_description, item_description)) as payment_description, payment_reference, company_name, emp_firstname, emp_lastname, payment_date, payment_amount, payment_from, payment_method",
             array (
-                "left join {$table_prefeix}companies on payment_to_company = company_id",
-                "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+                "left join {$table_prefix}companies on payment_to_company = company_id",
+                "left join {$table_prefix}employees on payment_to_employee = emp_id",
+                "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
             ),
             array (
               "payment.is_trash = 0 and payment_from"  => $_SESSION["aid"],
@@ -767,9 +767,9 @@ if(isset($_GET['page']) and $_GET['page'] == "shopExpensesList") {
           "payments as payment",
           "payment_id, if(item_description is not null, item_description, combine_description(payment_description, item_description)) as payment_description, payment_reference, company_name, emp_firstname, emp_lastname, payment_date, payment_amount, payment_from, payment_method",
           array (
-            "left join {$table_prefeix}companies on payment_to_company = company_id",
-            "left join {$table_prefeix}employees on payment_to_employee = emp_id",
-            "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefeix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
+            "left join {$table_prefix}companies on payment_to_company = company_id",
+            "left join {$table_prefix}employees on payment_to_employee = emp_id",
+            "left join ( select payment_items_payments_id, group_concat(payment_items_description SEPARATOR ', ' ) as item_description from {$table_prefix}payment_items group by payment_items_payments_id ) as payment_items on payment_items_payments_id = payment_id"
           ),
           array (
             "payment.is_trash = 0 and payment_from"  => $_SESSION["aid"]
@@ -1039,9 +1039,9 @@ if(isset($_GET['page']) and $_GET['page'] == "shopAdvanceCollectionList") {
             "received_payments as received_payment",
             "received_payments_id, customer_name, received_payments_shop, received_payments_from, received_payments_amount, received_payments_bonus, received_payments_details, received_payments_method, received_payments_cheque_no, received_payments_cheque_date, received_payments_datetime, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on received_payments_from = customer_id",
-                "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-                "left join {$table_prefeix}districts on customer_district = district_id"
+                "left join {$table_prefix}customers on received_payments_from = customer_id",
+                "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+                "left join {$table_prefix}districts on customer_district = district_id"
             ),
             array (
                 "received_payment.is_trash = 0 and received_payments_type" => "Advance Collection",
@@ -1065,9 +1065,9 @@ if(isset($_GET['page']) and $_GET['page'] == "shopAdvanceCollectionList") {
             "received_payments as received_payment",
             "received_payments_id, customer_name, received_payments_shop, received_payments_from, received_payments_amount, received_payments_bonus, received_payments_details, received_payments_method, received_payments_cheque_no, received_payments_cheque_date, received_payments_datetime, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on received_payments_from = customer_id",
-                "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-                "left join {$table_prefeix}districts on customer_district = district_id"
+                "left join {$table_prefix}customers on received_payments_from = customer_id",
+                "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+                "left join {$table_prefix}districts on customer_district = district_id"
             ),
             array (
                 "received_payment.is_trash = 0 and received_payments_type" => "Advance Collection",
@@ -1138,7 +1138,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editShopAdvanceCollection") {
             "received_payments_id" => $_GET["id"]
         ),
         "join"  => array(
-            "left join {$table_prefeix}customers on received_payments_from = customer_id"
+            "left join {$table_prefix}customers on received_payments_from = customer_id"
         )
     ))["data"][0];
     
@@ -1730,9 +1730,9 @@ if(isset($_GET['page']) and $_GET['page'] == "shopReceivedPaymentsList") {
             "received_payments as received_payment",
             "received_payments_id, customer_name, received_payments_shop, received_payments_from, received_payments_amount, received_payments_details, received_payments_method, received_payments_cheque_no, received_payments_cheque_date, received_payments_datetime, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on received_payments_from = customer_id",
-                "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-                "left join {$table_prefeix}districts on customer_district = district_id"
+                "left join {$table_prefix}customers on received_payments_from = customer_id",
+                "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+                "left join {$table_prefix}districts on customer_district = district_id"
             ),
             array (
                 "received_payment.is_trash = 0 and received_payments_type" => "Received Payments",
@@ -1756,9 +1756,9 @@ if(isset($_GET['page']) and $_GET['page'] == "shopReceivedPaymentsList") {
             "received_payments as received_payment",
             "received_payments_id, customer_name, received_payments_shop, received_payments_from, received_payments_amount, received_payments_details, received_payments_method, received_payments_cheque_no, received_payments_cheque_date, received_payments_datetime, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on received_payments_from = customer_id",
-                "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-                "left join {$table_prefeix}districts on customer_district = district_id"
+                "left join {$table_prefix}customers on received_payments_from = customer_id",
+                "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+                "left join {$table_prefix}districts on customer_district = district_id"
             ),
             array (
                 "received_payment.is_trash = 0 and received_payments_type" => "Received Payments",
@@ -1873,7 +1873,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editReceivedPayment") {
             "received_payments_id" => $_GET["id"]
         ),
         "join"  => array(
-            "left join {$table_prefeix}customers on received_payments_from = customer_id"
+            "left join {$table_prefix}customers on received_payments_from = customer_id"
         )
     ))["data"][0];
     
@@ -2076,7 +2076,7 @@ if(isset($_GET['page']) and $_GET['page'] == "discountsList") {
             "received_payments as received_payment",
             "received_payments_id, customer_name, received_payments_shop, received_payments_from, received_payments_amount, received_payments_details, received_payments_datetime",
             array (
-                "left join {$table_prefeix}customers on received_payments_from = customer_id"
+                "left join {$table_prefix}customers on received_payments_from = customer_id"
             ),
             array (
                 "received_payment.is_trash = 0 and received_payments_type" => "Discounts",
@@ -2100,7 +2100,7 @@ if(isset($_GET['page']) and $_GET['page'] == "discountsList") {
             "received_payments as received_payment",
             "received_payments_id, customer_name, received_payments_shop, received_payments_from, received_payments_amount, received_payments_details, received_payments_datetime",
             array (
-                "left join {$table_prefeix}customers on received_payments_from = customer_id"
+                "left join {$table_prefix}customers on received_payments_from = customer_id"
             ),
             array (
                 "received_payment.is_trash = 0 and received_payments_type" => "Discounts",
@@ -2168,7 +2168,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editDiscount") {
             "received_payments_type = 'Discounts' and received_payments_id" => $_GET["id"]
         ),
         "join"  => array(
-            "left join {$table_prefeix}customers on customer_id = received_payments_from"
+            "left join {$table_prefix}customers on customer_id = received_payments_from"
         )
     ))["data"][0];
     
@@ -2387,8 +2387,8 @@ if(isset($_GET['page']) and $_GET['page'] == "transferBalanceList") {
         "transfer_money as transfer_money",
         "transfer_money_id, transfer_money_date, transfer_money_from, transfer_money_to, from_accounts.accounts_name as from_accounts_name, to_accounts.accounts_name as to_accounts_name, transfer_money_amount, transfer_money_description",
         array (
-            "inner join {$table_prefeix}accounts as from_accounts on transfer_money_from = from_accounts.accounts_id",
-            "inner join {$table_prefeix}accounts as to_accounts on transfer_money_to = to_accounts.accounts_id"
+            "inner join {$table_prefix}accounts as from_accounts on transfer_money_from = from_accounts.accounts_id",
+            "inner join {$table_prefix}accounts as to_accounts on transfer_money_to = to_accounts.accounts_id"
         ),
         array (
             "transfer_money.is_trash = 0 and (transfer_money_from"  => $_SESSION["aid"],

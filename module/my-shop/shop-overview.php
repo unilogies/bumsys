@@ -16,8 +16,8 @@
         if(received_payments_amount_sum is null, 0, round(received_payments_amount_sum, 2) ) as received_payments_amount_sum,
         if(payment_amount_sum is null, 0, payment_amount_sum) as payment_amount_sum
         from time_dimension
-        left join ( select received_payments_add_on, sum(received_payments_amount) as received_payments_amount_sum from {$table_prefeix}received_payments where received_payments_type != 'Discounts' AND received_payments_shop = '{$shopId}' group by date(received_payments_add_on) ) as get_received_payments on date(received_payments_add_on) = db_date
-        left join ( select payment_date, sum(payment_amount) as payment_amount_sum from {$table_prefeix}payments where payment_from = {$accountsId} group by payment_date) as get_payments on payment_date = db_date
+        left join ( select received_payments_add_on, sum(received_payments_amount) as received_payments_amount_sum from {$table_prefix}received_payments where received_payments_type != 'Discounts' AND received_payments_shop = '{$shopId}' group by date(received_payments_add_on) ) as get_received_payments on date(received_payments_add_on) = db_date
+        left join ( select payment_date, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where payment_from = {$accountsId} group by payment_date) as get_payments on payment_date = db_date
         where db_date = CURRENT_DATE
       ")["data"][0];
 
@@ -107,8 +107,8 @@
                         stock_product_id, 
                         product_name, 
                         sum(stock_item_qty) as purchased_qnt 
-                    from {$table_prefeix}product_stock
-                    inner join {$table_prefeix}products on product_id = stock_product_id
+                    from {$table_prefix}product_stock
+                    inner join {$table_prefix}products on product_id = stock_product_id
                     where stock_type = 'sale' and date(stock_entry_date) = current_date group by stock_product_id order by purchased_qnt DESC LIMIT 0,5
                 ");
 
@@ -173,8 +173,8 @@
                                 <?php
                                 
                                 $getTopCustomer = easySelectD("
-                                    select sales_delivery_date, sales_customer_id, sum(sales_quantity) as total_purchased_qnt_today, customer_name from {$table_prefeix}sales 
-                                    left join {$table_prefeix}customers on sales_customer_id = customer_id
+                                    select sales_delivery_date, sales_customer_id, sum(sales_quantity) as total_purchased_qnt_today, customer_name from {$table_prefix}sales 
+                                    left join {$table_prefix}customers on sales_customer_id = customer_id
                                     where sales_delivery_date = CURRENT_DATE group by sales_customer_id order by total_purchased_qnt_today DESC LIMIT 0,5
                                 ");
 
@@ -228,8 +228,8 @@
                                         pbs.batch_expiry_date as expiry_date,
                                         batch_number
                                     FROM product_base_stock as pbs
-                                    left join {$table_prefeix}products as product on product.product_id = pbs.vp_id
-                                    left join {$table_prefeix}product_batches as product_batches on product_batches.batch_id = pbs.batch_id
+                                    left join {$table_prefix}products as product on product.product_id = pbs.vp_id
+                                    left join {$table_prefix}product_batches as product_batches on product_batches.batch_id = pbs.batch_id
                                     WHERE pbs.batch_expiry_date < DATE_ADD(NOW(), INTERVAL 30 DAY)
                                     order by pbs.batch_expiry_date DESC
                                 ");

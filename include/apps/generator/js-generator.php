@@ -27,7 +27,7 @@ if( isset($_GET["q"]) and $_GET["q"] === "head" ) {
     include( DIR_ASSETS . "js/functions.min.js");
 
     // Include BMS JS
-    include( DIR_ASSETS . "js/bms.js");
+    include( DIR_ASSETS . "js/bms.min.js");
 
 
 } else if( isset($_GET["q"]) and $_GET["q"] === "foot" ) {

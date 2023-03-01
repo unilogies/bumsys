@@ -137,7 +137,7 @@ $salesGrandTotal = 0;
 $salesChanges = 0;
 
 
-$insertSaleItems = "INSERT INTO {$table_prefeix}product_stock(
+$insertSaleItems = "INSERT INTO {$table_prefix}product_stock(
     stock_type,
     stock_entry_date,
     stock_sales_id,
@@ -310,7 +310,7 @@ foreach($getData["productID"] as $key => $productId) {
                         bg_product_qnt
                         ",
         "join"      => array(
-            "inner join {$table_prefeix}bg_product_items as bg_product on bg_product_id = product_id"
+            "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id"
         ),
         "where"     => array(
             "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"

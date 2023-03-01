@@ -16,7 +16,7 @@ $("body").addClass("sidebar-collapse");
                             round(sales_shipping, 2) as sales_shipping, round(sales_adjustment, 2) as sales_adjustment, round(sales_grand_total, 2) as sales_grand_total,
                             round(sales_paid_amount, 2) as sales_paid_amount, round(sales_change, 2) as sales_change, round(sales_due, 2) as sales_due, sales_note, sales_shop_id",
             "join"      => array(
-                "left join {$table_prefeix}customers on customer_id = sales_customer_id"
+                "left join {$table_prefix}customers on customer_id = sales_customer_id"
             ),
             "where"     => array(
                 "sales_id"  => $_GET["edit"]

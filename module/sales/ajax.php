@@ -61,10 +61,10 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
              round(sales_shipping, 2) as sales_shipping, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, 
              round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-                "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-                "left join {$table_prefeix}districts on customer_district = district_id",
-                "left join {$table_prefeix}shops on shop_id = sales_shop_id"
+                "left join {$table_prefix}customers on sales_customer_id = customer_id",
+                "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+                "left join {$table_prefix}districts on customer_district = district_id",
+                "left join {$table_prefix}shops on shop_id = sales_shop_id"
             ),
             array (
               "sale.is_trash = 0 and sale.is_return = 0",
@@ -91,10 +91,10 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
           "sales as sale",
           "sales_id, sales_delivery_date, sales_note, sales_reference, shop_name, sales_customer_id, customer_name, round(sales_surcharge, 2) as sales_surcharge, round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, round(sales_shipping, 2) as sales_shipping, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
           array (
-            "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-            "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-            "left join {$table_prefeix}districts on customer_district = district_id",
-            "left join {$table_prefeix}shops on shop_id = sales_shop_id"
+            "left join {$table_prefix}customers on sales_customer_id = customer_id",
+            "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+            "left join {$table_prefix}districts on customer_district = district_id",
+            "left join {$table_prefix}shops on shop_id = sales_shop_id"
           ),
           array("sale.is_trash = 0 and sale.is_return = 0"),
           array (
@@ -212,9 +212,9 @@ if(isset($_GET['page']) and $_GET['page'] == "salesProductReturnList") {
             "sales as sale",
             "sales_id, sales_delivery_date, sales_note, sales_reference, sales_customer_id, customer_name, round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, round(sales_shipping, 2) as sales_shipping, sales_surcharge, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
             array (
-              "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-              "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-              "left join {$table_prefeix}districts on customer_district = district_id"
+              "left join {$table_prefix}customers on sales_customer_id = customer_id",
+              "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+              "left join {$table_prefix}districts on customer_district = district_id"
             ),
             array (
                 "sale.is_trash = 0 and sale.is_return = 1",
@@ -249,9 +249,9 @@ if(isset($_GET['page']) and $_GET['page'] == "salesProductReturnList") {
             "sales as sale",
             "sales_id, sales_delivery_date, sales_note, sales_reference, sales_customer_id, customer_name, round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, round(sales_shipping, 2) as sales_shipping, sales_surcharge, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
             array (
-                "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-                "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-                "left join {$table_prefeix}districts on customer_district = district_id"
+                "left join {$table_prefix}customers on sales_customer_id = customer_id",
+                "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+                "left join {$table_prefix}districts on customer_district = district_id"
             ),
             array (
               "sale.is_trash = 0 and sale.is_return = 1",
@@ -277,9 +277,9 @@ if(isset($_GET['page']) and $_GET['page'] == "salesProductReturnList") {
           "sales as sale",
           "sales_id, sales_delivery_date, sales_note, sales_reference, sales_customer_id, customer_name, round(sales_total_amount, 2) as sales_total_amount, round(sales_product_discount, 2) as sales_product_discount, round(sales_discount, 2) as sales_discount, round(sales_shipping, 2) as sales_shipping, sales_surcharge, round(sales_grand_total, 2) as sales_grand_total, round(sales_paid_amount, 2) as sales_paid_amount, round(sales_due, 2) as sales_due, sales_payment_status, upazila_name, district_name",
           array (
-            "left join {$table_prefeix}customers on sales_customer_id = customer_id",
-            "left join {$table_prefeix}upazilas on customer_upazila = upazila_id",
-            "left join {$table_prefeix}districts on customer_district = district_id"
+            "left join {$table_prefix}customers on sales_customer_id = customer_id",
+            "left join {$table_prefix}upazilas on customer_upazila = upazila_id",
+            "left join {$table_prefix}districts on customer_district = district_id"
           ),
           array("sale.is_trash = 0 and sale.is_return = 1"),
           array (
@@ -536,7 +536,7 @@ if(isset($_GET['page']) and $_GET['page'] == "submitPostReturnPayments") {
             "product_returns as product_return",
             "product_returns_id, product_returns_date, product_returns_reference, customer_name, product_returns_total_amount, product_returns_items_discount, product_returns_total_discount, product_returns_surcharge, product_returns_grand_total",
             array (
-                "inner join {$table_prefeix}customers on product_returns_customer_id = customer_id"
+                "inner join {$table_prefix}customers on product_returns_customer_id = customer_id"
             ),
             array (
                 "product_return.is_trash = 0 and customer_name LIKE" => $requestData["search"]["value"]."%"
@@ -558,7 +558,7 @@ if(isset($_GET['page']) and $_GET['page'] == "submitPostReturnPayments") {
           "product_returns as product_return",
           "product_returns_id, product_returns_date, product_returns_reference, customer_name, product_returns_total_amount, product_returns_items_discount, product_returns_total_discount, product_returns_surcharge, product_returns_grand_total",
           array (
-            "inner join {$table_prefeix}customers on product_returns_customer_id = customer_id"
+            "inner join {$table_prefix}customers on product_returns_customer_id = customer_id"
           ),
           array("product_return.is_trash = 0"),
           array (
@@ -654,7 +654,7 @@ if(isset($_GET['page']) and $_GET['page'] == "wastageSaleList") {
             "wastage_sale as wastage_sale",
             "wastage_sale_id, wastage_sale_date, wastage_sale_reference, customer_name, wastage_sale_grand_total, wastage_sale_paid_amount, wastage_sale_due_amount, wastage_sale_note",
             array (
-              "inner join {$table_prefeix}customers on wastage_sale_customer = customer_id"
+              "inner join {$table_prefix}customers on wastage_sale_customer = customer_id"
             ),
             array (
                 "wastage_sale.is_trash = 0 and customer_name LIKE" => $requestData["search"]["value"]."%"
@@ -676,7 +676,7 @@ if(isset($_GET['page']) and $_GET['page'] == "wastageSaleList") {
           "wastage_sale as wastage_sale",
           "wastage_sale_id, wastage_sale_date, wastage_sale_reference, customer_name, wastage_sale_grand_total, wastage_sale_paid_amount, wastage_sale_due_amount, wastage_sale_note",
           array (
-            "inner join {$table_prefeix}customers on wastage_sale_customer = customer_id"
+            "inner join {$table_prefix}customers on wastage_sale_customer = customer_id"
           ),
           array("wastage_sale.is_trash = 0"),
           array (
@@ -774,7 +774,7 @@ if(isset($_GET['page']) and $_GET['page'] == "viewWastageSale") {
         "wastage_sale",
         "*",
         array (
-            "left join {$table_prefeix}customers on wastage_sale_customer = customer_id"
+            "left join {$table_prefix}customers on wastage_sale_customer = customer_id"
         ),
         array (
             "wastage_sale_id"  => $_GET["id"]

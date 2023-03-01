@@ -467,7 +467,7 @@
                                     ],
                                     "groupby"   => "product_attributes.pa_name",
                                     "join"  => [
-                                        "inner join {$table_prefeix}product_variations as product_variations on product_variations.pa_name = product_attributes.pa_name"
+                                        "inner join {$table_prefix}product_variations as product_variations on product_variations.pa_name = product_attributes.pa_name"
                                     ]
                                 ]);
 
