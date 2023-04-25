@@ -30,11 +30,13 @@
                 <thead>
                   <tr>
                     <th></th>
-                    <th><?= __("Date"); ?></th>
+                    <th class="px120"><?= __("Entry Date"); ?></th>
+                    <th class="px160"><?= __("Bill Date"); ?></th>
                     <th><?= __("Company"); ?></th>
                     <th><?= __("Reference"); ?></th>
                     <th class="countTotal"><?= __("Amount"); ?></th>
                     <th><?= __("Description"); ?></th>
+                    <th><?= __("Attachment"); ?></th>
                     <th class="no-sort"><?= __("Action"); ?></th>
                   </tr>
                 </thead>
@@ -42,11 +44,19 @@
                 <tfoot>
                   <tr>
                     <th></th>
-                    <th><?= __("Date"); ?></th>
-                    <th><?= __("Company"); ?></th>
+                    <th><?= __("Entry Date"); ?></th>
+                    <th>
+                        <input style="width: 175px;" type="text" placeholder="<?= __("Select Date"); ?>" id="billDateFilter" class="form-control" autocomplete="off">
+                    </th>
+                    <th>
+                        <select style="width: 320px; margin-left: 30px;" id="billCompanyFilter" class="form-control select2Ajax" select2-minimum-input-length="1" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=CompanyList" required>
+                            <option value=""><?= __("Select Company"); ?>....</option>
+                        </select>
+                    </th>
                     <th><?= __("Reference"); ?></th>
                     <th><?= __("Amount"); ?></th>
                     <th><?= __("Description"); ?></th>
+                    <th><?= __("Attachment"); ?></th>
                     <th><?= __("Action"); ?></th>
                   </tr>
                 </tfoot>
@@ -66,5 +76,6 @@
   <!-- /.content-wrapper -->
   
   <script>
+    BMS.FUNCTIONS.dateRangePickerPreDefined({selector: "#billDateFilter"});
     var DataTableAjaxPostUrl = "<?php echo full_website_address(); ?>/xhr/?module=expenses&page=billsList";
   </script>

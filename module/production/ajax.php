@@ -679,49 +679,56 @@ if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
 
 
                 // Select all Child product of this variable product
-                easySelectA(array(
+                $childProducts = easySelectA(array(
                     "table" => "products",
                     "where" => array(
-                        "parent_product_id" => $_POST["mainProduct"]
+                        "is_trash = 0 and product_type = 'Child' and parent_product_id" => $_POST["mainProduct"]
                     )
                 ));
 
-                
 
-                // Delete Privous bg product
-                easyPermDelete(
-                    "bg_product_items",
-                    array(
-                        "bg_product_id" => $_POST["mainProduct"]
-                    )
-                );
+                // If there is any child product in the variable product then add raw materials on child products
+                if( $childProducts !== false ) {
 
-                
-                foreach($_POST["bgProductID"] as $pkey => $bgProductId) {
+                    foreach($childProducts["data"] as $childProduct) {
 
-                    // If there have any unit in this product
-                    // Then multiply the bgProductQnt with unit base qty
-                    if( !empty($product['product_unit']) ) {
+                        // Delete Privous bg product
+                        easyPermDelete(
+                            "bg_product_items",
+                            array(
+                                "bg_product_id" => $childProduct["product_id"]
+                            )
+                        );
 
-                        $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefix}product_units where unit_name = '{$product['product_unit']}' )";
-
-                    } else {
                         
-                        $bgProductQty = safe_input($_POST["bgProductQnt"][$pkey]);
+                        foreach($_POST["bgProductID"] as $pkey => $bgProductId) {
+
+                            // If there have any unit in this child product
+                            // Then multiply the bgProductQnt with unit base qty
+                            if( !empty($childProduct['product_unit']) ) {
+
+                                $bgProductQty = "(select base_qnt * ". $_POST["bgProductQnt"][$pkey] ." from {$table_prefix}product_units where unit_name = '{$childProduct['product_unit']}' )";
+
+                            } else {
+                                
+                                $bgProductQty = safe_input($_POST["bgProductQnt"][$pkey]);
+
+                            }
+
+                            $insertSubProduct .= "(
+                                '{$childProduct['product_id']}',
+                                '{$bgProductId}',
+                                '". safe_input($_POST["bgProductSalePrice"][$pkey]) ."',
+                                '{$bgProductQty}',
+                                '1'
+                            ),";
+                            
+
+                        }
 
                     }
 
-                    $insertSubProduct .= "(
-                        '{$product['product_id']}',
-                        '{$bgProductId}',
-                        '". safe_input($_POST["bgProductSalePrice"][$pkey]) ."',
-                        '{$bgProductQty}',
-                        '1'
-                    ),";
-                    
-
                 }
-
 
             }
 
@@ -773,9 +780,9 @@ if(isset($_GET['page']) and $_GET['page'] == "linkRawMaterials") {
 
 
             // Check if there is any error on inserting data
-            if( !empty($conn->get_all_error)  ) {
+            if( !empty($get_all_db_error)  ) {
     
-                _e( $conn->get_all_error[0]. " Please check the error log for more information.");
+                _e( $get_all_db_error[0]. " Please check the error log for more information.");
     
                 // If there are any error then rollback/undo the data
                 runQuery("ROLLBACK;");

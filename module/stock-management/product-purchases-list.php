@@ -43,9 +43,10 @@
                 <thead>
                   <tr>
                     <th></th>
-                    <th class="defaultOrder"><?php echo __("Date"); ?></th>
+                    <th style="width: 120px;" class="defaultOrder"><?php echo __("Date"); ?></th>
                     <th><?php echo __("Shop"); ?></th>
-                    <th><?php echo __("Referense No"); ?></th>
+                    <th><?php echo __("Status"); ?></th>
+                    <th><?php echo __("Reference"); ?></th>
                     <th><?php echo __("Supplier"); ?></th>
                     <th class="countTotal no-sort"><?php echo __("Total"); ?></th>
                     <th class="countTotal no-sort"><?php echo __("Discount"); ?></th>
@@ -63,10 +64,18 @@
                 <tfoot>
                   <tr>
                     <th></th>
-                    <th class="col-md-1 no-print"><input style="width: 160px" type="text" name="purchaseDate" id="purchaseDate" placeholder="<?php echo date("Y-m-d"); ?>" class="form-control input-sm" autocomplete="off"></th>
+                    <th class="col-md-1 no-print"><input style="width: 120px" type="text" name="purchaseDate" id="purchaseDate" placeholder="<?php echo date("Y-m-d"); ?>" class="form-control input-sm" autocomplete="off"></th>
                     <th class="no-print">
                         <select id="purchaseShopFilter" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=shopList" style="width: 100%;">
                             <option value=""><?= __("Select Shop"); ?>....</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-control">
+                            <option value="">Select Status</option>
+                            <option value="Received">Received</option>
+                            <option value="Ordered">Ordered</option>
+                            <option value="Pending">Pending</option>
                         </select>
                     </th>
                     <th><?php echo __("Referense"); ?></th>

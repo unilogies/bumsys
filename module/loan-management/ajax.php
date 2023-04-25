@@ -86,6 +86,10 @@ if(isset($_GET['page']) and $_GET['page'] == "payLoan") {
 /************************** Pay New Loan **********************/
 if(isset($_GET['page']) and $_GET['page'] == "payNewLoan") {
 
+    if( !current_user_can("loan.Add") ) {
+        return _e("Sorry! you do not have permission to pay new loan");
+    }
+
     $accounts_balance = accounts_balance($_POST["loanPayingFromAccounts"]);
 
     if(empty($_POST["loanBorrower"]))  {
@@ -123,9 +127,9 @@ if(isset($_GET['page']) and $_GET['page'] == "payNewLoan") {
         // Update Accounts Balance
         updateAccountBalance($_POST["loanPayingFromAccounts"]);
 
-        //echo "<div class='alert alert-success'>Loan successfully created. Please <a href='{$insertLoan['last_insert_id']}'>click here to print</a> the agreement.</div>";
+        echo _s("Loan successfully created. Please <a %s>click here to print</a> the receipt.", "onClick='BMS.MAIN.printPage(this.href, event);' href='".full_website_address()."/invoice-print/?autoPrint=true&invoiceType=loanPaymentReceipt&id={$insertLoan['last_insert_id']}'");
         
-        _s("oan successfully created.");
+        // _s("oan successfully created.");
 
     } else {
         _e($insertLoan);
@@ -137,6 +141,10 @@ if(isset($_GET['page']) and $_GET['page'] == "payNewLoan") {
 
 /*************************** Loan List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "loanList") {
+
+    if( !current_user_can("loan.View") ) {
+        return _e("Sorry! you do not have permission to view loan list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -218,6 +226,7 @@ if(isset($_GET['page']) and $_GET['page'] == "loanList") {
                                     <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a <a onClick=\'BMS.MAIN.printPage(this.href, event);\' target="_blank" href="'. full_website_address() .'/invoice-print/?autoPrint=true&invoiceType=loanPaymentReceipt&id='. $value["loan_id"] .'"><i class="fa fa-print"></i> Print Receipt</a></li>
                                     <li><a class="'. ( current_user_can("Loan.Edit") ? "" : "restricted" ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=loan-management&page=editLoan&id='. $value["loan_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
                                     <li><a class="'. ( current_user_can("Loan.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=loan-management&page=deleteLoan" data-to-be-deleted="'. $value["loan_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
                                     </ul>
@@ -242,6 +251,10 @@ if(isset($_GET['page']) and $_GET['page'] == "loanList") {
 
 /************************** Pay Loan **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editLoan") {
+
+    if( !current_user_can("loan.Edit") ) {
+        return _e("Sorry! you do not have permission to edit loan");
+    }
   
     // Include the modal header
     modal_header("Edit Loan", full_website_address() . "/xhr/?module=loan-management&page=updateLoan");
@@ -358,6 +371,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteLoan") {
 /************************** Pay New Loan **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateLoan") {
 
+    if( !current_user_can("loan.Edit") ) {
+        return _e("Sorry! you do not have permission to edit loan");
+    }
+
     $accounts_balance = accounts_balance($_POST["loanPayingFromAccounts"]);
 
     // Update account balance with current loan ammount
@@ -423,6 +440,10 @@ if(isset($_GET['page']) and $_GET['page'] == "updateLoan") {
 
 /*************************** Loans Installment List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "loanInstallmentList") {
+
+    if( !current_user_can("loan_installment.View") ) {
+        return _e("Sorry! you do not have permission to view loan installment list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -507,7 +528,8 @@ if(isset($_GET['page']) and $_GET['page'] == "loanInstallmentList") {
     );
     
     // Encode in Json Formate
-    echo json_encode($jsonData); 
+    echo json_encode($jsonData);
+
 }
 
 
@@ -538,6 +560,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteLoanInstallment") {
             "title": "'. __("The loan installment has been deleted successfully.") .'"
         }';
     } 
+
 }
 
 
@@ -684,8 +707,12 @@ if(isset($_GET['page']) and $_GET['page'] == "addInstallment") {
 }
 
 
-/************************** Pay New Loan **********************/
+/************************** Add Loan installment **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewInstallment") {
+
+    if( !current_user_can("loan_installment.Add") ) {
+        return _e("Sorry! you do not have permission to add loan installment");
+    }
 
     if(empty($_POST["loanBorrower"]))  {
         return _e("Please select installment provider");

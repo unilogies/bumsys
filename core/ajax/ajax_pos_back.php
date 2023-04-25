@@ -609,11 +609,11 @@ if($updateSale === true) {
     runQuery(substr_replace($insertSaleItems, ";", -1, 1));
 
 
-    if( !empty($conn->get_all_error)  ) {
+    if( !empty($get_all_db_error)  ) {
 
         echo json_encode(array (
             "saleStatus"   => "error",
-            "msg"  =>  __($conn->get_all_error[0]. ". Please check the error log for more information.")
+            "msg"  =>  __($get_all_db_error[0]. ". Please check the error log for more information.")
         ));
 
         // If there have any error then rollback/undo the data

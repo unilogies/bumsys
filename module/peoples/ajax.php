@@ -89,6 +89,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newEmployee") {
 
 /*************************** Employee List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "employeeList") {
+
+    if( !current_user_can("peoples_employee.View") ) {
+        return _e("Sorry! you do not have permission to view employee list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -246,8 +250,11 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeList") {
 
 
 /***************** Delete Employee ****************/
-// Delete Group
 if(isset($_GET['page']) and $_GET['page'] == "deleteEmployee") {
+
+    if( !current_user_can("peoples_employee.Delete") ) {
+        return _e("Sorry! you do not have permission to delete employee");
+    }
 
     $deleteData = easyDelete(
         "employees",
@@ -267,6 +274,11 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteEmployee") {
 
 /************************** Edit Employee **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editEmployee") {
+
+
+    if( !current_user_can("peoples_employee.Edit") ) {
+        return _e("You do not have permission to edit employee");
+    }
 
     $selectEmployee = easySelect(
         "employees",
@@ -500,6 +512,9 @@ if(isset($_GET['page']) and $_GET['page'] == "editEmployee") {
 //*******************************  Update Employee ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateEmployee") {
 
+    if( !current_user_can("peoples_employee.Edit") ) {
+        return _e("Sorry! you do not have permission to edit employee");
+    }
 
     // Upload the image and update the employee photos
     if($_FILES["userPhoto"]["size"] > 0) {
@@ -565,25 +580,29 @@ if(isset($_GET['page']) and $_GET['page'] == "updateEmployee") {
     );
 
     if($updateDepartment === true) {
-        echo _s("Employee successfully updated.");
+
+        _s("Employee successfully updated.");
 
         $emp_id = safe_input($_POST["emp_id"]);
+
         // Update salary info
         $updatePayableSalary = easyUpdate(
-          "employees",
-          array (
-            "emp_payable_salary"    => getEmployeePayableAmount($emp_id, "salary"),
-            "emp_payable_overtime"  => getEmployeePayableAmount($emp_id, "overtime"),
-            "emp_payable_bonus"     => getEmployeePayableAmount($emp_id, "bonus")
-          ),
-          array (
-              "emp_id"    => $emp_id
-          )
+            "employees",
+            array (
+                "emp_payable_salary"    => getEmployeePayableAmount($emp_id, "salary"),
+                "emp_payable_overtime"  => getEmployeePayableAmount($emp_id, "overtime"),
+                "emp_payable_bonus"     => getEmployeePayableAmount($emp_id, "bonus")
+            ),
+            array (
+                "emp_id"    => $emp_id
+            )
         );
 
 
     } else {
+
         _e($updateDepartment);
+
     }
 
 }
@@ -664,192 +683,207 @@ if(isset($_GET['page']) and $_GET['page'] == "newUser") {
 //*******************************  Add New user ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "addNewUser") {
 
-  // Error handaling
-  if(empty($_POST["employeeID"])) {
-    return _e("Please select employee.");
-  } else if(empty($_POST["empGroup"])) {
-    return _e("Please select user group.");
-  } else if(empty($_POST["userName"])) {
-    return _e("Please enter username.");
-  }else if(empty($_POST["userEmail"])) {
-    return _e("Please enter user email.");
-  } else if(empty($_POST["userPassword"])) {
-    return _e("Please enter password.");
-  } else if(strlen($_POST["userPassword"]) < 8) {
-    return _e("Password must be at least 8 digit long.");
-  } elseif(empty($_POST["userPassword"]) or $_POST["userPassword"] !== $_POST["confirmUserPassword"]) {  
-    return _e("User password doesn't match. Please enter correctly");
-  }
-  
-  // Check if all data is not empty
-  if(!empty($_POST["employeeID"]) AND !empty($_POST["empGroup"]) AND !empty($_POST["userPassword"]) AND !empty($_POST["confirmUserPassword"]) AND $_POST["userPassword"] === $_POST["confirmUserPassword"]){
-   
-    $passwordHash = password_hash($_POST["confirmUserPassword"], PASSWORD_DEFAULT);
+    if( !current_user_can("peoples_user.Add") ) {
+        return _e("Sorry! you do not have permission to add user");
+    }
 
-    // Insert the user into database
-    $insertUser = easyInsert(
-      "users",
-      array(
-        "user_emp_id"       => $_POST["employeeID"],
-        "user_group_id"     => $_POST["empGroup"],
-        "user_permissions"  => html_entity_decode(easySelectA(array(
-            "table"     => "user_group",
-            "fields"    => "group_permission",
-            "where"     => array(
-                "group_id"  => $_POST["empGroup"]
-            )
-        ))["data"][0]["group_permission"]),
-        "user_pass"         => $passwordHash,
-        "user_name"         => $_POST["userName"],
-        "user_email"        => $_POST["userEmail"],
-        "user_homepage"     => $_POST["userHomepage"]
-      )
-    );
+    // Error handaling
+    if(empty($_POST["employeeID"])) {
+        return _e("Please select employee.");
+    } else if(empty($_POST["empGroup"])) {
+        return _e("Please select user group.");
+    } else if(empty($_POST["userName"])) {
+        return _e("Please enter username.");
+    }else if(empty($_POST["userEmail"])) {
+        return _e("Please enter user email.");
+    } else if(empty($_POST["userPassword"])) {
+        return _e("Please enter password.");
+    } else if(strlen($_POST["userPassword"]) < 8) {
+        return _e("Password must be at least 8 digit long.");
+    } elseif(empty($_POST["userPassword"]) or $_POST["userPassword"] !== $_POST["confirmUserPassword"]) {  
+        return _e("User password doesn't match. Please enter correctly");
+    }
+    
+    // Check if all data is not empty
+    if(!empty($_POST["employeeID"]) AND !empty($_POST["empGroup"]) AND !empty($_POST["userPassword"]) AND !empty($_POST["confirmUserPassword"]) AND $_POST["userPassword"] === $_POST["confirmUserPassword"]){
+    
+        $passwordHash = password_hash($_POST["confirmUserPassword"], PASSWORD_DEFAULT);
 
-    if($insertUser === true) {
-          _s("User successfully added");
-      } else {
-          _e($insertUser);
-      }
-  }
+        // Insert the user into database
+        $insertUser = easyInsert(
+        "users",
+        array(
+            "user_emp_id"       => $_POST["employeeID"],
+            "user_group_id"     => $_POST["empGroup"],
+            "user_permissions"  => html_entity_decode(easySelectA(array(
+                "table"     => "user_group",
+                "fields"    => "group_permission",
+                "where"     => array(
+                    "group_id"  => $_POST["empGroup"]
+                )
+            ))["data"][0]["group_permission"]),
+            "user_pass"         => $passwordHash,
+            "user_name"         => $_POST["userName"],
+            "user_email"        => $_POST["userEmail"],
+            "user_homepage"     => $_POST["userHomepage"]
+        )
+        );
+
+        if($insertUser === true) {
+            _s("User successfully added");
+        } else {
+            _e($insertUser);
+        }
+    }
   
 }
 
 
 /*************************** User List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "userList") {
+
+    if( !current_user_can("peoples_user.View") ) {
+        return _e("Sorry! you do not have permission to view user list");
+    }
     
-  $requestData = $_REQUEST;
-  $getData = [];
+    $requestData = $_REQUEST;
+    $getData = [];
 
-  // List of all columns name
-  $columns = array(
-      "emp_firstname",
-      "group_name"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-    "table" => "users",
-    "fields" => "count(*) as totalRow",
-    "where" => array(
-      "is_trash = 0"
-    )
-  ))["data"][0]["totalRow"];  
+    // List of all columns name
+    $columns = array(
+        "emp_firstname",
+        "group_name"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+        "table" => "users",
+        "fields" => "count(*) as totalRow",
+        "where" => array(
+        "is_trash = 0"
+        )
+    ))["data"][0]["totalRow"];  
 
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
 
-  if(!empty($requestData["search"]["value"])) {  // get data with search
-      
-      $getData = easySelect(
-          "users as user",
-          "user_id, user_emp_id, user_group_id, emp_firstname, emp_lastname, emp_photo, group_name, user_status, user_locked_reason, emp_positions",
-          array(
-              "left join {$table_prefix}employees on user_emp_id = emp_id",
-              "left join {$table_prefix}user_group on user_group_id = group_id"
-          ),
-          array (
-              "user.is_trash = 0 and emp_firstname LIKE" => $requestData['search']['value'] . "%",
-              " OR emp_lastname LIKE" => $requestData['search']['value'] . "%",
-              " OR group_name LIKE" => $requestData['search']['value'] . "%"
-          ),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
-  
-      $totalFilteredRecords = $getData ? $getData["count"] : 0;
+    if(!empty($requestData["search"]["value"])) {  // get data with search
+        
+        $getData = easySelect(
+            "users as user",
+            "user_id, user_emp_id, user_group_id, emp_firstname, emp_lastname, emp_photo, group_name, user_status, user_locked_reason, emp_positions",
+            array(
+                "left join {$table_prefix}employees on user_emp_id = emp_id",
+                "left join {$table_prefix}user_group on user_group_id = group_id"
+            ),
+            array (
+                "user.is_trash = 0 and emp_firstname LIKE" => $requestData['search']['value'] . "%",
+                " OR emp_lastname LIKE" => $requestData['search']['value'] . "%",
+                " OR group_name LIKE" => $requestData['search']['value'] . "%"
+            ),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
+    
+        $totalFilteredRecords = $getData ? $getData["count"] : 0;
 
-  } else { // Get data withouth search
+    } else { // Get data withouth search
 
-       $getData = easySelect(
-          "users as user",
-          "user_id, user_emp_id, user_group_id, emp_firstname, emp_lastname, emp_photo, group_name, user_status, user_locked_reason, emp_positions",
-          array(
-              "left join {$table_prefix}employees on user_emp_id = emp_id",
-              "left join {$table_prefix}user_group on user_group_id = group_id"
-          ),
-          array("user.is_trash = 0"),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
+        $getData = easySelect(
+            "users as user",
+            "user_id, user_emp_id, user_group_id, emp_firstname, emp_lastname, emp_photo, group_name, user_status, user_locked_reason, emp_positions",
+            array(
+                "left join {$table_prefix}employees on user_emp_id = emp_id",
+                "left join {$table_prefix}user_group on user_group_id = group_id"
+            ),
+            array("user.is_trash = 0"),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
 
-  }
+    }
 
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
-          $allNestedData = [];
-          $allNestedData[] = empty($value['emp_photo']) ? "<img width='80px' height='80px' src='".full_website_address()."/assets/images/defaultUserPic.png' class='img-circle'/>" : "<img width='80px' height='80px' src='".full_website_address()."/images/?for=employees&id={$value['user_emp_id']}&q=YTozOntzOjI6Iml3IjtpOjE4MDtzOjI6ImloIjtpOjE4MDtzOjI6ImlxIjtpOjcwO30=&v=". strlen($value['emp_photo']) ."' class='img-circle'/>";
-          $allNestedData[] = "<strong>{$value["emp_firstname"]} {$value["emp_lastname"]}</strong><br/>{$value["emp_positions"]}";
-          $allNestedData[] = "<strong>{$value["user_status"]}</strong> <br/>{$value["user_locked_reason"]}";
-          $allNestedData[] = $value["group_name"];
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                  <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editUser&id='. $value["user_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
-                                  <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=true&module=peoples&page=editPermissions&id='. $value["user_id"] .'"  data-target="#modalDefaultMdm"><i class="fa fa-edit"></i> Edit Permissions</a></li>
-                                  <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=peoples&page=deleteUser" data-to-be-deleted="'. $value["user_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $allNestedData[] = empty($value['emp_photo']) ? "<img width='80px' height='80px' src='".full_website_address()."/assets/images/defaultUserPic.png' class='img-circle'/>" : "<img width='80px' height='80px' src='".full_website_address()."/images/?for=employees&id={$value['user_emp_id']}&q=YTozOntzOjI6Iml3IjtpOjE4MDtzOjI6ImloIjtpOjE4MDtzOjI6ImlxIjtpOjcwO30=&v=". strlen($value['emp_photo']) ."' class='img-circle'/>";
+            $allNestedData[] = "<strong>{$value["emp_firstname"]} {$value["emp_lastname"]}</strong><br/>{$value["emp_positions"]}";
+            $allNestedData[] = "<strong>{$value["user_status"]}</strong> <br/>{$value["user_locked_reason"]}";
+            $allNestedData[] = $value["group_name"];
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editUser&id='. $value["user_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                    <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=true&module=peoples&page=editPermissions&id='. $value["user_id"] .'"  data-target="#modalDefaultMdm"><i class="fa fa-edit"></i> Edit Permissions</a></li>
+                                    <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=peoples&page=deleteUser" data-to-be-deleted="'. $value["user_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
 
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Formate
-  echo json_encode($jsonData); 
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
 
-  return;
+    return;
 }
 
 
 /***************** Delete User ****************/
-// Delete Group
 if(isset($_GET['page']) and $_GET['page'] == "deleteUser") {
 
-  $deleteData = easyDelete(
-      "users",
-      array(
-          "user_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("peoples_user.Delete") ) {
+        return _e("Sorry! you do not have permission to delete user");
+    }
 
-  if($deleteData === true) {
-      echo 1;
-  } 
+    $deleteData = easyDelete(
+        "users",
+        array(
+            "user_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo 1;
+    } 
 
 }
 
 
 //************************ Edit user permission ************************* */
 if(isset($_GET['page']) and $_GET['page'] == "editPermissions") {
+
+    if( !current_user_can("settings_group_permissions.Edit") ) {
+        return _e("Sorry! you do not have permission to edit user permission");
+    }
 
     $selectPermissions = easySelect(
         "users",
@@ -947,13 +981,15 @@ if(isset($_GET['page']) and $_GET['page'] == "editPermissions") {
     // Include the modal footer
     modal_footer();
 
-    return;
-
 }
 
 
-//*********************************  Group Update ******************** */
+//*********************************  Update User permission ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateUserPermission") {
+
+    if( !current_user_can("settings_group_permissions.Edit") ) {
+        return _e("Sorry! you do not have permission to edit user permission");
+    }
 
     $updateGroup = easyUpdate(
         "users",
@@ -976,20 +1012,24 @@ if(isset($_GET['page']) and $_GET['page'] == "updateUserPermission") {
 /************************** Edit User **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editUser") {
 
-  $selectUser = easySelect(
-      "users",
-      "*",
-      array(),
-      array(
-          "user_id" => $_GET['id']
-      )
-  );
+    if( !current_user_can("peoples_user.Edit") ) {
+        return _e("Sorry! you do not have permission to edit user");
+    }
 
-  $users = $selectUser["data"][0];
-  // Include the modal header
-  modal_header("Edit User", full_website_address() . "/xhr/?module=peoples&page=updateUser");
-  
-  ?>
+    $selectUser = easySelect(
+        "users",
+        "*",
+        array(),
+        array(
+            "user_id" => $_GET['id']
+        )
+    );
+
+    $users = $selectUser["data"][0];
+    // Include the modal header
+    modal_header("Edit User", full_website_address() . "/xhr/?module=peoples&page=updateUser");
+    
+    ?>
     <div class="box-body">
         <div class="form-group">
             <label for="employeeID"><?= __("Employee:"); ?></label>
@@ -1061,16 +1101,16 @@ if(isset($_GET['page']) and $_GET['page'] == "editUser") {
     </div>
     <!-- /Box body-->
     <script>
-    $(function () {
-      /* Initialize Select2 Elements */
-      $('#employeeID').select2();
-      $('#empGroup').select2();
-    });
-  </script>
-  <?php
+        $(function () {
+            /* Initialize Select2 Elements */
+            $('#employeeID').select2();
+            $('#empGroup').select2();
+        });
+    </script>
+    <?php
 
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
@@ -1078,7 +1118,11 @@ if(isset($_GET['page']) and $_GET['page'] == "editUser") {
 //*******************************  Update User ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateUser") {
 
-    // Error handaling
+    if( !current_user_can("peoples_user.Edit") ) {
+        return _e("Sorry! you do not have permission to edit user");
+    }
+
+    // Error handling
     if(empty($_POST["employeeID"])) {
         return _e("Please select employee.");
     } else if(empty($_POST["empGroup"])) {
@@ -1167,93 +1211,95 @@ if(isset($_GET['page']) and $_GET['page'] == "updateUser") {
 /************************** Edit Profile **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editProfile") {
 
-  $selectUser = easySelectA(array(
-    "table"   => "users",
-    "fields"  => "emp_firstname, emp_lastname, user_pass, user_language",
-    "join"    => array(
-      "left join {$table_prefix}employees on user_emp_id = emp_id"
-    ),
-    "where"   => array(
-      "user_id" => $_GET["id"]
-    )
-  ));
+    $selectUser = easySelectA(array(
+        "table"   => "users",
+        "fields"  => "emp_firstname, emp_lastname, user_pass, user_language",
+        "join"    => array(
+        "left join {$table_prefix}employees on user_emp_id = emp_id"
+        ),
+        "where"   => array(
+        "user_id" => $_GET["id"]
+        )
+    ));
 
-  $users = $selectUser["data"][0];
-  // Include the modal header
-  modal_header("Edit Profile", full_website_address() . "/xhr/?module=peoples&page=updateProfile");
-  
-  ?>
-    <div class="box-body">
-      <div class="form-group">
-        <label for=""><?= __("Name:"); ?></label>
-        <?php echo $users["emp_firstname"] . ' ' . $users["emp_lastname"]; ?>
-      </div>
-      <div class="form-group">
-        <label for="userLanguage"><?= __("Language:"); ?></label>
-        <select name="userLanguage" id="userLanguage" class="form-control">
-          <?php 
-            
-            static $lang = array(
-              ""      => "Default",
-              "bn_BD" => "Bengali (বাংলা)"
-            );
+    $users = $selectUser["data"][0];
+    // Include the modal header
+    modal_header("Edit Profile", full_website_address() . "/xhr/?module=peoples&page=updateProfile");
+    
+    ?>
+        <div class="box-body">
+        <div class="form-group">
+            <label for=""><?= __("Name:"); ?></label>
+            <?php echo $users["emp_firstname"] . ' ' . $users["emp_lastname"]; ?>
+        </div>
+        <div class="form-group">
+            <label for="userLanguage"><?= __("Language:"); ?></label>
+            <select name="userLanguage" id="userLanguage" class="form-control">
+            <?php 
+                
+                static $lang = array(
+                ""      => "Default",
+                "bn_BD" => "Bengali (বাংলা)"
+                );
 
-            foreach($lang as $lang_code => $lang_name){
-              $selected = $users["user_language"] === $lang_code ? "selected" : "";
-              echo "<option $selected value='$lang_code'>$lang_name</option>";
+                foreach($lang as $lang_code => $lang_name){
+                $selected = $users["user_language"] === $lang_code ? "selected" : "";
+                echo "<option $selected value='$lang_code'>$lang_name</option>";
+                }
+
+            ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="oldPassword"><?= __("Old Password:"); ?></label>
+            <input type="password" name="oldPassword" id="oldPassword" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="newPassword"><?= __("New Password:"); ?></label>
+            <input type="password" name="newPassword" id="newPassword" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="confirmNewPassword"><?= __("Confirm New Password:"); ?></label>
+            <input type="password" name="confirmNewPassword" id="confirmNewPassword" class="form-control">
+        </div>
+        <input type="hidden" name="user_id" value="<?php echo safe_entities($_GET['id']); ?>">
+                
+        </div>
+        <!-- /Box body-->
+
+        <script>
+
+        $(document).on("submit", "#modalForm", function(e) {
+            e.preventDefault();
+
+            if( $("#userLanguage").val() !== undefined && $("#userLanguage").val() !== '' ) {
+
+            $.ajax({
+                url: full_website_address + '/include/local/lang/'+ $("#userLanguage").val() +'.json',
+                success: function(data) {
+
+                    localStorage.setItem("dtLang", JSON.stringify(data));
+
+                },
+                error: function() {
+
+                    localStorage.setItem("dtLang", "{}");
+
+                }
+            });
+
+            } else {
+                localStorage.setItem("dtLang", "{}");
             }
-
-          ?>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="oldPassword"><?= __("Old Password:"); ?></label>
-        <input type="password" name="oldPassword" id="oldPassword" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="newPassword"><?= __("New Password:"); ?></label>
-        <input type="password" name="newPassword" id="newPassword" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="confirmNewPassword"><?= __("Confirm New Password:"); ?></label>
-        <input type="password" name="confirmNewPassword" id="confirmNewPassword" class="form-control">
-      </div>
-      <input type="hidden" name="user_id" value="<?php echo safe_entities($_GET['id']); ?>">
             
-    </div>
-    <!-- /Box body-->
+        });
 
-    <script>
+        </script>
 
-      $(document).on("submit", "#modalForm", function(e) {
-        e.preventDefault();
+    <?php
 
-        if( $("#userLanguage").val() !== undefined && $("#userLanguage").val() !== '' ) {
-
-          $.ajax({
-            url: full_website_address + '/include/local/lang/'+ $("#userLanguage").val() +'.json',
-            success: function(data) {
-                console.log(data);
-
-              localStorage.setItem("dtLang", JSON.stringify(data));
-            },
-            error: function() {
-              localStorage.setItem("dtLang", "{}");
-            }
-          });
-
-        } else {
-          localStorage.setItem("dtLang", "{}");
-        }
-        
-      });
-
-    </script>
-
-  <?php
-
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
@@ -1262,49 +1308,49 @@ if(isset($_GET['page']) and $_GET['page'] == "editProfile") {
 if(isset($_GET['page']) and $_GET['page'] == "updateProfile") {
 
 
-  $userPass = easySelectA(array(
-    "table"   => "users",
-    "fields"  => "user_pass",
-    "where"   => array(
-      "user_id" => $_POST["user_id"]
-    )
-  ))["data"][0]["user_pass"];
+    $userPass = easySelectA(array(
+        "table"   => "users",
+        "fields"  => "user_pass",
+        "where"   => array(
+        "user_id" => $_POST["user_id"]
+        )
+    ))["data"][0]["user_pass"];
 
 
-  if( !empty($_POST["oldPassword"]) and !password_verify($_POST["oldPassword"], $userPass ) ) {
+    if( !empty($_POST["oldPassword"]) and !password_verify($_POST["oldPassword"], $userPass ) ) {
 
-    return _e("You enter wrong old password.");
+        return _e("You enter wrong old password.");
 
-  } elseif(!empty($_POST["newPassword"]) and strlen($_POST["newPassword"]) < 8 ) {
+    } elseif(!empty($_POST["newPassword"]) and strlen($_POST["newPassword"]) < 8 ) {
 
-    return _e("Password must be at least 8 digit long.");
+        return _e("Password must be at least 8 digit long.");
 
-  } elseif($_POST["newPassword"] !== $_POST["confirmNewPassword"]) {  
+    } elseif($_POST["newPassword"] !== $_POST["confirmNewPassword"]) {  
 
-    return _e("User password doesn't match. Please enter correctly");
+        return _e("User password doesn't match. Please enter correctly");
 
-  }
+    }
 
-  $passwordHash = password_hash($_POST["confirmNewPassword"], PASSWORD_DEFAULT);
-  // Update the user into database with password
-  $updateUser = easyUpdate(
-    "users",
-    array(
-      "user_language" => $_POST["userLanguage"],
-      "user_pass"     => empty($_POST["oldPassword"]) ? $userPass : $passwordHash
-    ),
-    array(
-      "user_id" => $_POST["user_id"]
-    )
-  );
+    $passwordHash = password_hash($_POST["confirmNewPassword"], PASSWORD_DEFAULT);
+    // Update the user into database with password
+    $updateUser = easyUpdate(
+        "users",
+        array(
+            "user_language" => $_POST["userLanguage"],
+            "user_pass"     => empty($_POST["oldPassword"]) ? $userPass : $passwordHash
+        ),
+        array(
+            "user_id" => $_POST["user_id"]
+        )
+    );
 
-  
-  if($updateUser === true) {
-        
-      // Set language cookie
-      setcookie("lang", safe_entities($_POST["userLanguage"]), 0, "/");
     
-      _s("Profile has been successfully updated.");
+    if($updateUser === true) {
+            
+        // Set language cookie
+        setcookie("lang", safe_entities($_POST["userLanguage"]), 0, "/");
+        
+        _s("Profile has been successfully updated.");
 
     } else {
         _e($updateUser);
@@ -1320,387 +1366,434 @@ if(isset($_GET['page']) and $_GET['page'] == "newBiller") {
   
   ?>
     <div class="box-body">
-      <div class="form-group">
-        <label for="userId"><?= __("Select User:"); ?></label>
-        <select name="userId" id="userId" class="form-control select2" style="width: 100%;">
-          <option value=""><?= __("Choose user"); ?>....</option>
-          <?php 
+        <div class="form-group">
+            <label for="userId"><?= __("Select User:"); ?></label>
+            <select name="userId" id="userId" class="form-control select2" style="width: 100%;">
+            <option value=""><?= __("Choose user"); ?>....</option>
+            <?php 
 
-            $selectUsers = easySelect(
-              "users as user",
-              "user_id, emp_PIN, emp_firstname, emp_lastname",
-              array (
-                "left join {$table_prefix}employees on user_emp_id = emp_id"
-              ),
-              array("user.is_trash = 0")
-            );
+                $selectUsers = easySelect(
+                "users as user",
+                "user_id, emp_PIN, emp_firstname, emp_lastname",
+                array (
+                    "left join {$table_prefix}employees on user_emp_id = emp_id"
+                ),
+                array("user.is_trash = 0")
+                );
 
-            foreach($selectUsers["data"] as $users) {
-              echo "<option value='{$users['user_id']}'>{$users['emp_firstname']} {$users['emp_lastname']} ({$users['emp_PIN']})</option>";
-            }
-          ?>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="billerAccounts"><?= __("Default Accounts"); ?></label>
-        <select name="billerAccounts" id="billerAccounts" class="form-control select2" style="width: 100%;" required>
-          <option value="">Select accounts...</option>
-          <?php
-              $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), array("is_trash=0"));
-              
-              if($selectAccounts) {
-                foreach($selectAccounts["data"] as $accounts) {
-                    echo "<option value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
+                foreach($selectUsers["data"] as $users) {
+                echo "<option value='{$users['user_id']}'>{$users['emp_firstname']} {$users['emp_lastname']} ({$users['emp_PIN']})</option>";
                 }
-              }
-          ?>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="billerShop"><?= __("Default Shop:"); ?></label>
-        <select name="billerShop" id="billerShop" class="form-control select2" style="width: 100%;">
-          <option value=""><?= __("Select Shop"); ?>....</option>
-          <?php 
-            $SelectShop = easySelect("shops", "shop_id, shop_name, shop_city, shop_state", array(), array("is_trash=0"));
-            
-            if($SelectShop) {
-              foreach($SelectShop["data"] as $shops) {
-                echo "<option value='{$shops['shop_id']}'>{$shops['shop_name']} ({$shops['shop_city']}, {$shops['shop_state']})</option>";
-              }
-            }
-          ?>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="billerWarehouse"><?= __("Default Warehouse"); ?></label>
-        <select name="billerWarehouse" id="billerWarehouse" class="form-control select2" style="width: 100%;" required>
-          <option value=""><?= __("Select Warehouse"); ?>...</option>
-          <?php
-              $selectWarehouse = easySelect("warehouses", "warehouse_id, warehouse_name", array(), array("is_trash=0"));
-              
-              if($selectWarehouse) {
+            ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="billerAccounts"><?= __("Default Accounts"); ?></label>
+            <select name="billerAccounts" id="billerAccounts" class="form-control select2" style="width: 100%;" required>
+            <option value="">Select accounts...</option>
+            <?php
+                $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), array("is_trash=0"));
                 
-                foreach($selectWarehouse["data"] as $warehouse) {
-                  echo "<option value='{$warehouse['warehouse_id']}'>{$warehouse['warehouse_name']}</option>";
+                if($selectAccounts) {
+                    foreach($selectAccounts["data"] as $accounts) {
+                        echo "<option value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
+                    }
                 }
-            
-              }
-          ?>
-        </select>
-      </div>
-            
+            ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="billerShop"><?= __("Default Shop:"); ?></label>
+            <select name="billerShop" id="billerShop" class="form-control select2" style="width: 100%;">
+            <option value=""><?= __("Select Shop"); ?>....</option>
+            <?php 
+                $SelectShop = easySelect("shops", "shop_id, shop_name, shop_city, shop_state", array(), array("is_trash=0"));
+                
+                if($SelectShop) {
+                foreach($SelectShop["data"] as $shops) {
+                    echo "<option value='{$shops['shop_id']}'>{$shops['shop_name']} ({$shops['shop_city']}, {$shops['shop_state']})</option>";
+                }
+                }
+            ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="billerWarehouse"><?= __("Default Warehouse"); ?></label>
+            <select name="billerWarehouse" id="billerWarehouse" class="form-control select2" style="width: 100%;" required>
+            <option value=""><?= __("Select Warehouse"); ?>...</option>
+            <?php
+                $selectWarehouse = easySelect("warehouses", "warehouse_id, warehouse_name", array(), array("is_trash=0"));
+                
+                if($selectWarehouse) {
+                    
+                    foreach($selectWarehouse["data"] as $warehouse) {
+                    echo "<option value='{$warehouse['warehouse_id']}'>{$warehouse['warehouse_name']}</option>";
+                    }
+                
+                }
+            ?>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="maxDiscount">Maximum discount able to give</label>
+            <input type="text" name="maxDiscount" id="maxDiscount" placeholder="Eg 5% or 20" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="allowChangingPrice">Allow changing price on sale</label>
+            <select name="allowChangingPrice" id="allowChangingPrice" class="form-control">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+        </div>
+
+        
+                
     </div>
     <!-- /Box body-->
 
     <script>
-    $(function () {
-      /* Initialize Select2 Elements */
-      $('#empGroup').select2();
-    });
-  </script>
-  
-  <?php
+        $(function () {
+            /* Initialize Select2 Elements */
+            $('#empGroup').select2();
+        });
+    </script>
+    
+    <?php
 
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
 //*******************************  Add New Biller ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "addNewBiller") {
 
-  // Error handaling
-  if(empty($_POST["userId"])) {
-    return _e("Please select user.");
-  } else if(empty($_POST["billerShop"])) {
-    return _e("Please select shop.");
-  } else if(empty($_POST["billerAccounts"])) {
-    return _e("Please select accounts.");
-  } else if(empty($_POST["billerWarehouse"])) {
-    return _e("Please select warehouse.");
-  }
-  
-  // Check if all data is not empty
-  if(!empty($_POST["userId"]) AND !empty($_POST["billerShop"])){
-   
-    // Insert the biller into database
-    $insertBiller = easyInsert(
-      "billers",
-      array(
-        "biller_user_id"      => $_POST["userId"],
-        "biller_shop_id"      => $_POST["billerShop"],
-        "biller_accounts_id"  => $_POST["billerAccounts"],
-        "biller_warehouse_id" => $_POST["billerWarehouse"],
-      ), 
-      array (
-        "biller_user_id"  => $_POST["userId"]
-      )
-    );
+    if( !current_user_can("peoples_biller.Add") ) {
+        return _e("Sorry! you do not have permission to add new biller");
+    }
+
+    // Error handaling
+    if(empty($_POST["userId"])) {
+        return _e("Please select user.");
+    } else if(empty($_POST["billerShop"])) {
+        return _e("Please select shop.");
+    } else if(empty($_POST["billerAccounts"])) {
+        return _e("Please select accounts.");
+    } else if(empty($_POST["billerWarehouse"])) {
+        return _e("Please select warehouse.");
+    }
     
-    if(strlen($insertBiller) < 5) {
-          _s("New Biller successfully added.");
-      } else {
-          _e($insertBiller);
-      }
-  }
+    // Check if all data is not empty
+    if(!empty($_POST["userId"]) AND !empty($_POST["billerShop"])){
+    
+        // Insert the biller into database
+        $insertBiller = easyInsert(
+        "billers",
+        array(
+            "biller_user_id"        => $_POST["userId"],
+            "biller_shop_id"        => $_POST["billerShop"],
+            "biller_accounts_id"    => $_POST["billerAccounts"],
+            "biller_warehouse_id"   => $_POST["billerWarehouse"],
+            "biller_max_discount"   => $_POST["maxDiscount"],
+            "allow_changing_price"  => $_POST["allowChangingPrice"]
+        ), 
+        array (
+            "biller_user_id"  => $_POST["userId"]
+        )
+        );
+        
+        if(strlen($insertBiller) < 5) {
+            _s("New Biller successfully added.");
+        } else {
+            _e($insertBiller);
+        }
+    }
   
 }
 
 
 /*************************** Biller List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "billerList") {
+
+    if( !current_user_can("peoples_biller.View") ) {
+        return _e("Sorry! you do not have permission to view biller list");
+    }
     
-  $requestData = $_REQUEST;
-  $getData = [];
+    $requestData = $_REQUEST;
+    $getData = [];
 
-  // List of all columns name
-  $columns = array(
-      "emp_firstname",
-      "emp_firstname",
-      "emp_contact_number",
-      "shop_name"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-    "table" => "billers",
-    "fields" => "count(*) as totalRow",
-    "where" => array(
-      "is_trash = 0"
-    )
-  ))["data"][0]["totalRow"];
+    // List of all columns name
+    $columns = array(
+        "emp_firstname",
+        "emp_firstname",
+        "emp_contact_number",
+        "shop_name"
+    );
+    
+    // Count Total records
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+        "table" => "billers",
+        "fields" => "count(*) as totalRow",
+        "where" => array(
+        "is_trash = 0"
+        )
+    ))["data"][0]["totalRow"];
 
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
 
-  if(!empty($requestData["search"]["value"])) {  // get data with search
-      
-      $getData = easySelect(
-          "billers as biller",
-          "biller_user_id, biller_shop_id, biller_accounts_id, accounts_name, emp_id, emp_firstname, emp_lastname, emp_positions, emp_photo, emp_contact_number, emp_email, shop_name, shop_city, shop_state",
-          array(
-              "left join {$table_prefix}users on biller_user_id = user_id",  
-              "left join {$table_prefix}shops on biller_shop_id = shop_id",
-              "left join {$table_prefix}accounts on biller_accounts_id = accounts_id",
-              "left join {$table_prefix}employees on user_emp_id = emp_id"
-          ),
-          array (
-              "biller.is_trash = 0 and emp_firstname LIKE" => $requestData['search']['value'] . "%",
-              " OR emp_lastname LIKE" => $requestData['search']['value'] . "%",
-              " OR shop_name LIKE" => $requestData['search']['value'] . "%",
-              " OR emp_contact_number LIKE" => $requestData['search']['value'] . "%"
-          ),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
-  
-      $totalFilteredRecords = $getData ? $getData["count"] : 0;
+    if(!empty($requestData["search"]["value"])) {  // get data with search
+        
+        $getData = easySelect(
+            "billers as biller",
+            "biller_user_id, biller_shop_id, biller_accounts_id, accounts_name, emp_id, emp_firstname, emp_lastname, emp_positions, emp_photo, emp_contact_number, emp_email, shop_name, shop_city, shop_state",
+            array(
+                "left join {$table_prefix}users on biller_user_id = user_id",  
+                "left join {$table_prefix}shops on biller_shop_id = shop_id",
+                "left join {$table_prefix}accounts on biller_accounts_id = accounts_id",
+                "left join {$table_prefix}employees on user_emp_id = emp_id"
+            ),
+            array (
+                "biller.is_trash = 0 and emp_firstname LIKE" => $requestData['search']['value'] . "%",
+                " OR emp_lastname LIKE" => $requestData['search']['value'] . "%",
+                " OR shop_name LIKE" => $requestData['search']['value'] . "%",
+                " OR emp_contact_number LIKE" => $requestData['search']['value'] . "%"
+            ),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
+    
+        $totalFilteredRecords = $getData ? $getData["count"] : 0;
 
-  } else { // Get data withouth search
+    } else { // Get data without search
 
-      $getData = easySelect(
-          "billers as biller",
-          "biller_user_id, biller_shop_id, biller_accounts_id, accounts_name, emp_id, emp_firstname, emp_lastname, emp_positions, emp_photo, emp_contact_number, emp_email, warehouse_name, shop_name, shop_city, shop_state",
-          array(
-              "left join {$table_prefix}users on biller_user_id = user_id",  
-              "left join {$table_prefix}shops on biller_shop_id = shop_id",
-              "left join {$table_prefix}accounts on biller_accounts_id = accounts_id",
-              "left join {$table_prefix}warehouses on biller_warehouse_id = warehouse_id",
-              "left join {$table_prefix}employees on user_emp_id = emp_id"
-          ),
-          array("biller.is_trash = 0"),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
+        $getData = easySelect(
+            "billers as biller",
+            "biller_user_id, biller_shop_id, biller_accounts_id, accounts_name, emp_id, emp_firstname, emp_lastname, emp_positions, emp_photo, emp_contact_number, emp_email, warehouse_name, shop_name, shop_city, shop_state",
+            array(
+                "left join {$table_prefix}users on biller_user_id = user_id",  
+                "left join {$table_prefix}shops on biller_shop_id = shop_id",
+                "left join {$table_prefix}accounts on biller_accounts_id = accounts_id",
+                "left join {$table_prefix}warehouses on biller_warehouse_id = warehouse_id",
+                "left join {$table_prefix}employees on user_emp_id = emp_id"
+            ),
+            array("biller.is_trash = 0"),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
 
-  }
+    }
 
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
-          $allNestedData = [];
-          $allNestedData[] = empty($value['emp_photo']) ? "<img width='80px' height='80px' src='".full_website_address()."/assets/images/defaultUserPic.png' class='img-circle'/>" : "<img width='80px' height='80px' src='".full_website_address()."/images/?for=employees&id={$value['emp_id']}&q=YTozOntzOjI6Iml3IjtpOjE4MDtzOjI6ImloIjtpOjE4MDtzOjI6ImlxIjtpOjcwO30=&v=". strlen($value['emp_photo']) ."' class='img-circle'/>";
-          $allNestedData[] = "<strong>{$value["emp_firstname"]} {$value["emp_lastname"]}</strong><br/> {$value["emp_positions"]}";
-          $allNestedData[] = $value["emp_contact_number"] . "</br>" . $value["emp_email"];
-          $allNestedData[] = "{$value['shop_name']} ({$value['shop_city']}, {$value['shop_state']})";
-          $allNestedData[] = $value['accounts_name'];
-          $allNestedData[] = $value['warehouse_name'];
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                  <li><a class="'. ( current_user_can("peoples_biller.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=peoples&page=deleteBiller" data-to-be-deleted="'. $value["biller_user_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  <li><a class="'. ( current_user_can("peoples_biller.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editBiller&id='. $value["biller_user_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit Biller</a></li>
-                                  <li class="divider"></li>
-                                  <li><a class="'. ( current_user_can("peoples_user.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editUser&id='. $value["biller_user_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit this User</a></li>
-                                  <li><a class="'. ( current_user_can("peoples_employee.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editEmployee&id='. $value["emp_id"] .'"  data-target="#modalDefaultXlg"><i class="fa fa-edit"></i> Edit this Employee</a></li>
-                                  <li><a class="'. ( current_user_can("settings_shops.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=settings&page=editShop&id='. $value["biller_shop_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit this Shop</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $allNestedData[] = empty($value['emp_photo']) ? "<img width='80px' height='80px' src='".full_website_address()."/assets/images/defaultUserPic.png' class='img-circle'/>" : "<img width='80px' height='80px' src='".full_website_address()."/images/?for=employees&id={$value['emp_id']}&q=YTozOntzOjI6Iml3IjtpOjE4MDtzOjI6ImloIjtpOjE4MDtzOjI6ImlxIjtpOjcwO30=&v=". strlen($value['emp_photo']) ."' class='img-circle'/>";
+            $allNestedData[] = "<strong>{$value["emp_firstname"]} {$value["emp_lastname"]}</strong><br/> {$value["emp_positions"]}";
+            $allNestedData[] = $value["emp_contact_number"] . "</br>" . $value["emp_email"];
+            $allNestedData[] = "{$value['shop_name']} ({$value['shop_city']}, {$value['shop_state']})";
+            $allNestedData[] = $value['accounts_name'];
+            $allNestedData[] = $value['warehouse_name'];
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li><a class="'. ( current_user_can("peoples_biller.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=peoples&page=deleteBiller" data-to-be-deleted="'. $value["biller_user_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                    <li><a class="'. ( current_user_can("peoples_biller.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editBiller&id='. $value["biller_user_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit Biller</a></li>
+                                    <li class="divider"></li>
+                                    <li><a class="'. ( current_user_can("peoples_user.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editUser&id='. $value["biller_user_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit this User</a></li>
+                                    <li><a class="'. ( current_user_can("peoples_employee.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editEmployee&id='. $value["emp_id"] .'"  data-target="#modalDefaultXlg"><i class="fa fa-edit"></i> Edit this Employee</a></li>
+                                    <li><a class="'. ( current_user_can("settings_shops.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=settings&page=editShop&id='. $value["biller_shop_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit this Shop</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
 
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Formate
-  echo json_encode($jsonData); 
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
+
 }
 
 /************************** Edit Biller **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editBiller") {
 
-  // Include the modal header
-  modal_header("Edit Biller", full_website_address() . "/xhr/?module=peoples&page=updateBiller");
+    if( !current_user_can("peoples_biller.Edit") ) {
+        return _e("Sorry! you do not have permission to edit biller");
+    }
 
-  $selectBiller = easySelect(
-    "billers",
-    "",
-    array(),
-    array(
-      "biller_user_id" => $_GET['id']
-    )
-  )["data"][0];
-  
-  ?>
+    // Include the modal header
+    modal_header("Edit Biller", full_website_address() . "/xhr/?module=peoples&page=updateBiller");
+
+    $selectBiller = easySelect(
+        "billers",
+        "",
+        array(),
+        array(
+        "biller_user_id" => $_GET['id']
+        )
+    )["data"][0];
+    
+    ?>
     <div class="box-body">
-      <div class="form-group">
-        <label for="userId"><?= __("Select User:"); ?></label>
-        <select disabled id="userId" class="form-control select2" style="width: 100%;">
-          <option value=""><?= __("Choose user"); ?>....</option>
-          <?php 
+        <div class="form-group">
+            <label for="userId"><?= __("Select User:"); ?></label>
+            <select disabled id="userId" class="form-control select2" style="width: 100%;">
+            <option value=""><?= __("Choose user"); ?>....</option>
+            <?php 
 
-            $selectUsers = easySelect(
-              "users as user",
-              "user_id, emp_PIN, emp_firstname, emp_lastname",
-              array (
-                "left join {$table_prefix}employees on user_emp_id = emp_id"
-              ),
-              array("user.is_trash = 0")
-            );
+                $selectUsers = easySelect(
+                    "users as user",
+                    "user_id, emp_PIN, emp_firstname, emp_lastname",
+                    array (
+                        "left join {$table_prefix}employees on user_emp_id = emp_id"
+                    ),
+                    array("user.is_trash = 0")
+                );
 
-            foreach($selectUsers["data"] as $users) {
-              $selected = ($selectBiller["biller_user_id"] === $users['user_id']) ? "selected" : "";
-              echo "<option {$selected} value='{$users['user_id']}'>{$users['emp_firstname']} {$users['emp_lastname']} ({$users['emp_PIN']})</option>";
-            }
-          ?>
-        </select>
-        <input type="hidden" name="userId" value="<?php echo $selectBiller["biller_user_id"]; ?>">
-      </div>
-      <div class="form-group">
-        <label for="billerShop"><?= __("Default Shop:"); ?></label>
-        <select name="billerShop" id="billerShop" class="form-control select2" style="width: 100%;">
-          <option value=""><?= __("Select Shop"); ?>....</option>
-          <?php 
-            $SelectShop = easySelect("shops", "shop_id, shop_name, shop_city, shop_state", array(), array("is_trash=0"));
-            foreach($SelectShop["data"] as $shops) {
-              $selected = ($selectBiller["biller_shop_id"] === $shops['shop_id']) ? "selected" : "";
-              echo "<option {$selected} value='{$shops['shop_id']}'>{$shops['shop_name']} ({$shops['shop_city']}, {$shops['shop_state']})</option>";
-            }
-          ?>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="billerAccounts"><?= __("Default Accounts"); ?></label>
-        <select name="billerAccounts" id="billerAccounts" class="form-control select2" style="width: 100%;" required>
-          <option value=""><?= __("Select accounts"); ?>...</option>
-          <?php
-              $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), array("is_trash=0"));
-              
-              foreach($selectAccounts["data"] as $accounts) {
-                  $selected = ($selectBiller["biller_accounts_id"] === $accounts['accounts_id']) ? "selected" : "";
-                  echo "<option {$selected} value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
-              }
-          ?>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="billerWarehouse"><?= __("Default Warehouse"); ?></label>
-        <select name="billerWarehouse" id="billerWarehouse" class="form-control select2" style="width: 100%;" required>
-          <option value="">Select Warehouse...</option>
-          <?php
-              $selectWarehouse = easySelect("warehouses", "warehouse_id, warehouse_name", array(), array("is_trash=0"));
-              
-              if($selectWarehouse) {
-                
-                foreach($selectWarehouse["data"] as $warehouse) {
-                  $selected = ($selectBiller["biller_warehouse_id"] === $warehouse['warehouse_id']) ? "selected" : "";
-                  echo "<option $selected value='{$warehouse['warehouse_id']}'>{$warehouse['warehouse_name']}</option>";
+                foreach($selectUsers["data"] as $users) {
+                    $selected = ($selectBiller["biller_user_id"] === $users['user_id']) ? "selected" : "";
+                    echo "<option {$selected} value='{$users['user_id']}'>{$users['emp_firstname']} {$users['emp_lastname']} ({$users['emp_PIN']})</option>";
                 }
-            
-              }
-          ?>
-        </select>
-      </div>
-            
+            ?>
+            </select>
+            <input type="hidden" name="userId" value="<?php echo $selectBiller["biller_user_id"]; ?>">
+        </div>
+        <div class="form-group">
+            <label for="billerShop"><?= __("Default Shop:"); ?></label>
+            <select name="billerShop" id="billerShop" class="form-control select2" style="width: 100%;">
+            <option value=""><?= __("Select Shop"); ?>....</option>
+            <?php 
+                $SelectShop = easySelect("shops", "shop_id, shop_name, shop_city, shop_state", array(), array("is_trash=0"));
+                foreach($SelectShop["data"] as $shops) {
+                    $selected = ($selectBiller["biller_shop_id"] === $shops['shop_id']) ? "selected" : "";
+                    echo "<option {$selected} value='{$shops['shop_id']}'>{$shops['shop_name']} ({$shops['shop_city']}, {$shops['shop_state']})</option>";
+                }
+            ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="billerAccounts"><?= __("Default Accounts"); ?></label>
+            <select name="billerAccounts" id="billerAccounts" class="form-control select2" style="width: 100%;" required>
+            <option value=""><?= __("Select accounts"); ?>...</option>
+            <?php
+                $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), array("is_trash=0"));
+                
+                foreach($selectAccounts["data"] as $accounts) {
+                    $selected = ($selectBiller["biller_accounts_id"] === $accounts['accounts_id']) ? "selected" : "";
+                    echo "<option {$selected} value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
+                }
+            ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="billerWarehouse"><?= __("Default Warehouse"); ?></label>
+            <select name="billerWarehouse" id="billerWarehouse" class="form-control select2" style="width: 100%;" required>
+            <option value="">Select Warehouse...</option>
+            <?php
+                $selectWarehouse = easySelect("warehouses", "warehouse_id, warehouse_name", array(), array("is_trash=0"));
+                
+                if($selectWarehouse) {
+                    
+                    foreach($selectWarehouse["data"] as $warehouse) {
+                    $selected = ($selectBiller["biller_warehouse_id"] === $warehouse['warehouse_id']) ? "selected" : "";
+                    echo "<option $selected value='{$warehouse['warehouse_id']}'>{$warehouse['warehouse_name']}</option>";
+                    }
+                
+                }
+            ?>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="maxDiscount">Maximum discount able to give</label>
+            <input type="text" name="maxDiscount" id="maxDiscount" value="<?php echo $selectBiller["biller_max_discount"]; ?>" placeholder="Eg 5% or 20" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="allowChangingPrice">Allow changing price on sale</label>
+            <select name="allowChangingPrice" id="allowChangingPrice" class="form-control">
+                <option <?php echo $selectBiller["allow_changing_price"] != 0 ?: "selected"; ?> value="0">No</option>
+                <option <?php echo $selectBiller["allow_changing_price"] != 1 ?: "selected"; ?> value="1">Yes</option>
+            </select>
+        </div>
+                
     </div>
     <!-- /Box body-->
 
     <script>
-    $(function () {
-      /* Initialize Select2 Elements */
-      $('#empGroup').select2();
-    });
-  </script>
-  
-  <?php
+        $(function () {
+            /* Initialize Select2 Elements */
+            $('#empGroup').select2();
+        });
+    </script>
+    
+    <?php
 
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
 //*******************************  Update Biller ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateBiller") {
 
-  // Error handaling
-  if(empty($_POST["billerShop"])) {
-    return _e("Please select shop.");
-  }  else if(empty($_POST["billerAccounts"])) {
-    return _e("Please select accounts.");
-  }
-  
-  // Insert the biller into database
-  $updateBiller = easyUpdate(
-    "billers",
-    array(
-      "biller_shop_id"      => $_POST["billerShop"],
-      "biller_accounts_id"  => $_POST["billerAccounts"],
-      "biller_warehouse_id" => $_POST["billerWarehouse"]
-    ), 
-    array (
-      "biller_user_id"  => $_POST["userId"]
-    )
-  );
-  
-  if(strlen($updateBiller) < 5) {
-      _s("Biller successfully updated");
+    if( !current_user_can("peoples_biller.Edit") ) {
+        return _e("Sorry! you do not have permission to edit biller");
+    }
+
+    // Error handaling
+    if(empty($_POST["billerShop"])) {
+        return _e("Please select shop.");
+    }  else if(empty($_POST["billerAccounts"])) {
+        return _e("Please select accounts.");
+    }
+    
+    // Insert the biller into database
+    $updateBiller = easyUpdate(
+        "billers",
+        array(
+            "biller_shop_id"        => $_POST["billerShop"],
+            "biller_accounts_id"    => $_POST["billerAccounts"],
+            "biller_warehouse_id"   => $_POST["billerWarehouse"],
+            "biller_max_discount"   => $_POST["maxDiscount"],
+            "allow_changing_price"  => $_POST["allowChangingPrice"]
+        ), 
+        array (
+            "biller_user_id"  => $_POST["userId"]
+        )
+    );
+    
+    if(strlen($updateBiller) < 5) {
+        _s("Biller successfully updated");
     } else {
-      _e($updateBiller);
+        _e($updateBiller);
     }
   
 }
@@ -1721,18 +1814,18 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteBiller") {
     return;
   }
 
-  $deleteData = easyDelete(
-      "billers",
-      array(
-          "biller_user_id" => $_POST["datatoDelete"]
-      )
-  );
+    $deleteData = easyDelete(
+        "billers",
+        array(
+            "biller_user_id" => $_POST["datatoDelete"]
+        )
+    );
 
-  if($deleteData === true) {
-      echo 1;
-  } else {
-    echo $deleteData;
-  }
+    if($deleteData === true) {
+        echo 1;
+    } else {
+        echo $deleteData;
+    }
 
 }
 
@@ -1911,205 +2004,223 @@ if(isset($_GET['page']) and $_GET['page'] == "newCustomer") {
 //*******************************  Add New Customer ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "addNewCustomer") {
 
-  // Error handaling
-  if(empty($_POST["customerName"])) {
-    return _e("Please enter customer name.");
-  } else if(empty($_POST["customerPhone"])) {
-    return _e("Please enter customer phone.");
-  }
-  
-  // Check if all data is not empty
-  if(!empty($_POST["customerName"]) AND !empty($_POST["customerPhone"])){
-   
-    // Insert the customer into database
-    $insertCustomer = easyInsert(
-      "customers",
-      array(
-        "customer_name"             => $_POST["customerName"],
-        "customer_name_in_local_len"=> $_POST["customerNameLocalLen"],
-        "customer_type"             => $_POST["customerType"],
-        "customer_opening_balance"  => $_POST["customerOpeningBalance"],
-        "customer_balance"          => ($_POST["customerOpeningBalance"] < 0) ? 0 : abs($_POST["customerOpeningBalance"]),
-        "customer_due"              => ($_POST["customerOpeningBalance"] > 0) ? 0 : abs($_POST["customerOpeningBalance"]),
-        "customer_shipping_rate"    => $_POST["customerShippingRate"],
-        "customer_discount"         => $_POST["customerDiscount"],
-        "customer_upazila"          => empty($_POST["customerUpazila"]) ? NULL : $_POST["customerUpazila"],
-        "customer_district"         => empty($_POST["customerDistrict"]) ? NULL : $_POST["customerDistrict"],
-        "customer_division"         => empty($_POST["customerDivision"]) ? NULL : $_POST["customerDivision"],
-        "customer_address"          => $_POST["customerAddress"],
-        "customer_postal_code"      => $_POST["customerPostalCode"],
-        "customer_country"          => $_POST["customerCountry"],
-        "customer_phone"            => $_POST["customerPhone"],
-        "send_notif"                => $_POST["customerSendNotification"],
-        "customer_email"            => $_POST["customerEmail"],
-        "customer_website"          => empty($_POST["customerWebsite"]) ? '' : ''
-      ),
-      array(
-        "customer_phone"            => $_POST["customerPhone"]
-      )
-    );
-    
-    if($insertCustomer === true) {
-          _s("New customer successfully added.");
-    } else {
-        _e($insertCustomer);
+    if( !current_user_can("peoples_customer.Add") ) {
+        return _e("Sorry! you do not have permission to add customer");
     }
-  }
+
+    // Error handaling
+    if(empty($_POST["customerName"])) {
+        return _e("Please enter customer name.");
+    } else if(empty($_POST["customerPhone"])) {
+        return _e("Please enter customer phone.");
+    }
+    
+    // Check if all data is not empty
+    if(!empty($_POST["customerName"]) AND !empty($_POST["customerPhone"])){
+    
+        // Insert the customer into database
+        $insertCustomer = easyInsert(
+            "customers",
+            array(
+                "customer_name"             => $_POST["customerName"],
+                "customer_name_in_local_len"=> $_POST["customerNameLocalLen"],
+                "customer_type"             => $_POST["customerType"],
+                "customer_opening_balance"  => $_POST["customerOpeningBalance"],
+                "customer_balance"          => ($_POST["customerOpeningBalance"] < 0) ? 0 : abs($_POST["customerOpeningBalance"]),
+                "customer_due"              => ($_POST["customerOpeningBalance"] > 0) ? 0 : abs($_POST["customerOpeningBalance"]),
+                "customer_shipping_rate"    => $_POST["customerShippingRate"],
+                "customer_discount"         => $_POST["customerDiscount"],
+                "customer_upazila"          => empty($_POST["customerUpazila"]) ? NULL : $_POST["customerUpazila"],
+                "customer_district"         => empty($_POST["customerDistrict"]) ? NULL : $_POST["customerDistrict"],
+                "customer_division"         => empty($_POST["customerDivision"]) ? NULL : $_POST["customerDivision"],
+                "customer_address"          => $_POST["customerAddress"],
+                "customer_postal_code"      => $_POST["customerPostalCode"],
+                "customer_country"          => $_POST["customerCountry"],
+                "customer_phone"            => $_POST["customerPhone"],
+                "send_notif"                => $_POST["customerSendNotification"],
+                "customer_email"            => $_POST["customerEmail"],
+                "customer_website"          => empty($_POST["customerWebsite"]) ? '' : ''
+            ),
+            array(
+                "customer_phone"            => $_POST["customerPhone"]
+            )
+        );
+        
+        if($insertCustomer === true) {
+            _s("New customer successfully added.");
+        } else {
+            _e($insertCustomer);
+        }
+    }
   
 }
 
 
 /*************************** Customer List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "customerList") {
+
+    if( !current_user_can("peoples_customer.View") ) {
+        return _e("Sorry! you do not have permission to view customer list");
+    }
     
-  $requestData = $_REQUEST;
-  $getData = [];
+    $requestData = $_REQUEST;
+    $getData = [];
 
-  // List of all columns name for sorting
-  $columns = array(
-      "",
-      "customer_name",
-      "division_name",
-      "division_name",
-      "customer_address",
-      "customer_phone"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-    "table" => "customers",
-    "fields" => "count(*) as totalRow",
-    "where" => array(
-      "is_trash = 0"
-    )
-  ))["data"][0]["totalRow"];
+    // List of all columns name for sorting
+    $columns = array(
+        "",
+        "customer_name",
+        "division_name",
+        "division_name",
+        "customer_address",
+        "customer_phone"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+        "table" => "customers",
+        "fields" => "count(*) as totalRow",
+        "where" => array(
+        "is_trash = 0"
+        )
+    ))["data"][0]["totalRow"];
 
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
+    }
 
-  if(!empty($requestData["search"]["value"])) {  // get data with search
-      
-      $getData = easySelect(
-          "customers as customer",
-          "customer_id, customer_name, district_name, division_name, customer_phone, customer_email, customer_website, customer_address",
-          array (
-            "left join {$table_prefix}districts on customer_district = district_id",
-            "left join {$table_prefix}divisions on customer_division = division_id",
-          ),
-          array (
-              "customer.is_trash = 0 and customer_name LIKE" => $requestData['search']['value'] . "%",
-              " OR district_name LIKE" => $requestData['search']['value'] . "%",
-              " OR division_name LIKE" => $requestData['search']['value'] . "%",
-              " OR customer_phone LIKE" => $requestData['search']['value'] . "%",
-              " OR customer_email LIKE" => $requestData['search']['value'] . "%",
-              " OR customer_website LIKE" => $requestData['search']['value'] . "%"
-          ),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
-  
-      $totalFilteredRecords = $getData ? $getData["count"] : 0;
+    if(!empty($requestData["search"]["value"])) {  // get data with search
+        
+        $getData = easySelect(
+            "customers as customer",
+            "customer_id, customer_name, district_name, division_name, customer_phone, customer_email, customer_website, customer_address",
+            array (
+                "left join {$table_prefix}districts on customer_district = district_id",
+                "left join {$table_prefix}divisions on customer_division = division_id",
+            ),
+            array (
+                "customer.is_trash = 0 and customer_name LIKE" => "%" . $requestData['search']['value'] . "%",
+                " OR district_name LIKE" => $requestData['search']['value'] . "%",
+                " OR division_name LIKE" => $requestData['search']['value'] . "%",
+                " OR customer_phone LIKE" => $requestData['search']['value'] . "%",
+                " OR customer_email LIKE" => $requestData['search']['value'] . "%",
+                " OR customer_website LIKE" => $requestData['search']['value'] . "%"
+            ),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
+    
+        $totalFilteredRecords = $getData ? $getData["count"] : 0;
 
-  } else { // Get data withouth search
+    } else { // Get data withouth search
 
-      $getData = easySelect(
-          "customers as customer",
-          "customer_id, customer_name, district_name, division_name, customer_phone, customer_email, customer_website, customer_address",
-          array (
-            "left join {$table_prefix}districts on customer_district = district_id",
-            "left join {$table_prefix}divisions on customer_division = division_id",
-          ),
-          array("customer.is_trash = 0"),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
+        $getData = easySelect(
+            "customers as customer",
+            "customer_id, customer_name, district_name, division_name, customer_phone, customer_email, customer_website, customer_address",
+            array (
+                "left join {$table_prefix}districts on customer_district = district_id",
+                "left join {$table_prefix}divisions on customer_division = division_id",
+            ),
+            array("customer.is_trash = 0"),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
 
-  }
+    }
 
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
-          $allNestedData = [];
-          $allNestedData[] = "{$value['customer_phone']}";
-          $allNestedData[] = "{$value['customer_name']}";
-          $allNestedData[] = "{$value['district_name']}";
-          $allNestedData[] = "{$value['division_name']}";
-          $allNestedData[] = "{$value['customer_address']}";
-          $allNestedData[] = "{$value['customer_phone']}; {$value['customer_email']}";
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                  <li><a class="'. ( current_user_can("peoples_customer.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=peoples&page=deleteCustomer" data-to-be-deleted="'. $value["customer_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  <li><a class="'. ( current_user_can("peoples_customer.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editCustomer&id='. $value["customer_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit Customer</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $allNestedData[] = "{$value['customer_phone']}";
+            $allNestedData[] = "{$value['customer_name']}";
+            $allNestedData[] = "{$value['district_name']}";
+            $allNestedData[] = "{$value['division_name']}";
+            $allNestedData[] = "{$value['customer_address']}";
+            $allNestedData[] = "{$value['customer_phone']}; {$value['customer_email']}";
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a class="'. ( current_user_can("peoples_customer.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=peoples&page=deleteCustomer" data-to-be-deleted="'. $value["customer_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                        <li><a class="'. ( current_user_can("peoples_customer.Edit") ? "" : "restricted " ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?icheck=false&module=peoples&page=editCustomer&id='. $value["customer_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit Customer</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
 
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Formate
-  echo json_encode($jsonData); 
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
+
 }
 
 
 /***************** Delete Customer ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteCustomer") {
 
-  $deleteData = easyDelete(
-      "customers",
-      array(
-          "customer_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("peoples_customer.Delete") ) {
+        return _e("Sorry! you do not have permission to delete customer");
+    }
 
-  if($deleteData === true) {
+    $deleteData = easyDelete(
+        "customers",
+        array(
+            "customer_id" => $_POST["datatoDelete"]
+        )
+    );
 
-      echo '{
-          "title": "'. __("The customer has been successfully deleted.") .'",
-          "icon": "success"
-      }';
+    if($deleteData === true) {
 
-  } else {
+        echo '{
+            "title": "'. __("The customer has been successfully deleted.") .'",
+            "icon": "success"
+        }';
 
-    echo '{
-        "title": "Error: '.$deleteData.'",
-        "icon": "error"
-    }';
+    } else {
 
-  }
+        echo '{
+            "title": "Error: '.$deleteData.'",
+            "icon": "error"
+        }';
+
+    }
 
 }
 
 
 /************************** Edit Customer **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editCustomer") {
+
+
+    if( !current_user_can("peoples_customer.Edit") ) {
+        return _e("You do not have permission to edit customer");
+    }
 
   $selectCustomer = easySelect(
       "customers",
@@ -2299,50 +2410,53 @@ if(isset($_GET['page']) and $_GET['page'] == "editCustomer") {
 //*******************************  Update Customer ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateCustomer") {
 
-    // Error handaling
-  if(empty($_POST["customerName"])) {
-    return _e("Please enter customer name.");
-  } else if(empty($_POST["customerPhone"])) {
-    return _e("Please enter customer phone.");
-  }
-  
-  // Check if all data is not empty
-  if(!empty($_POST["customerName"]) AND !empty($_POST["customerPhone"])){
-   
-    // Update the customer into database
-    $updateCustomer = easyUpdate(
-      "customers",
-      array(
-        "customer_name"             => $_POST["customerName"],
-        "customer_name_in_local_len"=> $_POST["customerNameLocalLen"],
-        "customer_type"             => $_POST["customerType"],
-        "customer_opening_balance"  => $_POST["customerOpeningBalance"],
-        "customer_shipping_rate"    => $_POST["customerShippingRate"],
-        "customer_discount"         => $_POST["customerDiscount"],
-        "customer_upazila"          => empty($_POST["customerUpazila"]) ? NULL : $_POST["customerUpazila"],
-        "customer_district"         => empty($_POST["customerDistrict"]) ? NULL : $_POST["customerDistrict"],
-        "customer_division"         => empty($_POST["customerDivision"]) ? NULL : $_POST["customerDivision"],
-        "customer_address"          => $_POST["customerAddress"],
-        "customer_postal_code"      => $_POST["customerPostalCode"],
-        "customer_country"          => $_POST["customerCountry"],
-        "customer_phone"            => $_POST["customerPhone"],
-        "send_notif"                => $_POST["customerSendNotification"],
-        "customer_email"            => $_POST["customerEmail"],
-        "customer_website"          => empty($_POST["customerWebsite"]) ? '' : ''
-      ), 
-      array (
-        "customer_id" => $_POST["customer_id"] 
-      )
-
-    );
-      
-    if($updateCustomer === true) {
-        _s("Customer successfully updated.");
-    } else {
-        _e($updateCustomer);
+    if( !current_user_can("peoples_customer.Edit") ) {
+        return _e("Sorry! you do not have permission to edit customer");
     }
 
-  }
+    // Error handaling
+    if(empty($_POST["customerName"])) {
+        return _e("Please enter customer name.");
+    } else if(empty($_POST["customerPhone"])) {
+        return _e("Please enter customer phone.");
+    }
+    
+    // Check if all data is not empty
+    if(!empty($_POST["customerName"]) AND !empty($_POST["customerPhone"])){
+    
+        // Update the customer into database
+        $updateCustomer = easyUpdate(
+            "customers",
+            array(
+                "customer_name"             => $_POST["customerName"],
+                "customer_name_in_local_len"=> $_POST["customerNameLocalLen"],
+                "customer_type"             => $_POST["customerType"],
+                "customer_opening_balance"  => $_POST["customerOpeningBalance"],
+                "customer_shipping_rate"    => $_POST["customerShippingRate"],
+                "customer_discount"         => $_POST["customerDiscount"],
+                "customer_upazila"          => empty($_POST["customerUpazila"]) ? NULL : $_POST["customerUpazila"],
+                "customer_district"         => empty($_POST["customerDistrict"]) ? NULL : $_POST["customerDistrict"],
+                "customer_division"         => empty($_POST["customerDivision"]) ? NULL : $_POST["customerDivision"],
+                "customer_address"          => $_POST["customerAddress"],
+                "customer_postal_code"      => $_POST["customerPostalCode"],
+                "customer_country"          => $_POST["customerCountry"],
+                "customer_phone"            => $_POST["customerPhone"],
+                "send_notif"                => $_POST["customerSendNotification"],
+                "customer_email"            => $_POST["customerEmail"],
+                "customer_website"          => empty($_POST["customerWebsite"]) ? '' : ''
+            ), 
+            array (
+                "customer_id" => $_POST["customer_id"] 
+            )
+        );
+        
+        if($updateCustomer === true) {
+            _s("Customer successfully updated.");
+        } else {
+            _e($updateCustomer);
+        }
+
+    }
     
 }
 
@@ -2350,371 +2464,98 @@ if(isset($_GET['page']) and $_GET['page'] == "updateCustomer") {
 /************************** Edit Company **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newCompany") {
 
-  // Include the modal header
-  modal_header("New Company", full_website_address() . "/xhr/?module=peoples&page=addNewCompany");
-  
-  ?>
-    <div class="box-body">
-      <div class="form-group">
-        <label for="companyName"><?= __("Company Name:"); ?></label>
-        <input type="text" name="companyName" id="companyName" value="" class="form-control">
-      </div>
-      <div class="form-group required">
-        <label for="companyOpeningBalance"><?= __("Opening Balance"); ?></label>
-        <input type="number" name="companyOpeningBalance" value="" id="companyOpeningBalance" class="form-control" required>
-      </div>
-      <div class="form-group required">
-        <label for="companyType"><?= __("Company Type"); ?></label>
-        <select name="companyType" id="companyType" class="form-control select2" style="width: 100%;" required>
-          <?php
-            $companyType = array('Manufacturer', 'Supplier', 'Vendor', 'Assembler', 'Binders', 'Others');
-            foreach($companyType as $companyType) {
-              echo "<option value='{$companyType}'>{$companyType}</option>";
-            }
-          ?>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="companyContactPerson"><?= __("Contact Person Name:"); ?></label>
-        <input type="text" name="companyContactPerson" id="companyContactPerson" value="" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyAddress"><?= __("Company Address:"); ?></label>
-        <textarea name="companyAddress" id="companyAddress" rows="3" class="form-control"> </textarea>
-      </div>
-      <div class="form-group">
-        <label for="companyCity"><?= __("Company City:"); ?></label>
-        <input type="text" name="companyCity" id="companyCity" value="" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyState"><?= __("State:"); ?></label>
-        <input type="text" name="companyState" id="companyState" value="" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyPostalCode"><?= __("Postal Code:"); ?></label>
-        <input type="text" name="companyPostalCode" id="companyPostalCode" value="" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyCountry"><?= __("Country:"); ?></label>
-        <input type="text" name="companyCountry" id="companyCountry" value="" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyPhone"><?= __("Phone:"); ?></label>
-        <input type="text" name="companyPhone" id="companyPhone" value="" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyEmail"><?= __("Email:"); ?></label>
-        <input type="email" name="companyEmail" id="companyEmail" value="" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyWebsite"><?= __("Website:"); ?></label>
-        <input type="text" name="companyWebsite" id="companyWebsite" value="" class="form-control">
-      </div>
-            
-    </div>
-    <!-- /Box body-->
+    // Include the modal header
+    modal_header("New Company", full_website_address() . "/xhr/?module=peoples&page=addNewCompany");
+    
+    ?>
+        <div class="box-body">
+        <div class="form-group">
+            <label for="companyName"><?= __("Company Name:"); ?></label>
+            <input type="text" name="companyName" id="companyName" value="" class="form-control">
+        </div>
+        <div class="form-group required">
+            <label for="companyOpeningBalance"><?= __("Opening Balance"); ?></label>
+            <input type="number" name="companyOpeningBalance" value="" id="companyOpeningBalance" class="form-control" required>
+        </div>
+        <div class="form-group required">
+            <label for="companyType"><?= __("Company Type"); ?></label>
+            <select name="companyType" id="companyType" class="form-control select2" style="width: 100%;" required>
+            <?php
+                $companyType = array('Manufacturer', 'Supplier', 'Vendor', 'Assembler', 'Binders', 'Others');
+                foreach($companyType as $companyType) {
+                    echo "<option value='{$companyType}'>{$companyType}</option>";
+                }
+            ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="companyContactPerson"><?= __("Contact Person Name:"); ?></label>
+            <input type="text" name="companyContactPerson" id="companyContactPerson" value="" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="companyAddress"><?= __("Company Address:"); ?></label>
+            <textarea name="companyAddress" id="companyAddress" rows="3" class="form-control"> </textarea>
+        </div>
+        <div class="form-group">
+            <label for="companyCity"><?= __("Company City:"); ?></label>
+            <input type="text" name="companyCity" id="companyCity" value="" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="companyState"><?= __("State:"); ?></label>
+            <input type="text" name="companyState" id="companyState" value="" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="companyPostalCode"><?= __("Postal Code:"); ?></label>
+            <input type="text" name="companyPostalCode" id="companyPostalCode" value="" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="companyCountry"><?= __("Country:"); ?></label>
+            <input type="text" name="companyCountry" id="companyCountry" value="" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="companyPhone"><?= __("Phone:"); ?></label>
+            <input type="text" name="companyPhone" id="companyPhone" value="" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="companyEmail"><?= __("Email:"); ?></label>
+            <input type="email" name="companyEmail" id="companyEmail" value="" class="form-control">
+        </div>
+        <div class="form-group">
+            <label for="companyWebsite"><?= __("Website:"); ?></label>
+            <input type="text" name="companyWebsite" id="companyWebsite" value="" class="form-control">
+        </div>
+                
+        </div>
+        <!-- /Box body-->
 
-  <?php
+    <?php
 
-  // Include the modal footer
-  modal_footer();
+    // Include the modal footer
+    modal_footer();
 
 }
 
 //*******************************  Add New Company ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "addNewCompany") {
 
-  // Error handaling
-  if(empty($_POST["companyName"])) {
-    return _e("Please enter company name.");
-  } else if(empty($_POST["companyPhone"])) {
-    return _e("Please enter company phone.");
-  } else if(empty($_POST["companyType"])) {
-    return _e("Please select company type.");
-  }
-   
-  // Insert the company into database
-  $insertCompany = easyInsert(
-    "companies",
-    array(
-      "company_name"           => $_POST["companyName"],
-      "company_opening_balance"=> $_POST["companyOpeningBalance"],
-      "company_type"           => $_POST["companyType"],
-      "company_contact_person" => $_POST["companyContactPerson"],
-      "company_address"        => $_POST["companyAddress"],
-      "company_city"           => $_POST["companyCity"],
-      "company_state"          => $_POST["companyState"],
-      "company_postal_code"    => $_POST["companyPostalCode"],
-      "company_country"        => $_POST["companyCountry"],
-      "company_phone"          => $_POST["companyPhone"],
-      "company_email"          => $_POST["companyEmail"],
-      "company_website"        => $_POST["companyWebsite"],
-      "company_add_by"         => $_SESSION["uid"]
-    )
-  );
-  
-  if($insertCompany === true) {
-      _s("New company successfully added.");
-  } else {
-      _e($insertCompany);
-  }
-  
-  
-}
 
+    if( !current_user_can("peoples_company.Add") ) {
+        return _e("Sorry! you do not have permission to add company");
+    }
 
-/*************************** Company List ***********************/
-if(isset($_GET['page']) and $_GET['page'] == "companyList") {
+    // Error handaling
+    if(empty($_POST["companyName"])) {
+        return _e("Please enter company name.");
+    } else if(empty($_POST["companyPhone"])) {
+        return _e("Please enter company phone.");
+    } else if(empty($_POST["companyType"])) {
+        return _e("Please select company type.");
+    }
     
-  $requestData = $_REQUEST;
-  $getData = [];
-
-  // List of all columns name for sorting
-  $columns = array(
-      "",
-      "company_name",
-      "company_type",
-      "company_contact_person",
-      "company_city",
-      "company_email"
-  );
-  
-  // Count Total recrods
-  $totalFilteredRecords = $totalRecords = easySelectA(array(
-    "table" => "companies",
-    "fields" => "count(*) as totalRow",
-    "where" => array(
-      "is_trash = 0"
-    )
-  ))["data"][0]["totalRow"];
-
-  if($requestData['length'] == -1) {
-    $requestData['length'] = $totalRecords;
-  }
-
-  if(!empty($requestData["search"]["value"])) {  // get data with search
-      
-      $getData = easySelect(
-          "companies",
-          "*",
-          array(),
-          array (
-              "is_trash = 0 and company_name LIKE" => $requestData['search']['value'] . "%",
-              " OR company_type LIKE" => $requestData['search']['value'] . "%",
-              " OR company_contact_person LIKE" => $requestData['search']['value'] . "%",
-              " OR company_city LIKE" => $requestData['search']['value'] . "%",
-              " OR company_state LIKE" => $requestData['search']['value'] . "%",
-              " OR company_phone LIKE" => $requestData['search']['value'] . "%",
-              " OR company_email LIKE" => $requestData['search']['value'] . "%",
-              " OR company_website LIKE" => $requestData['search']['value'] . "%"
-          ),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
-  
-      $totalFilteredRecords = $getData ? $getData["count"] : 0;
-
-  } else { // Get data withouth search
-
-      $getData = easySelect(
-          "companies",
-          "*",
-          array(),
-          array("is_trash = 0"),
-          array (
-              $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
-          ),
-          array (
-              "start" => $requestData['start'],
-              "length" => $requestData['length']
-          )
-      );
-
-  }
-
-  $allData = [];
-  // Check if there have more then zero data
-  if(isset($getData['count']) and $getData['count'] > 0) {
-      
-      foreach($getData['data'] as $key => $value) {
-          $allNestedData = [];
-          $allNestedData[] = "{$value['company_phone']}";
-          $allNestedData[] = "{$value['company_name']}";
-          $allNestedData[] = "{$value['company_type']}";
-          $allNestedData[] = "{$value['company_contact_person']}";
-          $allNestedData[] = "{$value['company_address']}, {$value['company_city']}, {$value['company_state']}";
-          $allNestedData[] = "{$value['company_phone']}; {$value['company_email']}";
-          // The action button
-          $allNestedData[] = '<div class="btn-group">
-                                  <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
-                                  action
-                                  <span class="caret"></span>
-                                  <span class="sr-only">Toggle Dropdown</span>
-                                  </button>
-                                  <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                  <li><a class="'. ( current_user_can("peoples_company.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=peoples&page=deleteCompany" data-to-be-deleted="'. $value["company_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
-                                  <li><a class="'. ( current_user_can("peoples_company.Edit") ? "" : "restricted" ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?select2=true&module=peoples&page=editCompany&id='. $value["company_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
-                                  </ul>
-                              </div>';
-          
-          $allData[] = $allNestedData;
-      }
-  }
-  
-
-  $jsonData = array (
-      "draw"              => intval( $requestData['draw'] ),
-      "recordsTotal"      => intval( $totalRecords ),
-      "recordsFiltered"   => intval( $totalFilteredRecords ),
-      "data"              => $allData
-  );
-  
-  // Encode in Json Formate
-  echo json_encode($jsonData); 
-}
-
-
-/***************** Delete Company ****************/
-if(isset($_GET['page']) and $_GET['page'] == "deleteCompany") {
-
-  $deleteData = easyDelete(
-      "companies",
-      array(
-          "company_id" => $_POST["datatoDelete"]
-      )
-  );
-
-  if($deleteData === true) {
-
-      echo '{
-          "title": "'. __("The company has been successfully deleted.") .'",
-          "icon": "success"
-      }';
-
-  } else {
-
-    echo '{
-        "title": "Error: '.$deleteData.'",
-        "icon": "error"
-    }';
-
-  }
-
-}
-
-
-/************************** Edit Company **********************/
-if(isset($_GET['page']) and $_GET['page'] == "editCompany") {
-
-  $selectCompanies = easySelect(
-      "companies",
-      "*",
-      array(),
-      array(
-          "company_id" => $_GET['id']
-      )
-  );
-
-  $companies = $selectCompanies["data"][0];
-
-  // Include the modal header
-  modal_header("Edit Company", full_website_address() . "/xhr/?module=peoples&page=updateCompany");
-  
-  ?>
-    <div class="box-body">
-      <div class="form-group">
-        <label for="companyName"><?= __("Company Name:"); ?></label>
-        <input type="text" name="companyName" id="companyName" value="<?php echo $companies["company_name"]; ?>" class="form-control">
-      </div>
-      <div class="form-group required">
-        <label for="companyOpeningBalance"><?= __("Opening Balance"); ?></label>
-        <input type="number" name="companyOpeningBalance" value="<?php echo $companies["company_opening_balance"]; ?>" id="companyOpeningBalance" class="form-control" required>
-      </div>
-      <div class="form-group required">
-        <label for="companyType"><?= __("Company Type"); ?></label>
-        <select name="companyType" id="companyType" class="form-control select2" style="width: 100%;" required>
-          <?php
-            $companyType = array('Manufacturer', 'Supplier', 'Vendor', 'Assembler', 'Binders', 'Others');
-            foreach($companyType as $companyType) {
-              $selected = ($companies["company_type"] === $companyType) ? "selected" : "";
-              echo "<option {$selected} value='{$companyType}'>{$companyType}</option>";
-            }
-          ?>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="companyContactPerson"><?= __("Contact Person Name:"); ?></label>
-        <input type="text" name="companyContactPerson" id="companyContactPerson" value="<?php echo $companies["company_contact_person"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyAddress"><?= __("Company Address:"); ?></label>
-        <textarea name="companyAddress" id="companyAddress" rows="3" class="form-control"> <?php echo $companies["company_address"]; ?> </textarea>
-      </div>
-      <div class="form-group">
-        <label for="companyCity"><?= __("Company City:"); ?></label>
-        <input type="text" name="companyCity" id="companyCity" value="<?php echo $companies["company_city"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyState"><?= __("State:"); ?></label>
-        <input type="text" name="companyState" id="companyState" value="<?php echo $companies["company_state"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyPostalCode"><?= __("Postal Code:"); ?></label>
-        <input type="text" name="companyPostalCode" id="companyPostalCode" value="<?php echo $companies["company_postal_code"] ;?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyCountry"><?= __("Country:"); ?></label>
-        <input type="text" name="companyCountry" id="companyCountry" value="<?php echo $companies["company_country"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyPhone"><?= __("Phone:"); ?></label>
-        <input type="text" name="companyPhone" id="companyPhone" value="<?php echo $companies["company_phone"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyEmail"><?= __("Email:"); ?></label>
-        <input type="email" name="companyEmail" id="companyEmail" value="<?php echo $companies["company_email"]; ?>" class="form-control">
-      </div>
-      <div class="form-group">
-        <label for="companyWebsite"><?= __("Website:"); ?></label>
-        <input type="text" name="companyWebsite" id="companyWebsite" value="<?php echo $companies["company_website"]; ?>" class="form-control">
-      </div>
-      <input type="hidden" name="company_id" value="<?php echo safe_entities($_GET['id']); ?>">
-            
-    </div>
-    <!-- /Box body-->
-
-  <?php
-
-  // Include the modal footer
-  modal_footer();
-
-}
-
-
-//*******************************  Update Company ******************** */
-if(isset($_GET['page']) and $_GET['page'] == "updateCompany") {
-
-  // Error handaling
-  if(empty($_POST["companyName"])) {
-    return _e("Please enter company name.");
-  } else if(empty($_POST["companyPhone"])) {
-    return _e("Please enter company phone.");
-  } else if(empty($_POST["companyType"])) {
-    return _e("Please select company type.");
-  }
-  
-  // Check if all data is not empty
-  if(!empty($_POST["companyName"]) AND !empty($_POST["companyPhone"])){
-   
-    // Update the company into database
-    $updateCompany = easyUpdate(
-      "companies",
-      array(
+    // Insert the company into database
+    $insertCompany = easyInsert(
+        "companies",
+        array(
         "company_name"           => $_POST["companyName"],
         "company_opening_balance"=> $_POST["companyOpeningBalance"],
         "company_type"           => $_POST["companyType"],
@@ -2727,21 +2568,314 @@ if(isset($_GET['page']) and $_GET['page'] == "updateCompany") {
         "company_phone"          => $_POST["companyPhone"],
         "company_email"          => $_POST["companyEmail"],
         "company_website"        => $_POST["companyWebsite"],
-        "company_update_by"      => $_SESSION["uid"]
-      ), 
-      array (
-        "company_id" => $_POST["company_id"] 
-      )
-
+        "company_add_by"         => $_SESSION["uid"]
+        )
     );
-
-    if($updateCompany === true) {
-        _s("Company successfully updated.");
+    
+    if($insertCompany === true) {
+        _s("New company successfully added.");
     } else {
-        _e($updateCompany);
+        _e($insertCompany);
+    }
+  
+}
+
+
+/*************************** Company List ***********************/
+if(isset($_GET['page']) and $_GET['page'] == "companyList") {
+
+    if( !current_user_can("peoples_company.View") ) {
+        return _e("Sorry! you do not have permission to view company list");
+    }
+    
+    $requestData = $_REQUEST;
+    $getData = [];
+
+    // List of all columns name for sorting
+    $columns = array(
+        "",
+        "company_name",
+        "company_type",
+        "company_contact_person",
+        "company_city",
+        "company_email"
+    );
+    
+    // Count Total recrods
+    $totalFilteredRecords = $totalRecords = easySelectA(array(
+        "table" => "companies",
+        "fields" => "count(*) as totalRow",
+        "where" => array(
+        "is_trash = 0"
+        )
+    ))["data"][0]["totalRow"];
+
+    if($requestData['length'] == -1) {
+        $requestData['length'] = $totalRecords;
     }
 
-  }
+    if(!empty($requestData["search"]["value"])) {  // get data with search
+        
+        $getData = easySelect(
+            "companies",
+            "*",
+            array(),
+            array (
+                "is_trash = 0 and company_name LIKE" => $requestData['search']['value'] . "%",
+                " OR company_type LIKE" => $requestData['search']['value'] . "%",
+                " OR company_contact_person LIKE" => $requestData['search']['value'] . "%",
+                " OR company_city LIKE" => $requestData['search']['value'] . "%",
+                " OR company_state LIKE" => $requestData['search']['value'] . "%",
+                " OR company_phone LIKE" => $requestData['search']['value'] . "%",
+                " OR company_email LIKE" => $requestData['search']['value'] . "%",
+                " OR company_website LIKE" => $requestData['search']['value'] . "%"
+            ),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
+    
+        $totalFilteredRecords = $getData ? $getData["count"] : 0;
+
+    } else { // Get data withouth search
+
+        $getData = easySelect(
+            "companies",
+            "*",
+            array(),
+            array("is_trash = 0"),
+            array (
+                $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
+            ),
+            array (
+                "start" => $requestData['start'],
+                "length" => $requestData['length']
+            )
+        );
+
+    }
+
+    $allData = [];
+    // Check if there have more then zero data
+    if(isset($getData['count']) and $getData['count'] > 0) {
+        
+        foreach($getData['data'] as $key => $value) {
+            $allNestedData = [];
+            $allNestedData[] = "{$value['company_phone']}";
+            $allNestedData[] = "{$value['company_name']}";
+            $allNestedData[] = "{$value['company_type']}";
+            $allNestedData[] = "{$value['company_contact_person']}";
+            $allNestedData[] = "{$value['company_address']}, {$value['company_city']}, {$value['company_state']}";
+            $allNestedData[] = "{$value['company_phone']}; {$value['company_email']}";
+            // The action button
+            $allNestedData[] = '<div class="btn-group">
+                                    <button type="button" class="btn btn-xs btn-flat btn-primary dropdown-toggle" data-toggle="dropdown">
+                                    action
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                        <li><a class="'. ( current_user_can("peoples_company.Delete") ? "" : "restricted " ) .'deleteEntry" href="'. full_website_address() . '/xhr/?module=peoples&page=deleteCompany" data-to-be-deleted="'. $value["company_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
+                                        <li><a class="'. ( current_user_can("peoples_company.Edit") ? "" : "restricted" ) .'" data-toggle="modal" href="'. full_website_address() .'/xhr/?select2=true&module=peoples&page=editCompany&id='. $value["company_id"] .'"  data-target="#modalDefault"><i class="fa fa-edit"></i> Edit</a></li>
+                                    </ul>
+                                </div>';
+            
+            $allData[] = $allNestedData;
+        }
+    }
+    
+
+    $jsonData = array (
+        "draw"              => intval( $requestData['draw'] ),
+        "recordsTotal"      => intval( $totalRecords ),
+        "recordsFiltered"   => intval( $totalFilteredRecords ),
+        "data"              => $allData
+    );
+    
+    // Encode in Json Formate
+    echo json_encode($jsonData); 
+
+}
+
+
+/***************** Delete Company ****************/
+if(isset($_GET['page']) and $_GET['page'] == "deleteCompany") {
+
+    if( !current_user_can("peoples_company.Delete") ) {
+        return _e("Sorry! you do not have permission to delete company");
+    }
+
+    $deleteData = easyDelete(
+        "companies",
+        array(
+            "company_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+
+        echo '{
+            "title": "'. __("The company has been successfully deleted.") .'",
+            "icon": "success"
+        }';
+
+    } else {
+
+        echo '{
+            "title": "Error: '.$deleteData.'",
+            "icon": "error"
+        }';
+
+    }
+
+}
+
+
+/************************** Edit Company **********************/
+if(isset($_GET['page']) and $_GET['page'] == "editCompany") {
+
+    if( !current_user_can("peoples_company.Edit") ) {
+        return _e("Sorry! you do not have permission to edit company");
+    }
+
+    $selectCompanies = easySelect(
+        "companies",
+        "*",
+        array(),
+        array(
+            "company_id" => $_GET['id']
+        )
+    );
+
+    $companies = $selectCompanies["data"][0];
+
+    // Include the modal header
+    modal_header("Edit Company", full_website_address() . "/xhr/?module=peoples&page=updateCompany");
+    
+    ?>
+        <div class="box-body">
+            <div class="form-group">
+                <label for="companyName"><?= __("Company Name:"); ?></label>
+                <input type="text" name="companyName" id="companyName" value="<?php echo $companies["company_name"]; ?>" class="form-control">
+            </div>
+            <div class="form-group required">
+                <label for="companyOpeningBalance"><?= __("Opening Balance"); ?></label>
+                <input type="number" name="companyOpeningBalance" value="<?php echo $companies["company_opening_balance"]; ?>" id="companyOpeningBalance" class="form-control" required>
+            </div>
+            <div class="form-group required">
+                <label for="companyType"><?= __("Company Type"); ?></label>
+                <select name="companyType" id="companyType" class="form-control select2" style="width: 100%;" required>
+                <?php
+                    $companyType = array('Manufacturer', 'Supplier', 'Vendor', 'Assembler', 'Binders', 'Others');
+                    foreach($companyType as $companyType) {
+                    $selected = ($companies["company_type"] === $companyType) ? "selected" : "";
+                    echo "<option {$selected} value='{$companyType}'>{$companyType}</option>";
+                    }
+                ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="companyContactPerson"><?= __("Contact Person Name:"); ?></label>
+                <input type="text" name="companyContactPerson" id="companyContactPerson" value="<?php echo $companies["company_contact_person"]; ?>" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="companyAddress"><?= __("Company Address:"); ?></label>
+                <textarea name="companyAddress" id="companyAddress" rows="3" class="form-control"> <?php echo $companies["company_address"]; ?> </textarea>
+            </div>
+            <div class="form-group">
+                <label for="companyCity"><?= __("Company City:"); ?></label>
+                <input type="text" name="companyCity" id="companyCity" value="<?php echo $companies["company_city"]; ?>" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="companyState"><?= __("State:"); ?></label>
+                <input type="text" name="companyState" id="companyState" value="<?php echo $companies["company_state"]; ?>" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="companyPostalCode"><?= __("Postal Code:"); ?></label>
+                <input type="text" name="companyPostalCode" id="companyPostalCode" value="<?php echo $companies["company_postal_code"] ;?>" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="companyCountry"><?= __("Country:"); ?></label>
+                <input type="text" name="companyCountry" id="companyCountry" value="<?php echo $companies["company_country"]; ?>" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="companyPhone"><?= __("Phone:"); ?></label>
+                <input type="text" name="companyPhone" id="companyPhone" value="<?php echo $companies["company_phone"]; ?>" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="companyEmail"><?= __("Email:"); ?></label>
+                <input type="email" name="companyEmail" id="companyEmail" value="<?php echo $companies["company_email"]; ?>" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="companyWebsite"><?= __("Website:"); ?></label>
+                <input type="text" name="companyWebsite" id="companyWebsite" value="<?php echo $companies["company_website"]; ?>" class="form-control">
+            </div>
+            <input type="hidden" name="company_id" value="<?php echo safe_entities($_GET['id']); ?>">
+                
+        </div>
+        <!-- /Box body-->
+
+    <?php
+
+    // Include the modal footer
+    modal_footer();
+
+}
+
+
+//*******************************  Update Company ******************** */
+if(isset($_GET['page']) and $_GET['page'] == "updateCompany") {
+
+    if( !current_user_can("peoples_company.Edit") ) {
+        return _e("Sorry! you do not have permission to edit company");
+    }
+
+    // Error handaling
+    if(empty($_POST["companyName"])) {
+        return _e("Please enter company name.");
+    } else if(empty($_POST["companyPhone"])) {
+        return _e("Please enter company phone.");
+    } else if(empty($_POST["companyType"])) {
+        return _e("Please select company type.");
+    }
+    
+    // Check if all data is not empty
+    if(!empty($_POST["companyName"]) AND !empty($_POST["companyPhone"])){
+    
+        // Update the company into database
+        $updateCompany = easyUpdate(
+            "companies",
+            array(
+                "company_name"           => $_POST["companyName"],
+                "company_opening_balance"=> $_POST["companyOpeningBalance"],
+                "company_type"           => $_POST["companyType"],
+                "company_contact_person" => $_POST["companyContactPerson"],
+                "company_address"        => $_POST["companyAddress"],
+                "company_city"           => $_POST["companyCity"],
+                "company_state"          => $_POST["companyState"],
+                "company_postal_code"    => $_POST["companyPostalCode"],
+                "company_country"        => $_POST["companyCountry"],
+                "company_phone"          => $_POST["companyPhone"],
+                "company_email"          => $_POST["companyEmail"],
+                "company_website"        => $_POST["companyWebsite"],
+                "company_update_by"      => $_SESSION["uid"]
+            ), 
+            array (
+                "company_id" => $_POST["company_id"] 
+            )
+        );
+
+        if($updateCompany === true) {
+            _s("Company successfully updated.");
+        } else {
+            _e($updateCompany);
+        }
+
+    }
     
 }
 

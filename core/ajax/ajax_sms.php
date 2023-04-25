@@ -20,10 +20,7 @@ if(isset($_GET['page']) and $_GET['page'] == "sendSMS") {
 
                 <div class="form-group">
                   <label for="message">Message:</label>
-                  <textarea name="message" id="message" cols="30" rows="3" class="form-control">
-                  Dear Sir, Assalamu Alaikum. Please collect your salary from the account section.
-- <?php echo get_options("companyName"); ?>
-                  </textarea>
+                  <textarea name="message" id="message" cols="30" rows="3" class="form-control">Dear Sir, Assalamu Alaikum. Please collect your salary from the account section. - <?php echo get_options("companyName"); ?></textarea>
                 </div>
               </div>
          
@@ -90,14 +87,16 @@ if(isset($_GET['page']) and $_GET['page'] == "sendBulkSMS") {
 //*******************************   sendSMSCommand ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "sendSMSCommand") {
 
-      if(send_sms(
+    if(send_sms(
         str_replace(";", ",", safe_entities($_POST["numbers"]) ),
         safe_entities($_POST["message"])
-      )) {
+    )) {
 
         echo "<div class='alert alert-success'>SMS Sent Successfully.</div>";
 
-      }
+    } else {
+        _e("Sorry! Unable to send sms");
+    }
 
 }
 

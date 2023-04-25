@@ -1,5 +1,18 @@
 <?php
 
+// Remove directory browsing elements
+$pageSlug = str_replace(
+    array(
+        "./",
+        "../",
+        ".",
+        ".."
+    ),
+    "",
+    $pageSlug
+);
+
+
 // Build the module page link
 $ModulePageLink = DIR_MODULE . $pageSlug . ".php";
 
@@ -51,7 +64,7 @@ if(is_home()) {
     require $staticPage[$pageSlug];
     
 
-} else if(file_exists($ModulePageLink)) {
+} else if(file_exists($ModulePageLink) and strtolower(basename($ModulePageLink)) !== "ajax.php" ) {
     
     // This is for dynamic page loading based on url
     require "loadModule.php";

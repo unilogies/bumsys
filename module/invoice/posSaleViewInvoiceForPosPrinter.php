@@ -6,7 +6,8 @@ $selectSale = easySelect(
   "sales",
   "*",
   array (
-    "left join {$table_prefix}customers on sales_customer_id = customer_id"
+    "left join {$table_prefix}customers on sales_customer_id = customer_id",
+    "left join {$table_prefix}users on user_id = sales_created_by"
   ),
   array (
     "sales_id"  => $_GET["id"]
@@ -62,7 +63,11 @@ $sales = $selectSale["data"][0];
   </tr>
   <tr>
     <td colspan="2"><strong>Customer: <?php echo !empty($selectSale["data"][0]["customer_name_in_local_len"]) ? $selectSale["data"][0]["customer_name_in_local_len"] : $selectSale["data"][0]["customer_name"] ?> (<?php echo $selectSale["data"][0]["customer_phone"] ?>) </strong> </td>
+    
   </tr>
+  <tr>
+        <td colspan="2"><strong>Posted by: <?php echo $selectSale["data"][0]["user_name"]; ?> </strong> </td>
+    </tr>
 </tbody>
 </table>
 

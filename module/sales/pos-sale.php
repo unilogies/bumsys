@@ -35,6 +35,7 @@
                     <th class="no-sort countTotal text-center"><?php echo __("Cash In"); ?></th>
                     <th class="no-sort"><?php echo __("Sales Note"); ?></th>
                     <th class="sort text-center no-print"><?php echo __("Status"); ?></th>
+                    <th class="sort text-center no-print"><?php echo __("Sold By"); ?></th>
                     <th class="no-sort text-right no-print" width="80px !important;"><?php echo __("Action"); ?></th>
                   </tr>
                 </thead>
@@ -65,6 +66,11 @@
                         <option value="partial"><?php echo __("Partial"); ?></option>
                         <option value="due"><?php echo __("Due"); ?></option>
                       </select>
+                    </th>
+                    <th>
+                        <select style="width: 140px;" id="selectSoldBy" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=userList" style="width: 100%;">
+                            <option value=""><?= __("Select User"); ?>....</option>
+                        </select>
                     </th>
                     <th class="no-print"><?php echo __("Action"); ?></th>
                   </tr>

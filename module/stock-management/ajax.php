@@ -3,11 +3,9 @@
 /*************************** New Purchase ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "newPurchase") {
 
-    //print_r($_POST);
-
-    //echo "Hi";
-
-    //exit();
+    if( !current_user_can("product_purchases.Add") ) {
+        return _e("Sorry! you do not have permission to make purchase");
+    }
 
     // Check if the biller is set
     if(!isset($_SESSION["aid"])) {
@@ -130,88 +128,101 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchase") {
     if( isset($insertPurchase["status"]) and $insertPurchase["status"] === "success") {
         
         foreach($purchaseData["productID"] as $key => $productId) {
+
+
+            if( $productQnt[$key] > 0 ) {
+
+                // Calculate the discount
+                $productPurchaseDiscount = calculateDiscount($productPurchasePrice[$key], $productDiscount[$key]);
+
+                // Calculate the amount after discount
+                $itemAmountAfterDiscount = $productPurchasePrice[$key] - $productPurchaseDiscount;
+
+                $insertPurchaseItem = easyInsert(
+                    "product_stock",
+                    array (
+                        "stock_type"            => ( $purchaseData["purchaseStatus"] === "Received" ) ? 'purchase' : 'purchase-order',
+                        "stock_entry_date"      => $purchaseData["purchaseDate"],
+                        "stock_purchase_id"     => $insertPurchase["last_insert_id"],
+                        "stock_shop_id"         => $_SESSION["sid"],
+                        "stock_product_id"      => $productId,
+                        "stock_batch_id"        => empty($purchaseData["productBatch"][$key]) ? NULL : $purchaseData["productBatch"][$key],
+                        "stock_warehouse_id"    => $purchaseData["purchaseWarehouse"],
+                        "stock_item_qty"        => $productQnt[$key],
+                        "stock_item_price"      => $productPurchasePrice[$key],
+                        "stock_item_discount"   => $productPurchaseDiscount,
+                        "stock_item_subtotal"   => $productQnt[$key] * $itemAmountAfterDiscount, // Calculate the items total amount
+                        "stock_created_by"      => $_SESSION["uid"]
+                    )
+                );
+
+                // Select bundle products or sub products 
+                $subProducts = easySelectA(array(
+                    "table"     => "products as product",
+                    "fields"    => "bg_item_product_id, 
+                                    round( COALESCE(product_price.purchase_price, sub_product.product_purchase_price), 2) as purchase_price, 
+                                    bg_product_qnt
+                                    ",
+                    "join"      => array(
+                        "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
+                        "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id",
+                        "left join (SELECT
+                                        product_id,
+                                        purchase_price,
+                                        sale_price
+                            FROM {$table_prefix}product_price    
+                            WHERE shop_id = '{$_SESSION['sid']}'
+                        ) as product_price on product_price.product_id = bg_item_product_id"
+                    ),
+                    "where"     => array(
+                        "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
+                    )
+                ));
+
+                // Insert sub/ bundle products
+                if($subProducts !== false) {
+
+                    $subProducts = $subProducts["data"];
+                    foreach($subProducts as $spKey => $sp) {
+                    
+                        // Calculate the discount
+                        $productPurchaseDiscount = calculateDiscount($sp["purchase_price"], $productDiscount[$key]);
             
-            // Calculate the discount
-            $productPurchaseDiscount = calculateDiscount($productPurchasePrice[$key], $productDiscount[$key]);
+                        // Calculate the amount after discount
+                        $itemAmountAfterDiscount = $sp["purchase_price"] - $productPurchaseDiscount;
 
-            // Calculate the amount after discount
-            $itemAmoutnAfterDiscount = $productPurchasePrice[$key] - $productPurchaseDiscount;
+                        $totalSubProductQty = $productQnt[$key] * $sp["bg_product_qnt"];
+            
+                        $insertPurchaseItem = easyInsert(
+                            "product_stock",
+                            array (
+                                "stock_type"            => ( $purchaseData["purchaseStatus"] === "Received" ) ? 'purchase' : 'purchase-order',
+                                "stock_entry_date"      => $purchaseData["purchaseDate"],
+                                "stock_purchase_id"     => $insertPurchase["last_insert_id"],
+                                "stock_shop_id"         => $_SESSION["sid"],
+                                "stock_product_id"      => $sp["bg_item_product_id"],
+                                "stock_batch_id"        => NULL,
+                                "stock_warehouse_id"    => $purchaseData["purchaseWarehouse"],
+                                "stock_item_qty"        => $totalSubProductQty,
+                                "stock_item_price"      => $sp["purchase_price"],
+                                "stock_item_discount"   => $productPurchaseDiscount,
+                                "stock_item_subtotal"   => $totalSubProductQty * $itemAmountAfterDiscount, // Calculate the items total amount
+                                "stock_created_by"      => $_SESSION["uid"],
+                                "is_bundle_item"        => 1
+                            )
+                        );
+            
+                    }
 
-            $insertPurchaseItem = easyInsert(
-                "product_stock",
-                array (
-                    "stock_type"            => ( $purchaseData["purchaseStatus"] === "Received" ) ? 'purchase' : 'purchase-order',
-                    "stock_entry_date"      => $purchaseData["purchaseDate"],
-                    "stock_purchase_id"     => $insertPurchase["last_insert_id"],
-                    "stock_shop_id"         => $_SESSION["sid"],
-                    "stock_product_id"      => $productId,
-                    "stock_batch_id"        => empty($purchaseData["productBatch"][$key]) ? NULL : $purchaseData["productBatch"][$key],
-                    "stock_warehouse_id"    => $purchaseData["purchaseWarehouse"],
-                    "stock_item_qty"        => $productQnt[$key],
-                    "stock_item_price"      => $productPurchasePrice[$key],
-                    "stock_item_discount"   => $productPurchaseDiscount,
-                    "stock_item_subtotal"   => $productQnt[$key] * $itemAmoutnAfterDiscount, // Calculate the items total amount
-                    "stock_created_by"      => $_SESSION["uid"]
-                )
-            );
-
-            // Select bundle products or sub products 
-            $subProducts = easySelectA(array(
-                "table"     => "products as product",
-                "fields"    => "bg_item_product_id, 
-                                sub_product.product_purchase_price as purchase_price,
-                                bg_product_qnt
-                                ",
-                "join"      => array(
-                    "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
-                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
-                ),
-                "where"     => array(
-                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
-                )
-            ));
-
-            // Insert sub/ bundle products
-            if($subProducts !== false) {
-
-                $subProducts = $subProducts["data"];
-                foreach($subProducts as $spKey => $sp) {
-                
-                    // Calculate the discount
-                    $productPurchaseDiscount = calculateDiscount($sp["purchase_price"], $productDiscount[$key]);
-        
-                    // Calculate the amount after discount
-                    $itemAmoutnAfterDiscount = $sp["purchase_price"] - $productPurchaseDiscount;
-
-                    $totalSubProductQty = $productQnt[$key] * $sp["bg_product_qnt"];
-        
-                    $insertPurchaseItem = easyInsert(
-                        "product_stock",
-                        array (
-                            "stock_type"            => ( $purchaseData["purchaseStatus"] === "Received" ) ? 'purchase' : 'purchase-order',
-                            "stock_entry_date"      => $purchaseData["purchaseDate"],
-                            "stock_purchase_id"     => $insertPurchase["last_insert_id"],
-                            "stock_shop_id"         => $_SESSION["sid"],
-                            "stock_product_id"      => $sp["bg_item_product_id"],
-                            "stock_batch_id"        => NULL,
-                            "stock_warehouse_id"    => $purchaseData["purchaseWarehouse"],
-                            "stock_item_qty"        => $totalSubProductQty,
-                            "stock_item_price"      => $sp["purchase_price"],
-                            "stock_item_discount"   => $productPurchaseDiscount,
-                            "stock_item_subtotal"   => $totalSubProductQty * $itemAmoutnAfterDiscount, // Calculate the items total amount
-                            "stock_created_by"      => $_SESSION["uid"],
-                            "is_bundle_item"        => 1
-                        )
-                    );
-        
                 }
 
+
             }
+            
 
         }
 
         
-
         // if paid amount grater then zero in product purchase
         // then ad to expenses
         if($paidAmount > 0) {
@@ -300,12 +311,16 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchase") {
 
 
 
-/*************************** New Purchase ***********************/
+/*************************** Update Purchase ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
 
     //print_r($_POST);
 
     //exit();
+
+    if( !current_user_can("product_purchases.Edit") ) {
+        return _e("Sorry! you do not have permission to edit purchase");
+    }
 
     // Check if the biller is set
     if(!isset($_SESSION["aid"])) {
@@ -442,7 +457,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
     // check if the purchase successfully inserted then got to next for adding purchase item
     if( $updatePurchase === true ) {
 
-        // Delete Preivous purchase product
+        // Delete Previous purchase product
         easyPermDelete(
             "product_stock",
             array(
@@ -457,7 +472,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
             $productPurchaseDiscount = calculateDiscount($productPurchasePrice[$key], $productDiscount[$key]);
 
             // Calculate the amount after discount
-            $itemAmoutnAfterDiscount = $productPurchasePrice[$key] - $productPurchaseDiscount;
+            $itemAmountAfterDiscount = $productPurchasePrice[$key] - $productPurchaseDiscount;
 
             $insertPurchaseItem = easyInsert(
                 "product_stock",
@@ -472,7 +487,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
                     "stock_item_qty"        => $productQnt[$key],
                     "stock_item_price"      => $productPurchasePrice[$key],
                     "stock_item_discount"   => $productPurchaseDiscount,
-                    "stock_item_subtotal"   => $productQnt[$key] * $itemAmoutnAfterDiscount, // Calculate the items total amount
+                    "stock_item_subtotal"   => $productQnt[$key] * $itemAmountAfterDiscount, // Calculate the items total amount
                     "stock_created_by"      => $_SESSION["uid"]
                 )
             );
@@ -481,12 +496,19 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
             $subProducts = easySelectA(array(
                 "table"     => "products as product",
                 "fields"    => "bg_item_product_id, 
-                                sub_product.product_purchase_price as purchase_price,
+                                round( COALESCE(product_price.purchase_price, sub_product.product_purchase_price), 2) as purchase_price, 
                                 bg_product_qnt
                                 ",
                 "join"      => array(
                     "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
-                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
+                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id",
+                    "left join (SELECT
+                                    product_id,
+                                    purchase_price,
+                                    sale_price
+                        FROM {$table_prefix}product_price    
+                        WHERE shop_id = '{$_SESSION['sid']}'
+                    ) as product_price on product_price.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
                     "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -503,7 +525,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
                     $productPurchaseDiscount = calculateDiscount($sp["purchase_price"], $productDiscount[$key]);
         
                     // Calculate the amount after discount
-                    $itemAmoutnAfterDiscount = $sp["purchase_price"] - $productPurchaseDiscount;
+                    $itemAmountAfterDiscount = $sp["purchase_price"] - $productPurchaseDiscount;
 
                     $totalSubProductQty = $productQnt[$key] * $sp["bg_product_qnt"];
         
@@ -520,7 +542,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
                             "stock_item_qty"        => $totalSubProductQty,
                             "stock_item_price"      => $sp["purchase_price"],
                             "stock_item_discount"   => $productPurchaseDiscount,
-                            "stock_item_subtotal"   => $totalSubProductQty * $itemAmoutnAfterDiscount, // Calculate the items total amount
+                            "stock_item_subtotal"   => $totalSubProductQty * $itemAmountAfterDiscount, // Calculate the items total amount
                             "stock_created_by"      => $_SESSION["uid"],
                             "is_bundle_item"        => 1
                         )
@@ -547,6 +569,10 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
 
 /*************************** Product Purchase List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
+
+    if( !current_user_can("product_purchases.View") ) {
+        return _e("Sorry! you do not have permission to view purchase list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -582,8 +608,9 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
     if(     !empty($requestData["search"]["value"]) or
             !empty($requestData["columns"][1]['search']['value']) or
             !empty($requestData["columns"][2]['search']['value']) or
-            !empty($requestData["columns"][4]['search']['value']) or
-            !empty($requestData["columns"][12]['search']['value']) 
+            !empty($requestData["columns"][3]['search']['value']) or
+            !empty($requestData["columns"][5]['search']['value']) or
+            !empty($requestData["columns"][14]['search']['value'])
         ) {  // get data with search
 
             $dateRange[0] = "";
@@ -597,20 +624,19 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
         $getData = easySelect(
                 "purchases as product_purchase",
                 "purchase_id, purchase_date, shop_name, purchase_note, purchase_payment_status, purchase_reference, purchase_company_id, company_name, round(purchase_total_amount, 2) as purchase_total_amount, 
-                    round(purchase_product_discount, 2) as purchase_product_discount, round(purchase_discount, 2) as purchase_discount, round(purchase_shipping, 2) as purchase_shipping, 
-                    round(purchase_grand_total, 2) as purchase_grand_total, round(purchase_paid_amount, 2) as purchase_paid_amount, round(purchase_due, 2) as purchase_due",
+                round(purchase_product_discount, 2) as purchase_product_discount, round(purchase_discount, 2) as purchase_discount, round(purchase_shipping, 2) as purchase_shipping, purchase_shop_id, purchase_status,
+                round(purchase_grand_total, 2) as purchase_grand_total, round(purchase_paid_amount, 2) as purchase_paid_amount, round(purchase_due, 2) as purchase_due",
             array (
                 "left join {$table_prefix}companies on company_id = purchase_company_id",
                 "left join {$table_prefix}shops on shop_id = purchase_shop_id"
             ),
             array (
-                "product_purchase.is_return = 0 and product_purchase.is_trash = 0 and (",
-                " purchase_reference LIKE '". safe_input($requestData['search']['value']) ."%' ",
-                " or company_name LIKE" => $requestData['search']['value'] . "%",
-                ")",
+                "product_purchase.is_return = 0 and product_purchase.is_trash = 0",
+                " AND purchase_reference LIKE" => $requestData['search']['value'] . "%",
                 " AND purchase_shop_id" => $requestData["columns"][2]['search']['value'],
-                " AND purchase_company_id" => $requestData["columns"][4]['search']['value'],
-                " AND purchase_payment_status" => $requestData["columns"][12]['search']['value'],
+                " AND purchase_status" => $requestData["columns"][3]['search']['value'],
+                " AND purchase_company_id" => $requestData["columns"][5]['search']['value'],
+                " AND purchase_payment_status" => $requestData["columns"][14]['search']['value'],
                 " AND purchase_shop_id like '{$shopId}' $dateFilter"
             ),
             array (
@@ -629,7 +655,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
         $getData = easySelect(
             "purchases as product_purchase",
             "purchase_id, purchase_date, shop_name, purchase_note, purchase_payment_status, purchase_reference, purchase_company_id, company_name, round(purchase_total_amount, 2) as purchase_total_amount, 
-            round(purchase_product_discount, 2) as purchase_product_discount, round(purchase_discount, 2) as purchase_discount, round(purchase_shipping, 2) as purchase_shipping, 
+            round(purchase_product_discount, 2) as purchase_product_discount, round(purchase_discount, 2) as purchase_discount, round(purchase_shipping, 2) as purchase_shipping, purchase_shop_id, purchase_status,
             round(purchase_grand_total, 2) as purchase_grand_total, round(purchase_paid_amount, 2) as purchase_paid_amount, round(purchase_due, 2) as purchase_due",
             array (
             "left join {$table_prefix}companies on company_id = purchase_company_id",
@@ -666,7 +692,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
             $allNestedData[] = "";
             $allNestedData[] = $value["purchase_date"];
             $allNestedData[] = $value["shop_name"];
-            $allNestedData[] = $value["purchase_reference"];
+            $allNestedData[] = $value["purchase_status"];
+            $allNestedData[] = $value["purchase_status"] === "Ordered" ? "ORDER/{$value["purchase_shop_id"]}/{$value["purchase_id"]}" : $value["purchase_reference"];
             $allNestedData[] = $value["company_name"];
             $allNestedData[] = $value["purchase_total_amount"];
             $allNestedData[] = $value["purchase_product_discount"] + $value["purchase_discount"];
@@ -685,7 +712,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
                                     <span class="sr-only">Toggle Dropdown</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                        <li><a data-toggle="modal" href="'. full_website_address() .'/xhr/?module=stock-management&page=viewPurchasedProduct&id='. $value["purchase_id"] .'"  data-target="#modalDefault"><i class="fa fa-eye"></i> View Products</a></li>
+                                        <li><a target="_blank" href="'. full_website_address() .'/invoice-print/?invoiceType=purchaseDetailsInvoice&id='. $value["purchase_id"] .'"  data-target="#modalDefault"><i class="fa fa-eye"></i> View</a></li>
                                         <li><a href="'. full_website_address() .'/stock-management/edit-purchase/?id='. $value["purchase_id"] .'"><i class="fa fa-edit"></i> Edit Purchase</a></li>
                                         <li><a data-toggle="modal" data-target="#modalDefault" href="'. full_website_address() .'/xhr/?module=stock-management&page=addPurchasePayments&purchase_id='. $value["purchase_id"] .'&cid='. $value["purchase_company_id"] .'"><i class="fa fa-money"></i> Add Payment</a></li>
                                         <li><a class="deleteEntry" href="'. full_website_address() . '/xhr/?module=stock-management&page=deletePurchasedProduct" data-to-be-deleted="'. $value["purchase_id"] .'"><i class="fa fa-minus-circle"></i> Delete</a></li>
@@ -712,6 +739,10 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseList") {
 
 /************************** addPurchasePayments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addPurchasePayments") {
+
+    if( !current_user_can("product_purchases.Add") ) {
+        return _e("Sorry! you do not have permission to add purchase payment");
+    }
   
     // Include the modal header
     modal_header("Add Purchase Payments", full_website_address() . "/xhr/?module=stock-management&page=submitPurchasePayments");
@@ -725,7 +756,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addPurchasePayments") {
     ))["data"][0]["purchase_due"];
     
     ?>
-      <div class="box-body">
+
+    <div class="box-body">
         
         <div class="form-group required">
             <label for="purchasePaymentDate"><?= __("Date:"); ?></label>
@@ -780,8 +812,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addPurchasePayments") {
             });
         </script>
 
-      </div>
-      <!-- /Box body-->
+    </div>
+    <!-- /Box body-->
 
     <?php
   
@@ -793,6 +825,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addPurchasePayments") {
 
 /************************** submitPurchasePayments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "submitPurchasePayments") {
+
+    if( !current_user_can("product_purchases.Add") ) {
+        return _e("Sorry! you do not have permission to add purchase payment");
+    }
 
     
     if(empty($_POST["addPurchasePaymentsAmount"])) {
@@ -919,6 +955,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
 
     //exit();
 
+    if( !current_user_can("purchase_return.Add") ) {
+        return _e("Sorry! you do not have permission to add purchase return");
+    }
+
     // Check if the biller is set
     if(!isset($_SESSION["aid"])) {
         return _e("You must set you as a biller to make purchase return");
@@ -1039,7 +1079,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
             $productPurchaseDiscount = calculateDiscount($productPurchasePrice[$key], $productDiscount[$key]);
 
             // Calculate the amount after discount
-            $itemAmoutnAfterDiscount = $productPurchasePrice[$key] - $productPurchaseDiscount;
+            $itemAmountAfterDiscount = $productPurchasePrice[$key] - $productPurchaseDiscount;
 
             $insertPurchaseItem = easyInsert(
                 "product_stock",
@@ -1054,7 +1094,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
                     "stock_item_qty"        => $productQnt[$key],
                     "stock_item_price"      => $productPurchasePrice[$key],
                     "stock_item_discount"   => $productPurchaseDiscount,
-                    "stock_item_subtotal"   => $productQnt[$key] * $itemAmoutnAfterDiscount, // Calculate the items total amount
+                    "stock_item_subtotal"   => $productQnt[$key] * $itemAmountAfterDiscount, // Calculate the items total amount
                     "stock_created_by"      => $_SESSION["uid"]
                 )
             );
@@ -1063,12 +1103,19 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
             $subProducts = easySelectA(array(
                 "table"     => "products as product",
                 "fields"    => "bg_item_product_id, 
-                                sub_product.product_purchase_price as purchase_price,
+                                round( COALESCE(product_price.purchase_price, sub_product.product_purchase_price), 2) as purchase_price, 
                                 bg_product_qnt
                                 ",
                 "join"      => array(
                     "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
-                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
+                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id",
+                    "left join (SELECT
+                                    product_id,
+                                    purchase_price,
+                                    sale_price
+                        FROM {$table_prefix}product_price    
+                        WHERE shop_id = '{$_SESSION['sid']}'
+                    ) as product_price on product_price.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
                     "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -1085,7 +1132,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
                     $productPurchaseDiscount = calculateDiscount($sp["purchase_price"], $productDiscount[$key]);
         
                     // Calculate the amount after discount
-                    $itemAmoutnAfterDiscount = $sp["purchase_price"] - $productPurchaseDiscount;
+                    $itemAmountAfterDiscount = $sp["purchase_price"] - $productPurchaseDiscount;
 
                     $totalSubProductQty = $productQnt[$key] * $sp["bg_product_qnt"];
         
@@ -1102,7 +1149,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
                             "stock_item_qty"        => $totalSubProductQty,
                             "stock_item_price"      => $sp["purchase_price"],
                             "stock_item_discount"   => $productPurchaseDiscount,
-                            "stock_item_subtotal"   => $totalSubProductQty * $itemAmoutnAfterDiscount, // Calculate the items total amount
+                            "stock_item_subtotal"   => $totalSubProductQty * $itemAmountAfterDiscount, // Calculate the items total amount
                             "stock_created_by"      => $_SESSION["uid"],
                             "is_bundle_item"        => 1
                         )
@@ -1181,6 +1228,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
 
 /*************************** Product Purchase Return List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productPurchaseReturnList") {
+
+    if( !current_user_can("purchase_return.View") ) {
+        return _e("Sorry! you do not have permission to view purchase return list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1345,38 +1396,42 @@ if(isset($_GET['page']) and $_GET['page'] == "productPurchaseReturnList") {
 /***************** Delete Purchase ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deletePurchasedProduct") {
 
-  $deleteData = easyDelete(
-      "purchases",
-      array(
-          "purchase_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("product_purchases.Delete") ) {
+        return _e("Sorry! you do not have permission to delete purchase return");
+    }
 
-  if($deleteData === true) {
-
-    // Delete Payments if there any payment payments in this purchase
-    easyDelete(
-        "payments",
+    $deleteData = easyDelete(
+        "purchases",
         array(
-            "payment_purchase_id" => $_POST["datatoDelete"]
+            "purchase_id" => $_POST["datatoDelete"]
         )
     );
 
-    // Delete Payment returns, If there have any return in this purchase return;
-    easyDelete(
-        "payments_return",
-        array(
-            "payments_return_purchase_id"   => $_POST["datatoDelete"]
-        )
-    );
+    if($deleteData === true) {
+
+        // Delete Payments if there any payment payments in this purchase
+        easyDelete(
+            "payments",
+            array(
+                "payment_purchase_id" => $_POST["datatoDelete"]
+            )
+        );
+
+        // Delete Payment returns, If there have any return in this purchase return;
+        easyDelete(
+            "payments_return",
+            array(
+                "payments_return_purchase_id"   => $_POST["datatoDelete"]
+            )
+        );
 
 
-    echo '{
-        "title": "'. __("The purchase has been successfully deleted.") .'",
-        "icon": "success"
-    }';
-    
-  } 
+        echo '{
+            "title": "'. __("The purchase has been successfully deleted.") .'",
+            "icon": "success"
+        }';
+        
+    }
 
 }
 
@@ -1384,56 +1439,60 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePurchasedProduct") {
 if(isset($_GET['page']) and $_GET['page'] == "viewPurchasedProduct") {
   
 
-  // Select Purchased Item
-  $selectPurchasedItems = easySelect(
-      "product_stock",
-      "stock_product_id, product_name, product_unit, stock_item_qty",
-      array (
-        "left join {$table_prefix}products on product_id = stock_product_id"
-      ),
-      array (
-          "is_bundle_item = 0 and stock_purchase_id" => $_GET["id"]
-      )
-  );
+    if( !current_user_can("product_purchases.View") ) {
+        return _e("Sorry! you do not have permission to view purchase");
+    }
+        
+    // Select Purchased Item
+    $selectPurchasedItems = easySelect(
+        "product_stock",
+        "stock_product_id, product_name, product_unit, stock_item_qty",
+        array (
+            "left join {$table_prefix}products on product_id = stock_product_id"
+        ),
+        array (
+            "is_bundle_item = 0 and stock_purchase_id" => $_GET["id"]
+        )
+    );
 
 
-  ?>
+    ?>
 
-  <div class="modal-header">
-      <h4 class="modal-title"><?= __("Purchased Items"); ?></h4>
-  </div>
+    <div class="modal-header">
+        <h4 class="modal-title"><?= __("Purchased Items"); ?></h4>
+    </div>
 
-  <div class="modal-body">
+    <div class="modal-body">
 
-    <table class="table table-striped table-condensed">
-      <tbody>
-        <tr>
-            <td><?= __("Products"); ?></td>
-            <td><?= __("Quantity"); ?></td>
-            <td><?= __("Unit"); ?></td>
-        </tr>
+        <table class="table table-striped table-condensed">
+            <tbody>
+                <tr>
+                    <td><?= __("Products"); ?></td>
+                    <td><?= __("Quantity"); ?></td>
+                    <td><?= __("Unit"); ?></td>
+                </tr>
 
-      <?php 
+            <?php 
 
-          foreach($selectPurchasedItems["data"] as $key => $purcahedItem) {
+                foreach($selectPurchasedItems["data"] as $key => $purcahedItem) {
 
-            echo "<tr>";
-            echo " <td>{$purcahedItem['product_name']}</td>";
-            echo " <td>{$purcahedItem['stock_item_qty']}</td>";
-            echo " <td>{$purcahedItem['product_unit']}</td>";
-            echo "</tr>";
+                    echo "<tr>";
+                    echo " <td>{$purcahedItem['product_name']}</td>";
+                    echo " <td>{$purcahedItem['stock_item_qty']}</td>";
+                    echo " <td>{$purcahedItem['product_unit']}</td>";
+                    echo "</tr>";
 
-          }
+                }
 
-      ?>     
+            ?>     
 
-      </tbody>
+            </tbody>
 
-  </table>
-      
-  </div> <!-- /.modal-body -->
+        </table>
+            
+    </div> <!-- /.modal-body -->
 
-  <?php
+    <?php
 
 }
 
@@ -1444,6 +1503,9 @@ if(isset($_GET['page']) and $_GET['page'] == "newReturn") {
 
     //exit();
 
+    if( !current_user_can("sale_return.Add") ) {
+        return _e("Sorry! you do not have permission to return sale");
+    }
 
     // Check if the biller is set
     if(!isset($_SESSION["aid"])) {
@@ -1476,7 +1538,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newReturn") {
     );
     
 
-    // Referense Format: RETURN/n
+    // Reference Format: RETURN/n
     $returnReferences = "RETURN/".$_SESSION['sid'].$_SESSION['uid']."/";
 
     // check if there is minimum one records
@@ -1557,9 +1619,9 @@ if(isset($_GET['page']) and $_GET['page'] == "newReturn") {
             $salesTotalProductDiscount += $itemDiscountAmount * $getData["productQnt"][$key];
 
             // Calculate item amount after discount
-            $itemAmoutnAfterDiscount = $getData["productReturnPrice"][$key] - $itemDiscountAmount;
+            $itemAmountAfterDiscount = $getData["productReturnPrice"][$key] - $itemDiscountAmount;
 
-            $salesItemSubTotal = $getData["productQnt"][$key] * $itemAmoutnAfterDiscount;
+            $salesItemSubTotal = $getData["productQnt"][$key] * $itemAmountAfterDiscount;
 
             $insertSaleReturnItems .= "
             (
@@ -1794,6 +1856,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockTransfer") {
 
     //print_r($_POST);
     //exit();
+
+    if( !current_user_can("stock_transfer.Add") ) {
+        return _e("Sorry! you do not have permission to transfer stock");
+    }
     
     if( empty($_POST["stockTransferFromWarehouseId"]) ) {
         return _e("Please select from warehouse");
@@ -1892,12 +1958,19 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockTransfer") {
             $subProducts = easySelectA(array(
                 "table"     => "products as product",
                 "fields"    => "bg_item_product_id, 
-                                sub_product.product_purchase_price as purchase_price,
+                                round( COALESCE(product_price.purchase_price, sub_product.product_purchase_price), 2) as purchase_price, 
                                 bg_product_qnt
                                 ",
                 "join"      => array(
                     "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id",
-                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
+                    "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id",
+                    "left join (SELECT
+                                    product_id,
+                                    purchase_price,
+                                    sale_price
+                        FROM {$table_prefix}product_price    
+                        WHERE shop_id = '{$_SESSION['sid']}'
+                    ) as product_price on product_price.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
                     "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
@@ -1983,6 +2056,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockTransfer") {
 
 /*************************** stockTransferList ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "stockTransferList") {
+
+    if( !current_user_can("stock_transfer.View") ) {
+        return _e("Sorry! you do not have permission to view stock transfer list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -2134,28 +2211,102 @@ if(isset($_GET['page']) and $_GET['page'] == "stockTransferList") {
 
 /***************** Delete Stock Transfer ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteStockTransfer") {
-  
-  $deleteData = easyDelete(
-      "stock_transfer",
-      array(
-          "stock_transfer_id" => $_POST["datatoDelete"]
-      )
-  );
 
-  if($deleteData === true) {
-    echo '{
-        "title": "'. __("Stock transfer has been successfully deleted.") .'",
-        "icon": "success"
-    }';
-  } 
+    if( !current_user_can("stock_transfer.Delete") ) {
+        return _e("Sorry! you do not have permission to delete stock transfer");
+    }
+  
+    $deleteData = easyDelete(
+        "stock_transfer",
+        array(
+            "stock_transfer_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo '{
+            "title": "'. __("Stock transfer has been successfully deleted.") .'",
+            "icon": "success"
+        }';
+    } 
 
 }
 
 /************************** Purchased Product **********************/
 if(isset($_GET['page']) and $_GET['page'] == "viewTransferedProduct") {
 
-  // Select Purchased Item
-  $selectTransferedItems = easySelectA(array(
+    if( !current_user_can("stock_transfer.View") ) {
+        return _e("Sorry! you do not have permission to view stock transfer product");
+    }
+
+    // Select Purchased Item
+    $selectTransferedItems = easySelectA(array(
+            "table"   => "product_stock",
+            "fields"  => "round(stock_item_qty, 2) as stock_item_qty, 
+                            round(stock_item_discount, 2) as stock_item_discount, product_unit, round(stock_item_subtotal, 2) as stock_item_subtotal, product_name, if(batch_number is null, '', concat('(', batch_number, ')') ) as batch_number",
+            "join"    => array(
+            "left join {$table_prefix}products on stock_product_id = product_id",
+            "left join {$table_prefix}product_batches as product_batches on stock_product_id = product_batches.product_id and stock_batch_id = batch_id"
+            ),
+            "where" => array(
+            "is_bundle_item = 0 and stock_type = 'transfer-out' and stock_transfer_id"  => $_GET["id"],
+            )
+        ));
+
+
+    ?>
+
+    <div class="modal-header">
+        <h4 class="modal-title"><?= __("Stock Transfered Items"); ?></h4>
+    </div>
+
+    <div class="modal-body">
+
+        <table class="table table-striped table-condensed">
+        <tbody>
+            <tr>
+                <td><?= __("Products"); ?></td>
+                <td><?= __("Quantity"); ?></td>
+                <td><?= __("Unit"); ?></td>
+            </tr>
+
+        <?php 
+
+            foreach($selectTransferedItems["data"] as $key => $transferedItem) {
+
+            echo "<tr>";
+            echo " <td>{$transferedItem['product_name']}</td>";
+            echo " <td>{$transferedItem['stock_item_qty']}</td>";
+            echo " <td>{$transferedItem['product_unit']}</td>";
+            echo "</tr>";
+
+            }
+
+        ?>     
+
+        </tbody>
+
+    </table>
+        
+    </div> <!-- /.modal-body -->
+
+    <?php
+
+}
+
+
+/************************** Add new Batch **********************/
+if(isset($_GET['page']) and $_GET['page'] == "confirmRejectStockTransfer") {
+
+    if( !current_user_can("stock_transfer.Add") ) {
+        return _e("Sorry! you do not have permission to confirm stock transfer");
+    }
+
+    // Include the modal header
+    modal_header("Change Stock Transfer Status", full_website_address() . "/xhr/?module=stock-management&page=updateStockTransferStatus");
+
+    // Select Purchased Item
+    $selectTransferedItems = easySelectA(array(
         "table"   => "product_stock",
         "fields"  => "round(stock_item_qty, 2) as stock_item_qty, 
                         round(stock_item_discount, 2) as stock_item_discount, product_unit, round(stock_item_subtotal, 2) as stock_item_subtotal, product_name, if(batch_number is null, '', concat('(', batch_number, ')') ) as batch_number",
@@ -2167,60 +2318,13 @@ if(isset($_GET['page']) and $_GET['page'] == "viewTransferedProduct") {
         "is_bundle_item = 0 and stock_type = 'transfer-out' and stock_transfer_id"  => $_GET["id"],
         )
     ));
-
-
-  ?>
-
-  <div class="modal-header">
-      <h4 class="modal-title"><?= __("Stock Transfered Items"); ?></h4>
-  </div>
-
-  <div class="modal-body">
-
-    <table class="table table-striped table-condensed">
-      <tbody>
-        <tr>
-            <td><?= __("Products"); ?></td>
-            <td><?= __("Quantity"); ?></td>
-            <td><?= __("Unit"); ?></td>
-        </tr>
-
-      <?php 
-
-          foreach($selectTransferedItems["data"] as $key => $transferedItem) {
-
-          echo "<tr>";
-          echo " <td>{$transferedItem['product_name']}</td>";
-          echo " <td>{$transferedItem['stock_item_qty']}</td>";
-          echo " <td>{$transferedItem['product_unit']}</td>";
-          echo "</tr>";
-
-          }
-
-      ?>     
-
-      </tbody>
-
-  </table>
-      
-  </div> <!-- /.modal-body -->
-
-  <?php
-
-}
-
-
-/************************** Add new Batch **********************/
-if(isset($_GET['page']) and $_GET['page'] == "confirmRejectStockTransfer") {
-
-    // Include the modal header
-    modal_header("Change Stock Transfer Status", full_website_address() . "/xhr/?module=stock-management&page=updateStockTransferStatus");
     
     ?>
       <div class="box-body">
+
         
         <div class="form-group required">
-            <label for="stockTransferStatus"><?= __("Product:"); ?></label>
+            <label for="stockTransferStatus"><?= __("Status:"); ?></label>
             <select name="stockTransferStatus" id="stockTransferStatus" class="form-control" required>
                 <option value=""><?= __("Status"); ?>...</option>
                 <option value="Confirmed">Confirm</option>
@@ -2231,6 +2335,33 @@ if(isset($_GET['page']) and $_GET['page'] == "confirmRejectStockTransfer") {
             <label for="stockTransferStatusNote"><?= __("Note:"); ?></label>
             <textarea name="stockTransferStatusNote" id="stockTransferStatusNote" rows="3" class="form-control"></textarea>
         </div>
+
+        <table class="table table-striped table-condensed">
+            <tbody>
+                <tr>
+                    <td><?= __("Products"); ?></td>
+                    <td><?= __("Quantity"); ?></td>
+                    <td><?= __("Unit"); ?></td>
+                </tr>
+
+            <?php 
+
+                foreach($selectTransferedItems["data"] as $key => $transferedItem) {
+
+                echo "<tr>";
+                echo " <td>{$transferedItem['product_name']}</td>";
+                echo " <td>{$transferedItem['stock_item_qty']}</td>";
+                echo " <td>{$transferedItem['product_unit']}</td>";
+                echo "</tr>";
+
+                }
+
+            ?>     
+
+            </tbody>
+
+        </table>
+
         <input type="hidden" name="stockTransferId" value="<?php echo safe_entities($_GET["id"]); ?>">
               
       </div>
@@ -2246,6 +2377,10 @@ if(isset($_GET['page']) and $_GET['page'] == "confirmRejectStockTransfer") {
 
 // Add new Warehouse
 if(isset($_GET['page']) and $_GET['page'] == "updateStockTransferStatus") {
+
+    if( !current_user_can("stock_transfer.Add") ) {
+        return _e("Sorry! you do not have permission to change stock transfer status");
+    }
 
     if(empty($_POST["stockTransferStatus"])) {
         return _e("Please select status.");
@@ -2347,6 +2482,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newWarehouse") {
 // Add new Warehouse
 if(isset($_GET['page']) and $_GET['page'] == "addNewWarehouse") {
 
+    if( !current_user_can("warehouse.Add") ) {
+        return _e("Sorry! you do not have permission to add new warehouse");
+    }
+
     if(empty($_POST["warehouseName"])) {
         return _e("Please enter warehouse name.");
     }
@@ -2375,6 +2514,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewWarehouse") {
 
 /*************************** Product Warehouse List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "productWarehouseList") {
+
+    if( !current_user_can("warehouse.View") ) {
+        return _e("Sorry! you do not have permission to view warehouse list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -2489,22 +2632,30 @@ if(isset($_GET['page']) and $_GET['page'] == "productWarehouseList") {
 /***************** Delete Warehouse ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteWarehouse") {
 
-  $deleteData = easyDelete(
-      "warehouses",
-      array(
-          "warehouse_id" => $_POST["datatoDelete"]
-      )
-  );
+    if( !current_user_can("warehouse.Delete") ) {
+        return _e("Sorry! you do not have permission to delete warehouse");
+    }
 
-  if($deleteData === true) {
-      echo 1;
-  } 
+    $deleteData = easyDelete(
+        "warehouses",
+        array(
+            "warehouse_id" => $_POST["datatoDelete"]
+        )
+    );
+
+    if($deleteData === true) {
+        echo 1;
+    } 
 
 }
 
 
 /************************** Edit Warehouse **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editWarehouse") {
+
+    if( !current_user_can("warehouse.Edit") ) {
+        return _e("Sorry! you do not have permission to edit warehouse");
+    }
 
     $selectWarehouse = easySelectA(array(
         "table"     => "warehouses",
@@ -2560,30 +2711,39 @@ if(isset($_GET['page']) and $_GET['page'] == "editWarehouse") {
 //*******************************  Update Warehouse ******************** */
 if(isset($_GET['page']) and $_GET['page'] == "updateWarehouse") {
 
-  // Update warehouse Information
-  $updateWarehouse = easyUpdate(
-      "warehouses",
-      array(
-          "warehouse_name"      => $_POST["warehouseName"],
-          "warehouse_shop"      => $_POST["warehouseShopId"],
-          "warehouse_contacts"  => $_POST["warehouseContacts"],
-          "warehouse_location"  => $_POST["warehouseLocation"]
-      ),
-      array(
-          "warehouse_id" => $_POST["warehouse_id"]
-      )
-  );
+    if( !current_user_can("warehouse.Edit") ) {
+        return _e("Sorry! you do not have permission to edit warehouse");
+    }
 
-  if($updateWarehouse === true) {
-      _s("Warehouse successfully updated.");
-  } else {
-      _e($updateWarehouse);
-  }
+    // Update warehouse Information
+    $updateWarehouse = easyUpdate(
+        "warehouses",
+        array(
+            "warehouse_name"      => $_POST["warehouseName"],
+            "warehouse_shop"      => $_POST["warehouseShopId"],
+            "warehouse_contacts"  => $_POST["warehouseContacts"],
+            "warehouse_location"  => $_POST["warehouseLocation"]
+        ),
+        array(
+            "warehouse_id" => $_POST["warehouse_id"]
+        )
+    );
+
+    if($updateWarehouse === true) {
+        _s("Warehouse successfully updated.");
+    } else {
+        _e($updateWarehouse);
+    }
+
 }
 
 
 /*************************** Product Return List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "ProductReturnList") {
+
+    if( !current_user_can("sale_return.View") ) {
+        return _e("Sorry! you do not have permission to view return list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -2854,6 +3014,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newBatchForSelectedProduct") {
   
 // Add new Warehouse
 if(isset($_GET['page']) and $_GET['page'] == "addNewBatch") {
+
+    if( !current_user_can("batches.Add") ) {
+        return _e("Sorry! you do not have permission to add batch");
+    }
   
     if (empty($_POST["batchProductId"])) {
         return _e("Please select product.");
@@ -2889,6 +3053,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewBatch") {
 
 /*************************** Batch List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "batchList") {
+
+    if( !current_user_can("batches.View") ) {
+        return _e("Sorry! you do not have permission to view batch list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -3004,6 +3172,10 @@ if(isset($_GET['page']) and $_GET['page'] == "batchList") {
   
 /***************** Delete Warehouse ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteBatch") {
+
+    if( !current_user_can("batches.Delete") ) {
+        return _e("Sorry! you do not have permission to delete batch");
+    }
   
     $deleteData = easyDelete(
         "product_batches",
@@ -3025,6 +3197,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockEntry") {
 
     //print_r($_POST);
     //exit();
+
+    if( !current_user_can("stock_entry.Add") ) {
+        return _e("Sorry! you do not have permission to entry stock");
+    }
     
     if( empty($_POST["stockEntryWarehouse"]) ) {
         return _e("Please select warehouse");
@@ -3168,6 +3344,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockEntry") {
 
 /*************************** stockEntryList ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "stockEntryList") {
+
+    if( !current_user_can("stock_entry.View") ) {
+        return _e("Sorry! you do not have permission to view stock entry list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -3286,11 +3466,14 @@ if(isset($_GET['page']) and $_GET['page'] == "stockEntryList") {
 /************************** viewStockEntryProduct **********************/
 if(isset($_GET['page']) and $_GET['page'] == "viewStockEntryProduct") {
   
+    if( !current_user_can("stock_entry.View") ) {
+        return _e("Sorry! you do not have permission to view stock entry list");
+    }
 
     // Select StockEntry Item
     $selectStockEntryItems = easySelect(
         "product_stock as product_stock",
-        "stock_product_id, product_name, product_unit, stock_item_qty",
+        "stock_product_id, product_name, product_group, product_unit, round(stock_item_qty, 2) as stock_item_qty",
         array (
           "left join {$table_prefix}products on product_id = stock_product_id"
         ),
@@ -3321,7 +3504,7 @@ if(isset($_GET['page']) and $_GET['page'] == "viewStockEntryProduct") {
             foreach($selectStockEntryItems["data"] as $key => $item) {
   
                 echo "<tr>";
-                echo " <td>{$item['product_name']}</td>";
+                echo " <td>{$item['stock_product_id']}. {$item['product_name']} - {$item['product_group']}</td>";
                 echo " <td>{$item['stock_item_qty']}</td>";
                 echo " <td>{$item['product_unit']}</td>";
                 echo "</tr>";
@@ -3343,6 +3526,10 @@ if(isset($_GET['page']) and $_GET['page'] == "viewStockEntryProduct") {
 
 /***************** Delete Purchase ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteStockEntry") {
+
+    if( !current_user_can("stock_entry.Delete") ) {
+        return _e("Sorry! you do not have permission to delete stock entry");
+    }
 
     $deleteData = easyDelete(
         "stock_entries",
@@ -3374,5 +3561,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteStockEntry") {
     } 
   
 }
+
+
 
 ?>

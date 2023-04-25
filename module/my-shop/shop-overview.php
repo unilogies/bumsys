@@ -8,22 +8,38 @@
     </section>
 
     <?php 
-      $shopId = safe_input($_SESSION['sid']);
-      $accountsId = safe_input($_SESSION['aid']);
+        $shopId = safe_input($_SESSION['sid']);
+        $accountsId = safe_input($_SESSION['aid']);
+        
 
-      $shopOverview = easySelectD("
-        select db_date,
-        if(received_payments_amount_sum is null, 0, round(received_payments_amount_sum, 2) ) as received_payments_amount_sum,
-        if(payment_amount_sum is null, 0, payment_amount_sum) as payment_amount_sum
-        from time_dimension
-        left join ( select received_payments_add_on, sum(received_payments_amount) as received_payments_amount_sum from {$table_prefix}received_payments where received_payments_type != 'Discounts' AND received_payments_shop = '{$shopId}' group by date(received_payments_add_on) ) as get_received_payments on date(received_payments_add_on) = db_date
-        left join ( select payment_date, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where payment_from = {$accountsId} group by payment_date) as get_payments on payment_date = db_date
-        where db_date = CURRENT_DATE
-      ")["data"][0];
+        $shopOverview = easySelectD("
+            select 
+                db_date,
+                if(received_payments_amount_sum is null, 0, round(received_payments_amount_sum, 2) ) as received_payments_amount_sum,
+                if(payment_amount_sum is null, 0, payment_amount_sum) as payment_amount_sum
+            from time_dimension
+            left join ( select 
+                    received_payments_add_on, 
+                    sum(received_payments_amount) as received_payments_amount_sum 
+                from {$table_prefix}received_payments 
+                where received_payments_type != 'Discounts' AND received_payments_shop = '{$shopId}' 
+                group by date(received_payments_add_on) 
+            ) as get_received_payments on date(received_payments_add_on) = db_date
+            left join ( select 
+                    payment_date, 
+                    sum(payment_amount) as payment_amount_sum 
+                from {$table_prefix}payments 
+                where payment_from = {$accountsId} 
+                group by payment_date
+            ) as get_payments on payment_date = db_date
+            where db_date = CURRENT_DATE
+        ");
 
-      $todayEarns = $shopOverview["received_payments_amount_sum"];
-      $todayCashIn = $todayEarns - $shopOverview["payment_amount_sum"];
-	    $todayCashIn = $todayCashIn < 0 ? 0 : $todayCashIn;
+
+
+        $todayEarns = $shopOverview === false ? 0 : $shopOverview["received_payments_amount_sum"];
+        $todayCashIn = $shopOverview === false ? 0 : $todayEarns - $shopOverview["payment_amount_sum"];
+        $todayCashIn = $todayCashIn < 0 ? 0 : $todayCashIn;
 	  
     ?>
 
@@ -61,7 +77,7 @@
             </span>
             <div class="info-box-content">
               <span class="info-box-text"><?= __("Today's Expense"); ?></span>
-              <span class="info-box-number"><?php echo __(number_format($shopOverview["payment_amount_sum"], 2)); ?></span>
+              <span class="info-box-number"><?php echo __(number_format($shopOverview === false ? 0 : $shopOverview["payment_amount_sum"], 2)); ?></span>
             </div>
           </div>
         </div>

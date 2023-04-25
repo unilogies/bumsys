@@ -115,6 +115,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewAccount") {
 
 /*************************** Accounts List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "accountList") {
+
+    if(current_user_can("accounts.View") !== true) {
+        return _e("Sorry! you do not have permission to view account list.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -263,12 +267,17 @@ if(isset($_GET['page']) and $_GET['page'] == "updateAccountBalance") {
     echo '{
         "title": "The account balance has been updated successfully."
     }';
+
 }
 
 
 
 /************************** Edit Accounts **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editAccount") {
+
+    if(current_user_can("accounts.Edit") !== true) {
+        return _e("Sorry! you do not have permission to edit account.");
+    }
 
     $selectAccount = easySelect(
         "accounts",
@@ -346,11 +355,12 @@ if(isset($_GET['page']) and $_GET['page'] == "editAccount") {
   }
   
   
-  //*******************************  Update User ******************** */
+  //*******************************  Update Account ******************** */
   if(isset($_GET['page']) and $_GET['page'] == "updateAccount") {
 
+
     if(current_user_can("accounts.Edit") !== true) {
-        return _e("Sorry! you do not have permission to add new Account.");
+        return _e("Sorry! you do not have permission to edit account.");
     }
   
     if(empty($_POST["accountName"])) {
@@ -387,7 +397,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editAccount") {
         _e($updateAccounts);
     }
   
-  }
+}
 
 
 /************************** Transfer Money **********************/
@@ -518,6 +528,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewTransfer") {
 
 /*************************** Transfer List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "transferList") {
+
+    if(current_user_can("transfer_money.View") !== true) {
+        return _e("Sorry! you do not have permission to view transfer money list.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -545,7 +559,18 @@ if(isset($_GET['page']) and $_GET['page'] == "transferList") {
         $requestData['length'] = $totalRecords;
     }
  
-    if(!empty($requestData["search"]["value"])) {  // get data with search
+    if( !empty($requestData["search"]["value"]) or 
+        !empty($requestData["columns"][1]['search']['value']) or
+        !empty($requestData["columns"][2]['search']['value']) or
+        !empty($requestData["columns"][3]['search']['value'])
+    
+    ) {  // get data with search
+
+        $dateRange[0] = "";
+        $dateRange[1] = "";
+        if(!empty($requestData["columns"][1]['search']['value'])) {
+            $dateRange = explode(" - ", safe_input($requestData["columns"][1]['search']['value']));
+        }
         
         $getData = easySelect(
             "transfer_money as transfer_money",
@@ -556,8 +581,9 @@ if(isset($_GET['page']) and $_GET['page'] == "transferList") {
             ),
             array (
                 "transfer_money.is_trash"  => 0,
-                " AND from_accounts.accounts_name LIKE" => $requestData['search']['value'] . "%",
-                " OR to_accounts.accounts_name LIKE" => $requestData['search']['value'] . "%"
+                " AND transfer_money_from" =>  $requestData["columns"][2]['search']['value'],
+                " AND transfer_money_to" =>  $requestData["columns"][3]['search']['value'],
+                " AND transfer_money_date BETWEEN '{$dateRange[0]}' and '{$dateRange[1]}'"
             ),
             array (
                 $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
@@ -636,6 +662,10 @@ if(isset($_GET['page']) and $_GET['page'] == "transferList") {
 /************************** Transfer Money **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editTransferMoney") {
 
+    if(current_user_can("transfer_money.Edit") !== true) {
+        return _e("Sorry! you do not have permission to edit transfer money.");
+    }
+
     // Include the modal header
     modal_header("Edit Transfer Money", full_website_address() . "/xhr/?module=accounts&page=updateTransferMoney");
 
@@ -710,15 +740,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updateTransferMoney") {
 
 
     if(current_user_can("transfer_money.Edit") !== true) {
-        echo '{
-            "title": "Sorry!",
-            "text": "'. __('you do not have permission to edit transfer money.') . '",
-            "showConfirmButton": true,
-            "showCloseButton": true,
-            "toast": false,
-            "icon": "error"
-        }';
-        return;
+        return _e("Sorry! you do not have permission to edit transfer money.");
     }
 
     $transferedAmount = easySelect(
@@ -852,6 +874,11 @@ if(isset($_GET['page']) and $_GET['page'] == "newCapital") {
 /************************** Add New Capital **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewCapital") {
 
+
+    if(current_user_can("capital.Add") !== true) {
+        return _e("Sorry! you do not have permission to add capital.");
+    }
+
     if(empty($_POST["capitalReceivedDate"])) {
         return _e("Please select capital received date.");
     } elseif(empty($_POST["capitalAccounts"])) {
@@ -890,6 +917,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewCapital") {
 
 /*************************** Transfer List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "capitalList") {
+
+    if(current_user_can("capital.View") !== true) {
+        return _e("Sorry! you do not have permission to view capital list.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1029,6 +1060,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newClosings") {
 /************************** Add New Capital **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewClosing") {
 
+    if(current_user_can("closings.Add") !== true) {
+        return _e("Sorry! you do not have permission to add closings.");
+    }
+
     if(empty($_POST["closingCustomer"])) {
         return _e("Please select the customer.");
     } elseif(empty($_POST["closingTitle"])) {
@@ -1068,6 +1103,11 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewClosing") {
 
 /*************************** Transfer List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "closingList") {
+
+
+    if(current_user_can("closings.View") !== true) {
+        return _e("Sorry! you do not have permission to view closing list.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1209,6 +1249,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteClosings") {
 /************************** Edit Closings **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editClosings") {
 
+    if(current_user_can("closings.Edit") !== true) {
+        return _e("Sorry! you do not have permission to edit closings.");
+    }
+
     // Include the modal header
     modal_header("Edit Closings", full_website_address() . "/xhr/?module=accounts&page=updateClosing");
     
@@ -1257,6 +1301,11 @@ if(isset($_GET['page']) and $_GET['page'] == "editClosings") {
 /************************** Add New Capital **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateClosing") {
 
+
+    if(current_user_can("closings.Edit") !== true) {
+        return _e("Sorry! you do not have permission to edit closings.");
+    }
+
     if(empty($_POST["closingCustomer"])) {
         return _e("Please select the customer.");
     } elseif(empty($_POST["closingTitle"])) {
@@ -1295,6 +1344,11 @@ if(isset($_GET['page']) and $_GET['page'] == "updateClosing") {
 
 /*************************** Amount receivable report ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "receivableReport") {
+
+
+    if(current_user_can("amount_receivable_report.View") !== true) {
+        return _e("Sorry! you do not have permission to view receivable report.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1442,6 +1496,10 @@ if(isset($_GET['page']) and $_GET['page'] == "receivableReport") {
 
 /*************************** Amount payable report ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "payableReport") {
+
+    if(current_user_can("amount_payable_report.View") !== true) {
+        return _e("Sorry! you do not have permission to view payable report.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];

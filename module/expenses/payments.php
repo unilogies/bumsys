@@ -57,7 +57,17 @@
                     <th class="no-print col-md-1"><input style="width: 160px" type="text" name="paidTo" placeholder="<?= __("Enter name or ID"); ?>" id="paidTo" value="" class="form-control"></th>
                     
                     <th>Amount</th>
-                    <th class="no-print"><?= __("Payment From"); ?></th>
+                    <th class="no-print">
+                        <select id="paymentFromAccountFilter" class="form-control select2" style="width: 100%;" required>
+                            <option value="">All...</option>
+                            <?php
+                                $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), array("is_trash" => 0));
+                                foreach($selectAccounts["data"] as $accounts) {
+                                    echo "<option value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
+                                }
+                            ?>
+                        </select>
+                    </th>
                     <th>Description</th>
                     <th>Status</th>
                     <!-- Payment Method -->

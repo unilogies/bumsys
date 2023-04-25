@@ -1,14 +1,12 @@
 
-  <div class="content-wrapper">
+<div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-      <h1>
-        <?= __("Payments Return"); ?>
-      </h1>
-      <ol class="breadcrumb">
-        <li><a href="#"><i class="fa fa-dashboard"></i> Payments</a></li>
-        <li class="active">Payment List</li>
-      </ol>
+        <h1>
+            <?= __("Payments Return"); ?>
+            <a data-toggle="modal" data-target="#modalDefault" href="<?php echo full_website_address(); ?>/xhr/?tooltip=true&select2=true&module=expenses&page=returnCustomerPayment" class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> <?= __("Customer Payment Return"); ?></a>
+        </h1>
+      
     </section>
 
     <!-- Main content -->

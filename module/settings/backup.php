@@ -5,6 +5,11 @@ if( isset($_GET["export"]) and !isset($_POST["backupToken"]) or ( isset($_POST["
     header('HTTP/1.0 403 Forbidden');
     die("<strong>Error:</strong> You have no permission to access this resource.");
 
+} else if( !current_user_can("settings_backup.Add") ) {
+
+    header('HTTP/1.0 403 Forbidden');
+    die("<strong>Error:</strong> You have no permission to access this resource.");
+    
 }
 
 ini_set('memory_limit', '-1');
@@ -18,9 +23,11 @@ if(isset($_GET["export"]) and isset($_GET["type"]) and $_GET["type"] === "db" ) 
         $filename = $_POST["backupName"];
     }
 
-    if( !empty($_POST["backupFormat"]) ) {
-        $format = $_POST["backupFormat"];
-    }
+
+    // Currently support only sql format
+    // if( !empty($_POST["backupFormat"]) ) {
+    //     $format = $_POST["backupFormat"];
+    // }
 
     $filename = preg_replace("/[^a-z0-9\_\-\.]/i", '', $filename) . '.' . $format;
 
@@ -140,9 +147,10 @@ if(isset($_GET["export"]) and isset($_GET["type"]) and $_GET["type"] === "files"
         $filename = $_POST["backupName"];
     }
 
-    if( !empty($_POST["backupFormat"]) ) {
-        $format = $_POST["backupFormat"];
-    }
+    // Currently support only zip format
+    // if( !empty($_POST["backupFormat"]) ) {
+    //     $format = $_POST["backupFormat"];
+    // }
 
     $filename = preg_replace("/[^a-z0-9\_\-\.]/i", '', $filename) . '.' . $format;
 

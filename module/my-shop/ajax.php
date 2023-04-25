@@ -5,6 +5,10 @@ $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), 
 
 /*************************** Pos Sale List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
+
+    if( !current_user_can("myshop_pos_sales.View") ) {
+        return _e("Sorry! you do not have permission to view sale list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -41,7 +45,8 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
       
         $getData = easySelect(
             "sales as sales",
-            "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
+            "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, customer_phone, sales_total_amount, sales_product_discount, 
+            sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
             array (
                 "left join {$table_prefix}customers on customer_id = sales_customer_id",
                 "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
@@ -50,7 +55,6 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
             array (
                 "sales.is_trash = 0 and sales.is_return = 0 and sales.sales_delivery_date is not null and sales_shop_id" => $_SESSION["sid"],
                 " AND customer_name LIKE" => $requestData['search']['value'] . "%",
-                " OR sales_reference LIKE" => $requestData['search']['value'] . "%"
             ),
             array (
                 $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
@@ -63,7 +67,12 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
   
         $totalFilteredRecords = $getData ? $getData["count"] : 0;
   
-    } else if(!empty($requestData["columns"][1]['search']['value']) or !empty($requestData["columns"][2]['search']['value']) or !empty($requestData["columns"][3]['search']['value']) or !empty($requestData["columns"][11]['search']['value'])) { // Get data with search by column
+    } else if(!empty($requestData["columns"][1]['search']['value']) or 
+            !empty($requestData["columns"][2]['search']['value']) or 
+            !empty($requestData["columns"][3]['search']['value']) or 
+            !empty($requestData["columns"][12]['search']['value']) or
+            !empty($requestData["columns"][13]['search']['value'])
+        ) { // Get data with search by column
         
         $dateRange[0] = "";
         $dateRange[1] = "";
@@ -73,7 +82,7 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
         
         $getData = easySelect(
             "sales as sales",
-            "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, 
+            "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, customer_phone,
             sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, 
             sales_due, sales_payment_status, upazila_name, district_name",
             array (
@@ -85,7 +94,8 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
               "sales.is_trash = 0 and sales.is_return = 0 and sales.sales_delivery_date is not null and sales_shop_id" => $_SESSION["sid"],
               " AND sales_reference LIKE" => "%" . $requestData["columns"][2]['search']['value'] . "%",
               " AND customer_name LIKE" => "%" . $requestData["columns"][3]['search']['value'] . "%",
-              " AND sales_payment_status" => $requestData["columns"][11]['search']['value'],
+              " AND sales_payment_status" => $requestData["columns"][12]['search']['value'],
+              " AND sales_status" => $requestData["columns"][13]['search']['value'],
               " AND (sales_delivery_date BETWEEN '{$dateRange[0]}' and '{$dateRange[1]}')"
             ),
             array (
@@ -104,7 +114,8 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
   
       $getData = easySelect(
           "sales as sales",
-          "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, sales_total_amount, sales_product_discount, sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
+          "sales_id, sales_delivery_date, sales_status, sales_shop_id, sales_reference, sales_customer_id, customer_name, customer_phone, sales_total_amount, sales_product_discount, 
+          sales_discount, sales_change, sales_shipping, sales_grand_total, sales_paid_amount, sales_due, sales_payment_status, upazila_name, district_name",
           array (
             "left join {$table_prefix}customers on customer_id = sales_customer_id",
             "left join {$table_prefix}upazilas on upazila_id = customer_upazila",
@@ -152,6 +163,7 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
             $allNestedData[] = "<iledit>{$value["sales_delivery_date"]}</iledit>";
             $allNestedData[] = "<a data-toggle='modal' data-target='#modalDefault' href='" . full_website_address() . "/xhr/?module=reports&page=showInvoiceProducts&id={$value['sales_id']}'>{$value['sales_reference']}</a>";
             $allNestedData[] = "<iledit data-val='{$value["sales_customer_id"]}'>{$value['customer_name']}, {$value['upazila_name']}, {$value['district_name']}</iledit>";
+            $allNestedData[] = "<span class='copyThis'>{$value["customer_phone"]}</span>";
             $allNestedData[] = $value["sales_total_amount"];
             $allNestedData[] = $value["sales_product_discount"] + $value["sales_discount"];
             $allNestedData[] = $value["sales_shipping"];
@@ -203,6 +215,10 @@ if(isset($_GET['page']) and $_GET['page'] == "posSaleList") {
 if(isset($_GET['page']) and $_GET['page'] == "changeSaleStatus") {
 
   
+    if( !current_user_can("myshop_pos_sales.Edit") ) {
+        return _e("Sorry! you do not have permission to edit sale status");
+    }
+
     // Update sales status
     $updateData = easyUpdate(
         "sales",
@@ -257,11 +273,15 @@ if(isset($_GET['page']) and $_GET['page'] == "changeSaleStatus") {
     }
 
     
-
 }
+
 
 /************************** Shop POS Sales Add Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addPostSalesPayments") {
+
+    if( !current_user_can("myshop_received_payments.Add") ) {
+        return _e("Sorry! you do not have permission to add sales payment");
+    }
   
     // Include the modal header
     modal_header("Add Payments", full_website_address() . "/xhr/?module=my-shop&page=submitPostSalesPayments");
@@ -319,6 +339,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addPostSalesPayments") {
 
 /************************** Shop POS Sales Add Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "submitPostSalesPayments") {
+
+    if( !current_user_can("myshop_received_payments.Add") ) {
+        return _e("Sorry! you do not have permission to add sales payment");
+    }
     
     if(empty($_POST["addSalesPaymentsAmount"])) {
         return _e("Please enter payment amount");
@@ -404,12 +428,91 @@ if(isset($_GET['page']) and $_GET['page'] == "submitPostSalesPayments") {
 }
   
 
+
+
+/************************** Edit Sale note and shipping Address **********************/
+if(isset($_GET['page']) and $_GET['page'] == "editSaleNote") {
+  
+
+    if( !current_user_can("myshop_pos_sales.Edit") ) {
+        return _e("Sorry! you do not have permission to edit sales");
+    }
+
+    // Include the modal header
+    modal_header("Edit Sale Note and Shipping Address", full_website_address() . "/xhr/?module=my-shop&page=updateSaleNote");
+
+    $sale = easySelectA(array(
+        "table"     => "sales",
+        "fields"    => "sales_note, sales_shipping_address",
+        "where"     => array(
+            "sales_id"  => $_GET["id"]
+        )
+    ))["data"][0];
+    
+    ?>
+
+      <div class="box-body">    
+        
+        <div class="form-group">
+            <label for="salesNote"><?= __("Sale Note:"); ?></label>
+            <textarea name="salesNote" id="salesNote" rows="3" class="form-control"><?php echo $sale["sales_note"]; ?></textarea>
+        </div>
+        <div class="form-group">
+            <label for="salesShippingAddress"><?= __("Shipping Address:"); ?></label>
+            <textarea name="salesShippingAddress" id="salesShippingAddress" rows="3" class="form-control"><?php echo $sale["sales_shipping_address"]; ?></textarea>
+        </div>
+        <input type="hidden" name="sales_id" value="<?php echo safe_entities($_GET["id"]); ?>">
+
+        <div id="ajaxSubmitMsg"></div>
+
+      </div>
+      <!-- /Box body-->
+
+    <?php
+  
+    // Include the modal footer
+    modal_footer("Update");
+
+}
+
+
+/************************** Update Sale Note **********************/
+if(isset($_GET['page']) and $_GET['page'] == "updateSaleNote") {
+
+    if( !current_user_can("myshop_pos_sales.Edit") ) {
+        return _e("Sorry! you do not have permission to edit sales");
+    }
+
+    // Update Sales
+    $updateSale = easyUpdate(
+        "sales",
+        array (
+            "sales_note"                => $_POST["salesNote"],
+            "sales_shipping_address"    => $_POST["salesShippingAddress"],
+        ), 
+        array (
+            "sales_id"  => $_POST["sales_id"]
+        )
+    );
+
+
+    if( $updateSale === true ) {
+        _s("Successfully updated.");
+    } else {
+        _e($updateSale);
+    }
+
+
+}
+
+
+
 /***************** Delete POS Sale ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deletePosSales") {
 
 
     if(!current_user_can("myshop_pos_sales.Delete")) {
-        echo "{error: true, msg: 'Error'}";
+        echo "{error: true, msg: 'Error: You do not have permission to delete sale'}";
         exit();
     }
 
@@ -434,7 +537,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePosSales") {
 
     if($deleteSales === true) {
 
-        // Delete Received Payments Regurding this sales
+        // Delete Received Payments Regarding this sales
         easyDelete(
             "received_payments",
             array(
@@ -443,7 +546,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deletePosSales") {
             )
         );
 
-        // Delete Payment Return Regurding this sales
+        // Delete Payment Return Regarding this sales
         easyDelete(
             "payments_return",
             array(
@@ -551,6 +654,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addShopExpense") {
 
 /************************** Add Expense in My Shop **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newShopExpense") {
+
+    if( !current_user_can("myshop_expenses.Add") ) {
+        return _e("Sorry! you do not have permission to add expenses");
+    }
 
     $accounts_balance = accounts_balance($_SESSION["aid"]);
 
@@ -676,6 +783,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newShopExpense") {
 
 /*************************** My Shop Expenses List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "shopExpensesList") {
+
+    if( !current_user_can("myshop_expenses.View") ) {
+        return _e("Sorry! you do not have permission to view expenses");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -928,6 +1039,10 @@ if(isset($_GET['page']) and $_GET['page'] == "shopAdvanceCollection") {
 /************************** Add Shop Advance Collection **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newShopAdvanceCollection") {
 
+    if( !current_user_can("myshop_advance_collection.Add") ) {
+        return _e("Sorry! you do not have permission to add advance collection");
+    }
+
     if(empty($_POST["advanceCollectionFrom"])) {
         return _e("Please select customer");
     } else if(empty($_POST["advanceCollectionAmount"])) {
@@ -1005,6 +1120,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newShopAdvanceCollection") {
 
 /*************************** My Shop Advance Collection List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "shopAdvanceCollectionList") {
+
+    if( !current_user_can("myshop_advance_collection.View") ) {
+        return _e("Sorry! you do not have permission to view advance collection list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1123,11 +1242,16 @@ if(isset($_GET['page']) and $_GET['page'] == "shopAdvanceCollectionList") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
+
 }
 
 
 /************************** Shop Advance Collection edit **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editShopAdvanceCollection") {
+
+    if( !current_user_can("myshop_advance_collection.Edit") ) {
+        return _e("Sorry! you do not have permission to edit advance collection");
+    }
   
     // Include the modal header
     modal_header("Edit Advance Collection", full_website_address() . "/xhr/?module=my-shop&page=updateShopAdvanceCollection");
@@ -1239,6 +1363,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editShopAdvanceCollection") {
 /************************** Add Shop Advance Collection **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateShopAdvanceCollection") {
 
+    if( !current_user_can("myshop_advance_collection.Edit") ) {
+        return _e("Sorry! you do not have permission to edit advance collection");
+    }
+
     if(empty($_POST["advanceCollectionFrom"])) {
         return _e("Please select customer");
     } else if(empty($_POST["advanceCollectionAmount"])) {
@@ -1312,7 +1440,7 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteAdvanceCollection") {
     if(current_user_can("myshop_advance_collection.Delete") !== true) {
         echo '{
             "title": "Sorry!",
-            "text": "'. __("you do not have permission to delete received payments.") .'",
+            "text": "'. __("you do not have permission to delete advance collection.") .'",
             "showConfirmButton": true,
             "showCloseButton": true,
             "toast": false,
@@ -1535,6 +1663,10 @@ if(isset($_GET['page']) and $_GET['page'] == "shopAddReceivedPayments") {
 /************************** Add Shop Received Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newShopAddReceivedPayments") {
 
+    if( !current_user_can("myshop_received_payments.Add") ) {
+        return _e("Sorry! you do not have permission to add payment");
+    }
+
     if(empty($_POST["receivedPaymentsFrom"])) {
         return _e("Please select customer");
     } else if(empty($_POST["receivedPaymentsAmount"])) {
@@ -1652,6 +1784,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addDiscount") {
 /************************** Add New Discount **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewDiscount") {
 
+    if( !current_user_can("myshop_discount.Add") ) {
+        return _e("Sorry! you do not have permission to add discount");
+    }
+
     if(empty($_POST["discountCustomer"])) {
         return _e("Please select customer");
     }  else if(empty($_POST["discountAmount"])) {
@@ -1696,6 +1832,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewDiscount") {
 
 /*************************** My Shop Received Payments List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "shopReceivedPaymentsList") {
+
+    if( !current_user_can("myshop_received_payments.View") ) {
+        return _e("Sorry! you do not have permission to view receive payment list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1863,6 +2003,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteReceivedPayment") {
 
 /************************** Edit Received Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editReceivedPayment") {
+
+    if( !current_user_can("myshop_received_payments.Edit") ) {
+        return _e("Sorry! you do not have permission to edit receive payment");
+    }
   
     // Include the modal header
     modal_header("Edit Received Payment", full_website_address() . "/xhr/?module=my-shop&page=updateReceivedPayments");
@@ -1978,13 +2122,17 @@ if(isset($_GET['page']) and $_GET['page'] == "editReceivedPayment") {
 /************************** updateReceivedPayments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateReceivedPayments") {
 
+    if( !current_user_can("myshop_received_payments.Edit") ) {
+        return _e("Sorry! you do not have permission to edit receive payment");
+    }
+
     if(empty($_POST["receivedPaymentsFrom"])) {
         return _e("Please select customer");
     } else if(empty($_POST["receivedPaymentsAmount"])) {
         return _e("Please enter payments amount.");
     }
 
-    // Select the previouse account
+    // Select the previous account
     $previousAccount = easySelectA(array(
         "table" => "received_payments",
         "fields" => "received_payments_accounts",
@@ -2043,6 +2191,10 @@ if(isset($_GET['page']) and $_GET['page'] == "updateReceivedPayments") {
 
 /*************************** My Shop Discounts List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "discountsList") {
+
+    if( !current_user_can("myshop_discount.View") ) {
+        return _e("Sorry! you do not have permission to view discount list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -2157,6 +2309,10 @@ if(isset($_GET['page']) and $_GET['page'] == "discountsList") {
 
 /************************** Edit Discount **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editDiscount") {
+
+    if( !current_user_can("myshop_discount.Edit") ) {
+        return _e("Sorry! you do not have permission to edit discount");
+    }
   
     // Include the modal header
     modal_header("Edit Discount", full_website_address() . "/xhr/?module=my-shop&page=updateDiscount");
@@ -2211,6 +2367,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editDiscount") {
 /***************** Delete Discount ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteDiscount") {
 
+    if( !current_user_can("myshop_discount.Delete") ) {
+        return _e("Sorry! you do not have permission to delete discount");
+    }
+
     $deleteData = easyDelete(
         "received_payments",
         array(
@@ -2229,6 +2389,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteDiscount") {
 
 /************************** Add New Discount **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateDiscount") {
+
+    if( !current_user_can("myshop_discount.Edit") ) {
+        return _e("Sorry! you do not have permission to edit discount");
+    }
 
     if(empty($_POST["discountCustomer"])) {
         return __("Please select customer");
@@ -2309,6 +2473,10 @@ if(isset($_GET['page']) and $_GET['page'] == "myShopNewTransferBalance") {
 /************************** New Transfer Money **********************/
 if(isset($_GET['page']) and $_GET['page'] == "addNewmyShopTransferBalance") {
 
+    if( !current_user_can("myshop_transfer_balance.Add") ) {
+        return _e("Sorry! you do not have permission to transfer balance");
+    }
+
     $accounts_balance = accounts_balance($_SESSION["aid"]);
 
     if(empty($_POST["transferDate"])) {
@@ -2354,6 +2522,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewmyShopTransferBalance") {
 
 /*************************** Transfer List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "transferBalanceList") {
+
+    if( !current_user_can("myshop_transfer_balance.View") ) {
+        return _e("Sorry! you do not have permission to view transfer balance");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -2434,6 +2606,8 @@ if(isset($_GET['page']) and $_GET['page'] == "transferBalanceList") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
+
 }
+
 
 ?>

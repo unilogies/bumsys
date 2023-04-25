@@ -21,7 +21,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
         "",
         "",
         "sale_qty",
-        "sale_qty_in_range",
         "",
         "",
         "",
@@ -34,7 +33,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
         "table" => "products",
         "fields" => "count(*) as totalRow",
         "where" => array(
-            "is_trash = 0"
+            "is_trash = 0 AND product_type != 'Child'"
         )
     ))["data"][0]["totalRow"];
 
@@ -42,19 +41,28 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
         $requestData['length'] = $totalRecords;
     }
 
-    $soldDateRange[0] = "";
-    $soldDateRange[1] = "";
-    if( !empty($requestData["columns"][12]['search']['value']) ) {
-        
-        $soldDateRange = explode(" - ", safe_input($requestData["columns"][12]['search']['value']));
-
-    }
  
-    if(!empty($requestData["search"]["value"]) or !empty($requestData["columns"][1]['search']['value']) or !empty($requestData["columns"][2]['search']['value']) or !empty($requestData["columns"][3]['search']['value']) or !empty($requestData["columns"][4]['search']['value']) ) {  // get data with search
+    if( !empty($requestData["search"]["value"]) or 
+        !empty($requestData["columns"][1]['search']['value']) or 
+        !empty($requestData["columns"][2]['search']['value']) or 
+        !empty($requestData["columns"][3]['search']['value']) or 
+        !empty($requestData["columns"][4]['search']['value']) or
+        !empty($requestData["columns"][11]['search']['value']) 
+
+    ) {  // get data with search
         
         $edition_filter = empty($requestData["columns"][4]['search']['value']) ? "AND product.product_type != 'Child'" : "AND product_edition = '". safe_input($requestData["columns"][4]['search']['value']) ."' ";
 
         $warehouse_filter = empty($requestData["columns"][1]['search']['value']) ? "" : " = '". safe_input($requestData["columns"][1]['search']['value']) ."'";
+
+        $dateRangeFilter = "";
+        if( !empty($requestData["columns"][11]['search']['value']) ) {
+            
+            $soldDateRange = explode(" - ", safe_input($requestData["columns"][11]['search']['value']));
+
+            $dateRangeFilter = " AND stock_entry_date between '{$soldDateRange[0]}' and '{$soldDateRange[1]}'";
+
+        }
 
         
         $getData = easySelectA(array(
@@ -79,7 +87,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                             round(coalesce(variable_stock_qty, stock_qty, 0), 2) as stock_qty,
                             round(coalesce(variable_sale_item_subtotal, sale_item_subtotal, 0), 2) as total_sold_amount,
                             round(coalesce(variable_purchase_item_subtotal, purchase_item_subtotal, 0), 2) as total_purchased_amount,
-                            round(coalesce(variable_sale_qty_in_range, sale_qty_in_range, 0), 2) as sale_qty_in_range,
                             round(coalesce(variable_specimen_copy_qty, specimen_copy_qty, 0), 2) as specimen_copy_qty
             ",
             "join"      => array(
@@ -89,7 +96,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(case when stock_type = 'initial' then stock_item_qty end) as initial_qty,
                         sum(case when stock_type = 'sale-production' then stock_item_qty end) as production_qty,
                         sum(case when stock_type = 'sale' then stock_item_qty end) as sale_qty,
-                        sum(case when stock_type = 'sale' and stock_entry_date between '{$soldDateRange[0]}' and '{$soldDateRange[1]}' then stock_item_qty end) as sale_qty_in_range,
                         sum(case when stock_type = 'sale' then stock_item_subtotal end) as sale_item_subtotal,
                         sum(case when stock_type = 'wastage-sale' then stock_item_qty end) as wastage_sale_qty,
                         sum(case when stock_type = 'sale-return' then stock_item_qty end) as sale_return_qty,
@@ -102,7 +108,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(case when stock_type = 'specimen-copy' then stock_item_qty end) as specimen_copy_qty,
                         sum(case when stock_type = 'specimen-copy-return' then stock_item_qty end) as specimen_copy_return_qty
                     from {$table_prefix}product_stock
-                    where is_trash = 0 and stock_warehouse_id $warehouse_filter
+                    where is_trash = 0 and stock_warehouse_id {$warehouse_filter} {$dateRangeFilter}
                     group by stock_product_id
                 ) as product_stock on stock_product_id = product.product_id",
 
@@ -123,7 +129,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(initial_qty) as variable_initial_qty,
                         sum(production_qty) as variable_production_qty,
                         sum(sale_qty) as variable_sale_qty,
-                        sum(sale_qty_in_range) as variable_sale_qty_in_range,
                         sum(sale_item_subtotal) as variable_sale_item_subtotal,
                         sum(wastage_sale_qty) as variable_wastage_sale_qty,
                         sum(sale_return_qty) as variable_sale_return_qty,
@@ -145,7 +150,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                             sum(case when stock_type = 'initial' then stock_item_qty end) as initial_qty,
                             sum(case when stock_type = 'sale-production' then stock_item_qty end) as production_qty,
                             sum(case when stock_type = 'sale' then stock_item_qty end) as sale_qty,
-                            sum(case when stock_type = 'sale' and stock_entry_date between '{$soldDateRange[0]}' and '{$soldDateRange[1]}' then stock_item_qty end) as sale_qty_in_range,
                             sum(case when stock_type = 'sale' then stock_item_subtotal end) as sale_item_subtotal,
                             sum(case when stock_type = 'wastage-sale' then stock_item_qty end) as wastage_sale_qty,
                             sum(case when stock_type = 'sale-return' then stock_item_qty end) as sale_return_qty,
@@ -158,7 +162,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                             sum(case when stock_type = 'specimen-copy' then stock_item_qty end) as specimen_copy_qty,
                             sum(case when stock_type = 'specimen-copy-return' then stock_item_qty end) as specimen_copy_return_qty
                         from {$table_prefix}product_stock
-                        where is_trash = 0 and stock_warehouse_id $warehouse_filter
+                        where is_trash = 0 and stock_warehouse_id {$warehouse_filter} {$dateRangeFilter}
                         group by stock_product_id
                     ) as product_stock on stock_product_id = childProduct.product_id
 
@@ -223,7 +227,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                             round(coalesce(variable_stock_qty, stock_qty, 0), 2) as stock_qty,
                             round(coalesce(variable_sale_item_subtotal, sale_item_subtotal, 0), 2) as total_sold_amount,
                             round(coalesce(variable_purchase_item_subtotal, purchase_item_subtotal, 0), 2) as total_purchased_amount,
-                            round(coalesce(variable_sale_qty_in_range, sale_qty_in_range, 0), 2) as sale_qty_in_range,
                             round(coalesce(variable_specimen_copy_qty, specimen_copy_qty, 0), 2) as specimen_copy_qty
             ",
             "join"      => array(
@@ -233,7 +236,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(case when stock_type = 'initial' then stock_item_qty end) as initial_qty,
                         sum(case when stock_type = 'sale-production' then stock_item_qty end) as production_qty,
                         sum(case when stock_type = 'sale' then stock_item_qty end) as sale_qty,
-                        sum(case when stock_type = 'sale' and stock_entry_date between '{$soldDateRange[0]}' and '{$soldDateRange[1]}' then stock_item_qty end) as sale_qty_in_range,
                         sum(case when stock_type = 'sale' then stock_item_subtotal end) as sale_item_subtotal,
                         sum(case when stock_type = 'wastage-sale' then stock_item_qty end) as wastage_sale_qty,
                         sum(case when stock_type = 'sale-return' then stock_item_qty end) as sale_return_qty,
@@ -265,7 +267,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                         sum(initial_qty) as variable_initial_qty,
                         sum(production_qty) as variable_production_qty,
                         sum(sale_qty) as variable_sale_qty,
-                        sum(sale_qty_in_range) as variable_sale_qty_in_range,
                         sum(sale_item_subtotal) as variable_sale_item_subtotal,
                         sum(wastage_sale_qty) as variable_wastage_sale_qty,
                         sum(sale_return_qty) as variable_sale_return_qty,
@@ -287,7 +288,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
                             sum(case when stock_type = 'initial' then stock_item_qty end) as initial_qty,
                             sum(case when stock_type = 'sale-production' then stock_item_qty end) as production_qty,
                             sum(case when stock_type = 'sale' then stock_item_qty end) as sale_qty,
-                            sum(case when stock_type = 'sale' and stock_entry_date between '{$soldDateRange[0]}' and '{$soldDateRange[1]}' then stock_item_qty end) as sale_qty_in_range,
                             sum(case when stock_type = 'sale' then stock_item_subtotal end) as sale_item_subtotal,
                             sum(case when stock_type = 'wastage-sale' then stock_item_qty end) as wastage_sale_qty,
                             sum(case when stock_type = 'sale-return' then stock_item_qty end) as sale_return_qty,
@@ -351,7 +351,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
 
             if($value["hasChildProduct"] === "1") {
 
-                $allNestedData[] = "<a data-parent-product-id='{$value['pid']}' title='Show More Details' class='has-child-row'>{$value['product_name']}</a>";
+                $allNestedData[] = "<a data-parent-product-id='{$value['pid']}' title='Show More Details' class='has-child-row'>{$value['product_name']}</a>
+                <a target='_blank' title='View Comparison' style='padding-left: 5px; color: #a1a1a1;' href='". full_website_address() . "/reports/product-comparison/?pid=". $value["pid"] ."'><i class='fa fa-area-chart'></i></a>";
 
             } else {
                 
@@ -370,7 +371,6 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
             $allNestedData[] = $value["transfer_in_qty"];
             $allNestedData[] = $value["transfer_out_qty"];
             $allNestedData[] = $value["sale_qty"];
-            $allNestedData[] = $value["sale_qty_in_range"];
             $allNestedData[] = $value["sale_return_qty"];
             $allNestedData[] = $value["specimen_copy_qty"];
             $allNestedData[] = $value["specimen_copy_return_qty"];
@@ -381,6 +381,8 @@ if(isset($_GET['page']) and $_GET['page'] == "productReports") {
             $allNestedData[] = $value["stock_qty"] * $value["product_purchase_price"];
             $allNestedData[] = $value["total_purchased_amount"];
             $allNestedData[] = $value["total_sold_amount"];
+            $allNestedData[] = $value["sale_qty"] * $value["product_purchase_price"];
+            $allNestedData[] = $value["total_sold_amount"] - ( $value["sale_qty"] * $value["product_purchase_price"] );
 
             
             $allData[] = $allNestedData;

@@ -56,6 +56,21 @@
             $tariffCharges = array_sum($_POST["tariffChargesAmount"]);
             $wastageSalesPaidAmount = empty($_POST["wastageSalePaidAmount"]) ? 0 : $_POST["wastageSalePaidAmount"];
 
+            // Upload attachment
+            $wastageSaleAttachment = NULL;
+            if($_FILES["wastageSaleAttachment"]["size"] > 0) {
+
+                $upload_dir = "sales/wastage/". date("Y-m-d");
+                $wastageSaleAttachment = easyUpload($_FILES["wastageSaleAttachment"], $upload_dir, "", "all");
+
+                if(!isset($wastageSaleAttachment["success"])) {
+                    return _e($wastageSaleAttachment);
+                } else {
+                    $wastageSaleAttachment = $upload_dir . "/". $wastageSaleAttachment["fileName"];
+                }
+                
+            }
+
             $insertWastageSale = easyInsert(
                 "wastage_sale",
                 array(
@@ -65,7 +80,8 @@
                     "wastage_sale_tariff_charges"           => $tariffCharges,
                     "wastage_sale_tariff_charges_details"   => serialize($_POST["tariffChargesName"]),
                     "wastage_sale_paid_amount"              => $wastageSalesPaidAmount,
-                    "wastage_sale_note"                     => $_POST["wastageSaleNote"]
+                    "wastage_sale_note"                     => $_POST["wastageSaleNote"],
+                    "wastage_sale_attachment"               => $wastageSaleAttachment
                 ),
                 array(),
                 true
@@ -168,7 +184,7 @@
                                 <input type="text" name="wastageSaleDate" id="wastageSaleDate" value="<?php echo date("Y-m-d"); ?>" class="form-control pull-right datePicker" required>
                             </div>
                         </div>
-                        <div class="form-group col-sm-5 required">
+                        <div class="form-group col-sm-3 required">
                             <label for="wastageSaleCustomer" class="required"><?= __("Customer:"); ?></label>
                             <i data-toggle="tooltip" data-placement="right" title="From where the product is wastageSaleing from. Eg. Customers" class="fa fa-question-circle"></i>
                             <select name="wastageSaleCustomer" id="wastageSaleCustomer" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=customerList" style="width: 100%;" required>
@@ -179,6 +195,10 @@
                         <div class="form-group col-sm-3">
                             <label for="wastageSaleReference"><?= __("Reference:"); ?></label>
                             <input type="text" name="wastageSaleReference" id="wastageSaleReference" class="form-control">
+                        </div>
+                        <div class="form-group col-sm-3">
+                            <label for="wastageSaleAttachment"><?= __("Attachment:"); ?></label>
+                            <input type="file" name="wastageSaleAttachment" id="wastageSaleAttachment" class="form-control">
                         </div>
                         
 

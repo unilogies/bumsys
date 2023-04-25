@@ -110,6 +110,10 @@ if(isset($_GET['page']) and $_GET['page'] == "advanceCollection") {
 /************************** Add Advance Collection **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newAdvanceCollection") {
 
+    if( !current_user_can("income_advance_collection.Add") ) {
+        return _e("Sorry! you do not have permission to add advance collection");
+    }
+
     if(empty($_POST["advanceCollectionFrom"])) {
         return _e("Please select customer");
     } else if(empty($_POST["advanceCollectionAmount"])) {
@@ -183,6 +187,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newAdvanceCollection") {
 
 /*************************** Advance Collection List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "AdvanceCollectionList") {
+
+    if( !current_user_can("income_advance_collection.View") ) {
+        return _e("Sorry! you do not have permission to view advance collection list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -314,7 +322,7 @@ if(isset($_GET['page']) and $_GET['page'] == "AdvanceCollectionList") {
 /***************** Delete Advance Collection ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteAdvanceCollection") {
 
-    if(current_user_can("myshop_advance_collection.Delete") !== true) {
+    if(current_user_can("income_advance_collection.Delete") !== true) {
         echo '{
             "title": "Sorry!",
             "text": "'. __("you do not have permission to delete advance collection.") .'",
@@ -351,13 +359,18 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteAdvanceCollection") {
         echo '{
             "title": "'. __("The entry has been deleted successfully.") .'"
         }';
-    } 
+    }
+
 }
 
 
 
 /************************** Advance Collection **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editAdvanceCollection") {
+
+    if( !current_user_can("income_advance_collection.Edit") ) {
+        return _e("Sorry! you do not have permission to edit advance collection");
+    }
   
     // Include the modal header
     modal_header("Edit Advance Collection", full_website_address() . "/xhr/?module=incomes&page=updateAdvanceCollection");
@@ -483,6 +496,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editAdvanceCollection") {
 
 /************************** update Advance Collection **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateAdvanceCollection") {
+
+    if( !current_user_can("income_advance_collection.Edit") ) {
+        return _e("Sorry! you do not have permission to edit advance collection");
+    }
 
     if(empty($_POST["advanceCollectionFrom"])) {
         return _e("Please select customer");
@@ -741,6 +758,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addReceivedPayments") {
 /************************** Received Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "newReceivedPayments") {
 
+    if( !current_user_can("income_received_payments.Add") ) {
+        return _e("Sorry! you do not have permission to receive payment");
+    }
+
     if(empty($_POST["receivedPaymentsFrom"])) {
         return _e("Please select customer");
     } else if(empty($_POST["receivedPaymentsAmount"])) {
@@ -812,6 +833,10 @@ if(isset($_GET['page']) and $_GET['page'] == "newReceivedPayments") {
 
 /*************************** Receive Payment List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "receivedPaymentsList") {
+
+    if( !current_user_can("income_received_payments.View") ) {
+        return _e("Sorry! you do not have permission to view receive payment list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -987,6 +1012,10 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteReceivedPayment") {
 
 /************************** Edit Received Payments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editReceivedPayment") {
+
+    if( !current_user_can("income_received_payments.Edit") ) {
+        return _e("Sorry! you do not have permission to edit receive payment");
+    }
   
     // Include the modal header
     modal_header("Edit Received Payment", full_website_address() . "/xhr/?module=my-shop&page=updateReceivedPayments");
@@ -1109,6 +1138,10 @@ if(isset($_GET['page']) and $_GET['page'] == "editReceivedPayment") {
 
 /************************** updateReceivedPayments **********************/
 if(isset($_GET['page']) and $_GET['page'] == "updateReceivedPayments") {
+
+    if( !current_user_can("income_received_payments.Edit") ) {
+        return _e("Sorry! you do not have permission to edit receive payment");
+    }
 
     if(empty($_POST["receivedPaymentsFrom"])) {
         return _e("Please select customer");
@@ -1280,6 +1313,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewIncome") {
 
 /*************************** Accounts List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "incomeList") {
+
+    if( !current_user_can("incomes.View") ) {
+        return _e("Sorry! you do not have permission to view income list");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -1405,6 +1442,10 @@ if(isset($_GET['page']) and $_GET['page'] == "incomeList") {
 /************************** Edit Income **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editIncome") {
 
+    if( !current_user_can("incomes.Edit") ) {
+        return _e("Sorry! you do not have permission to edit income");
+    }
+
     // Include the modal header
     modal_header("Edit Income", full_website_address() . "/xhr/?module=incomes&page=UpdateIncome");
     $selectIncome = easySelect(
@@ -1425,7 +1466,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editIncome") {
     
     ?>
 
-      <div class="box-body">
+    <div class="box-body">
         
         <div class="form-group required">
             <label for="incomeDate"><?= __("Date:"); ?></label>
@@ -1466,8 +1507,8 @@ if(isset($_GET['page']) and $_GET['page'] == "editIncome") {
         </div>
         <input type="hidden" name="income_id" value="<?php echo safe_entities($_GET["id"]); ?>">
 
-      </div>
-      <!-- /Box body-->
+    </div>
+    <!-- /Box body-->
 
     <?php
   
@@ -1553,7 +1594,6 @@ if(isset($_GET['page']) and $_GET['page'] == "deleteIncome") {
         }';
     } 
 }
-
 
 
 

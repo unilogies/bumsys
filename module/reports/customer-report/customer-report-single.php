@@ -248,7 +248,7 @@ $last30DaysPurchaseDetails = easySelectD("
             sum(stock_item_qty) as stock_item_qty 
         from {$table_prefix}product_stock as product_stock
         left join {$table_prefix}sales on stock_sales_id = sales_id
-        where product_stock.is_trash = 0 and sales_customer_id = '{$cid}'
+        where product_stock.is_trash = 0 and stock_type = 'sale' and sales_customer_id = '{$cid}'
         group by stock_sales_id, stock_entry_date 
     ) as get_sales_data on stock_entry_date = db_date
     where db_date BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) and DATE(NOW())  
@@ -267,14 +267,14 @@ if($last30DaysPurchaseDetails != false) {
 
 // Purchase Data By Month
 $purchaseByMonth = easySelectD("
-  select 
-        MONTHNAME(db_date) as sales_month, 
-        if(stock_item_qty is null, 0, sum(stock_item_qty)) as sold_by_month 
-    from time_dimension
-  left join {$table_prefix}product_stock as product_stock on stock_entry_date = db_date
-  left join {$table_prefix}sales as sales on stock_sales_id = sales_id
-  where year(db_date) = year(CURRENT_DATE) and sales.is_trash = 0 and sales.sales_customer_id  = '{$cid}' and product_stock.is_trash = 0 
-  group by month(db_date)
+    select 
+            MONTHNAME(db_date) as sales_month, 
+            if(stock_item_qty is null, 0, sum(stock_item_qty)) as sold_by_month 
+        from time_dimension
+    left join {$table_prefix}product_stock as product_stock on stock_entry_date = db_date
+    left join {$table_prefix}sales as sales on stock_sales_id = sales_id
+    where year(db_date) = year(CURRENT_DATE) and sales.is_trash = 0 and sales.is_return = 0 and sales.sales_customer_id = '{$cid}' and product_stock.is_trash = 0 
+    group by month(db_date)
 ");
 
 $purchaseMonth = array();

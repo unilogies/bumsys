@@ -27,23 +27,24 @@
                     <th style="width: 120px;"><?php echo __("Category"); ?></th>
                     <th class="hideit" style="width: 110px;"><?php echo __("Edition"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Initial"); ?></th>
-                    <th class="no-sort countTotal"><?php echo __("Production"); ?></th>
+                    <th class="hideit no-sort countTotal"><?php echo __("Production"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Purchased"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Purchased Return"); ?></th>
-                    <th class="no-sort countTotal"><?php echo __("Stck.Trsfr.In"); ?></th>
-                    <th class="no-sort countTotal"><?php echo __("Stck.Trsfr.Out"); ?></th>
-                    <th class="countTotal"><?php echo __("Total Sold"); ?></th>
-                    <th class=""><?php echo __("Sold In"); ?></th>
+                    <th class="hideit no-sort countTotal"><?php echo __("Stck.Trsfr.In"); ?></th>
+                    <th class="hideit no-sort countTotal"><?php echo __("Stck.Trsfr.Out"); ?></th>
+                    <th class="defaultOrder"><?php echo __("Total Sold"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Sales Return"); ?></th>
                     <th class="hideit no-sort countTotal"><?php echo __("Specimen"); ?></th>
                     <th class="hideit no-sort countTotal"><?php echo __("Specimen Return"); ?></th>
-                    <th class="no-sort countTotal"><?php echo __("Expired"); ?></th>
+                    <th class="hideit no-sort countTotal"><?php echo __("Expired"); ?></th>
                     <th class="countTotal"><?php echo __("Stock"); ?></th>
                     <th class="no-sort"><?php echo __("Unit"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Stock Value"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Stock Balance"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Purchased"); ?></th>
                     <th class="no-sort countTotal"><?php echo __("Sold"); ?></th>
+                    <th class="no-sort countTotal"><?php echo __("Cost"); ?></th>
+                    <th class="no-sort highlightWithCountTotal"><?php echo __("Net Gain"); ?></th>
                   </tr>
                 </thead>
    
@@ -112,10 +113,11 @@
                     <th></th>
                     <th></th>
                     <th></th>
-                    <th></th>
                     <th class="no-print">
                         <textarea style="width: 65px; cursor:pointer; caret-color: transparent; white-space: break-spaces; font-size: 12px; padding: 0; overflow: hidden; resize: none;" name="soldInDateRange" id="soldInDateRange" class="btn btn-default"></textarea>
                     </th>
+                    <th></th>
+                    <th></th>
                     <th></th>
                     <th></th>
                     <th></th>
@@ -144,16 +146,21 @@
   <!-- /.content-wrapper -->
   
   <script>
-        BMS.FUNCTIONS.dateRangePickerPreDefined({
-            selector: "#soldInDateRange", 
-            ranges: {
-                        'Today': [moment(), moment()],
-                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                        'This Month': [moment().startOf('month'), moment().endOf('month')],
-                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                    }
-        });
+
+        // BMS.FUNCTIONS.dateRangePickerPreDefined({
+        //     selector: "#soldInDateRange", 
+        //     ranges: {
+        //                 'Today': [moment(), moment()],
+        //                 'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+        //                 'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+        //                 'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+        //                 'This Month': [moment().startOf('month'), moment().endOf('month')],
+        //                 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        //             }
+        // });
+
+        BMS.FUNCTIONS.dateRangePickerPreDefined({selector: "#soldInDateRange"});
+
         var DataTableAjaxPostUrl = "<?php echo full_website_address(); ?>/xhr/?module=reports&page=productReports";
+
   </script>

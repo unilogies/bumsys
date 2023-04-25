@@ -22,7 +22,7 @@
                 //print_r($activeModule);
 
                 // Active the module
-                if( isset($_GET["active"]) and !in_array($_GET["active"], $activeModule) ) {
+                if( isset($_GET["active"]) and basename($_GET["active"]) === "introductory.php" AND !in_array($_GET["active"], $activeModule) ) {
                         
                     $activeModule[] = $_GET["active"];
                     set_options("activeModule", serialize($activeModule));

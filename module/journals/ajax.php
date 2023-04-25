@@ -75,6 +75,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewJournal") {
 
 /*************************** Journal List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "journalList") {
+
+    if(current_user_can("journal.View") !== true) {
+        return _e("Sorry! you do not have permission to view journal.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -182,6 +186,10 @@ if(isset($_GET['page']) and $_GET['page'] == "journalList") {
 
 /************************** Add New Journal **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editJournal") {
+
+    if(current_user_can("journal.Edit") !== true) {
+        return _e("Sorry! you do not have permission to edit journal.");
+    }
 
     $selectJournal = easySelect(
         "journals",
@@ -419,6 +427,10 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewJournalRecord") {
 
 /*************************** Journal List ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "journalRecordList") {
+
+    if( !current_user_can("journal_records.View") ) {
+        return _e("Sorry! you have no permission to view journal records list.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -449,7 +461,18 @@ if(isset($_GET['page']) and $_GET['page'] == "journalRecordList") {
         $requestData['length'] = $totalRecords;
     }
  
-    if(!empty($requestData["search"]["value"])) {  // get data with search
+    if( !empty($requestData["search"]["value"]) or
+        !empty($requestData["columns"][1]['search']['value']) or
+        !empty($requestData["columns"][3]['search']['value']) or
+        !empty($requestData["columns"][4]['search']['value']) or
+        !empty($requestData["columns"][5]['search']['value'])
+    ) {  // get data with search
+
+        $dateRange[0] = "";
+        $dateRange[1] = "";
+        if(!empty($requestData["columns"][1]['search']['value'])) {
+            $dateRange = explode(" - ", safe_input($requestData["columns"][1]['search']['value']));
+        }
         
         $getData = easySelect(
             "journal_records as journal_records",
@@ -460,9 +483,10 @@ if(isset($_GET['page']) and $_GET['page'] == "journalRecordList") {
             ),
             array (
                 "journal_records.is_trash = 0", 
-                " and journals_name LIKE" => $requestData['search']['value'] . "%",
-                " OR journal_records_reference LIKE" => $requestData['search']['value'] . "%",
-                " OR journal_records_narration LIKE" => $requestData['search']['value'] . "%"
+                " AND journal_records_journal_id"       => $requestData["columns"][3]['search']['value'],
+                " AND journal_records_accounts"         => $requestData["columns"][4]['search']['value'],
+                " AND journal_records_payments_type"    => $requestData["columns"][5]['search']['value'],
+                " AND date(journal_records_datetime) BETWEEN '{$dateRange[0]}' and '{$dateRange[1]}'"
             ),
             array (
                 $columns[$requestData['order'][0]['column']] => $requestData['order'][0]['dir']
@@ -542,6 +566,10 @@ if(isset($_GET['page']) and $_GET['page'] == "journalRecordList") {
 
 /************************** Add New Journal **********************/
 if(isset($_GET['page']) and $_GET['page'] == "editJournalRecord") {
+
+    if( !current_user_can("journal_records.Edit") ) {
+        return _e("Sorry! you have no permission to edit journal records.");
+    }
 
     // Include the modal header
     modal_header("Edit Journal Record", full_website_address() . "/xhr/?module=journals&page=updateJournalRecord");
@@ -691,7 +719,11 @@ if(isset($_GET['page']) and $_GET['page'] == "updateJournalRecord") {
 /***************** Delete Journal Records ****************/
 if(isset($_GET['page']) and $_GET['page'] == "deleteJournalRecords") {
 
-    // Select accounts id of delected journal records
+    if( !current_user_can("journal_records.Delete") ) {
+        return _e("Sorry! you have no permission to delete journal records.");
+    }
+
+    // Select accounts id of delected journal records 
     $selectAccountId = easySelect(
         "journal_records",
         "journal_records_accounts",

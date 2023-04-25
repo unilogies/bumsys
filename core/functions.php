@@ -640,7 +640,7 @@ function current_user_can_visit_this_page() {
  * @param array		$duplicateCheck	Optional. For checking the data if exists on the DB. The array is same as easySelect() function's $where.
  * @param bool      @extraInfo      Optional. If needs last_insert_id the set it true. Default is false
  * 
- * @return string|bool	Return true if data is successfully inserted into the table, otherwise it will throw the mysql error.
+ * @return string|bool|array	Return true if data is successfully inserted into the table, otherwise it will throw the mysql error.
  */
 function easyInsert(
     string $table,
@@ -650,7 +650,8 @@ function easyInsert(
     ) {
 
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
+    global $conn;           // MySQL connection variable.
+    global $get_all_db_error;	// Error variable
     $fields = "";			// The field variable will store all table field.
     $fieldsValue = "";		// The fieldValue variable will sotre all filed value
 
@@ -729,7 +730,7 @@ function easyInsert(
         // create_log($sqlQuery, debug_backtrace());
 
         // Keep the transaction error record
-        $conn->get_all_error[] = $conn->error;
+        $get_all_db_error[] = $conn->error;
 
         // return error msg
         return $conn->error;
@@ -764,7 +765,7 @@ function easyInsert(
  * @param array 	$orderBy	Optional. How the data will show. ASC OR DESC
  * @param array     $limit      Optional. Must be in numeric value. 
  * 
- * @return array/bool			Return all data with array format. [count] return number of records and [data] retruns all records. Return error massage if the query is wrong. Return False if there is no data.
+ * @return array|bool|string			Return all data with array format. [count] return number of records and [data] retruns all records. Return error massage if the query is wrong. Return False if there is no data.
  */
 function easySelect(
     string $table, 
@@ -776,8 +777,9 @@ function easySelect(
     ) {
 
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
-    $dataFromDB = [];
+    global $conn;           // MySQL connection variable.
+    global $get_all_db_error;	// Error variable
+
 
     // if field empty then input a star (*)
     if(empty($field)) {
@@ -894,19 +896,13 @@ function easySelect(
         create_log($conn->error, debug_backtrace());
 
         // Keep the transaction error record
-        $conn->get_all_error[] = $conn->error;
+        $get_all_db_error[] = $conn->error;
 
         return $conn->error; // Return the error
     }
 
     // Check if there is more then Zero (0) result.
     if($getResult->num_rows > 0) {
-        
-
-        // $countTotalFilteredRow = "SELECT count(*) as totalFilteredRow FROM {$table_prefix}{$table}";
-        // $countTotalFilteredRow .= " {$joinClues}";
-        // $countTotalFilteredRow .= empty($whereClause) ? "" : " WHERE {$whereClause}";
-        // $countTotalFilteredRow = $conn->query($countTotalFilteredRow)->fetch_all(true)[0]["totalFilteredRow"];
 
         $countTotalFilteredRow = $conn->query("SELECT found_rows() as totalFilteredRow;")->fetch_all(true)[0]["totalFilteredRow"];
 
@@ -936,8 +932,9 @@ function easySelect(
 function easySelectA(array $query) {
 
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
-    $dataFromDB = [];
+    global $conn;           // MySQL connection variable.
+    global $get_all_db_error;	// Error variable
+
     $table = $fields = $join = $where = $groupby = $orderBy = $limit = "";
 
     // Lower case all key name.
@@ -1108,7 +1105,7 @@ function easySelectA(array $query) {
         create_log($conn->error, debug_backtrace());
 
         // Keep the transaction error record
-        $conn->get_all_error[] = $conn->error;
+        $get_all_db_error[] = $conn->error;
 
         return $conn->error; // Return the error
 
@@ -1145,14 +1142,15 @@ function easySelectA(array $query) {
  * 
  * @param $query    The query which will run
  * 
- * @return array/bool			Return all data with array format. [count] return number of records and [data] retruns all records. Return error massage if the query is wrong. Return False if there is no data.
+ * @return array|bool			Return all data with array format. [count] return number of records and [data] retruns all records. Return error massage if the query is wrong. Return False if there is no data.
  * 
  */
 function easySelectD($query) {
 
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
-    $dataFromDB = [];
+    global $conn;		    // MySQL connection variable.
+    global $get_all_db_error;	// Error variable
+
 
     /* echo $query;
     exit(); */
@@ -1166,7 +1164,7 @@ function easySelectD($query) {
         create_log($conn->error, debug_backtrace());
 
         // Keep the transaction error record
-        $conn->get_all_error[] = $conn->error;
+        $get_all_db_error[] = $conn->error;
 
         return $conn->error; // Return the error
     }
@@ -1190,7 +1188,8 @@ function easySelectD($query) {
 
 function runQuery($query){
    
-    global $conn;			// MySQL connection variable.
+    global $conn;		// MySQL connection variable.
+    global $get_all_db_error;	// Error variable
 
     $runQuery = $conn->query($query);
 
@@ -1201,7 +1200,7 @@ function runQuery($query){
         create_log($conn->error, debug_backtrace());
 
         // Keep the transaction error record
-        $conn->get_all_error[] = $conn->error;
+        $get_all_db_error[] = $conn->error;
 
         return $conn->error; // Return the error
 
@@ -1228,8 +1227,9 @@ function easyDelete(
     ) {
 
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
-
+    global $conn;   		// MySQL connection variable.
+    global $get_all_db_error;	// Error variable
+    
 
     // Check if the data exists or not
     $DataToByDeleted = easySelect(
@@ -1263,7 +1263,7 @@ function easyDelete(
         create_log($conn->error, debug_backtrace());
 
         // Keep the transaction error record
-        $conn->get_all_error[] = $conn->error;
+        $get_all_db_error[] = $conn->error;
 
         return $conn->error;
 
@@ -1288,7 +1288,8 @@ function easyPermDelete(
     ) {
 
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
+    global $conn;       	// MySQL connection variable.
+    global $get_all_db_error;	// Error variable
 
     // Check if the data exists or not
     $DataToByDeleted = easySelect(
@@ -1341,7 +1342,8 @@ function easyUpdate(
     ) {
 
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
+    global $conn;   		// MySQL connection variable.
+    global $get_all_db_error;	// Error variable
 
     // Check if the data exists or not
     if(easySelect(
@@ -1413,7 +1415,7 @@ function easyUpdate(
         create_log($conn->error, debug_backtrace());
 
         // Keep the transaction error record
-        $conn->get_all_error[] = $conn->error;
+        $get_all_db_error[] = $conn->error;
 
         return $conn->error;
 
@@ -1431,7 +1433,8 @@ function easyUpdate(
  */
 function save_query($query) {
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
+    global $conn;   		// MySQL connection variable.
+
     $query = json_encode($query);
     $conn->query("INSERT INTO {$table_prefix}latest_queries (query_value) VALUES ($query)");
 
@@ -1458,6 +1461,48 @@ function save_deleted_date($table, $data) {
 
 }
 
+
+
+function isValidFile( array $file, string $type) {
+
+
+    global $_SETTINGS;
+
+    $mimeType = strtolower($file["type"]);
+    $extension = explode(".", $file["name"]);
+    $extension = end($extension);
+    
+    $maxUploadSize = $_SETTINGS["MAX_UPLOAD_SIZE"] * 1024 * 1024;
+
+    if ($maxUploadSize < $file["size"]) {
+
+        return false;
+
+    }
+
+    $validFileForUpload = [];
+    switch($type) {
+        case "image":       $validFileForUpload = $_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"]; break;
+        case "document":    $validFileForUpload = $_SETTINGS["VALID_DOCUMENT_TYPE_FOR_UPLOAD"]; break;
+        case "video":       $validFileForUpload = $_SETTINGS["VALID_VIDEO_TYPE_FOR_UPLOAD"]; break;
+        case "audio":       $validFileForUpload = $_SETTINGS["VALID_AUDIO_TYPE_FOR_UPLOAD"]; break;
+        case "program":     $validFileForUpload = $_SETTINGS["VALID_PROGRAM_TYPE_FOR_UPLOAD"]; break;
+        case 'all':         $validFileForUpload = array_merge($_SETTINGS["VALID_IMAGE_TYPE_FOR_UPLOAD"], $_SETTINGS["VALID_DOCUMENT_TYPE_FOR_UPLOAD"]); break;
+    }
+
+    // Validate both file extension and mime type
+    if( isset( $validFileForUpload[$extension] ) AND in_array( $mimeType, $validFileForUpload[$extension] )  ) {
+
+       return true;
+
+    } else {
+
+        return false;
+
+    }
+    
+}
+
 /**
  * @since 0.1
  * 
@@ -1466,7 +1511,6 @@ function save_deleted_date($table, $data) {
  * @param string    $location       Optional. Where the uploaded file has stored. Default is db and return an blob string
  * 
  */
-
 function easyUpload( 
     array $file, 
     string $location="db",
@@ -1560,6 +1604,9 @@ function easyUpload(
     }
     
 }
+
+
+
 
 function easyUpload_back(
     string $fileInputName, 
@@ -2080,7 +2127,8 @@ function accounts_balance(int $accounts_id) {
 
  function add_login_info(int $user_id) {
     global $table_prefix;	// table prefix;
-    global $conn;			// MySQL connection variable.
+    global $conn;
+global $get_all_db_error;			// MySQL connection variable.
 
     $user_ip = safe_input(get_ipaddr());
     $user_aggent = safe_input($_SERVER['HTTP_USER_AGENT']);

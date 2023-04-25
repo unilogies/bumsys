@@ -2,6 +2,10 @@
 
 /*************************** Employee Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
+
+    if( !current_user_can("employee_ledger.View") ) {
+        return _e("Sorry! You do not have permission to view employee ledger.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -130,6 +134,10 @@ if(isset($_GET['page']) and $_GET['page'] == "employeeLedger") {
 
 /*************************** Accounts Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
+
+    if( !current_user_can("accounts_ledger.View") ) {
+        return _e("Sorry! You do not have permission to view accounts ledger.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -385,7 +393,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 					received_payments_datetime,
 					received_payments_from,
 					'',
-					combine_description( concat(received_payments_type, ' from ', customer_name, ', ', upazila_name, ', ', district_name), received_payments_details),
+					combine_description( concat(received_payments_type, ' from ', customer_name, ', ', COALESCE(upazila_name, ''), ', ', COALESCE(district_name, '') ), received_payments_details),
 					received_payments_amount,
 					0
 				from {$table_prefix}received_payments as received_payments
@@ -476,6 +484,10 @@ if(isset($_GET['page']) and $_GET['page'] == "accountsLedger") {
 
 /*************************** Journal Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
+
+    if( !current_user_can("journal_ledger.View") ) {
+        return _e("Sorry! You do not have permission to view journal ledger.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -578,12 +590,17 @@ if(isset($_GET['page']) and $_GET['page'] == "journalLedger") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
+
 }
 
 
 
 /*************************** Customer Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
+
+    if( !current_user_can("customer_ledger.View") ) {
+        return _e("Sorry! You do not have permission to view customer ledger.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -753,6 +770,10 @@ if(isset($_GET['page']) and $_GET['page'] == "customerLedger") {
 
 /*************************** Company Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
+
+    if( !current_user_can("company_ledger.View") ) {
+        return _e("Sorry! You do not have permission to view company ledger.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -944,6 +965,10 @@ if(isset($_GET['page']) and $_GET['page'] == "companyLedger") {
 
 /*************************** Employee Ledger ***********************/
 if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
+
+    if( !current_user_can("advance_payment_ledger.View") ) {
+        return _e("Sorry! You do not have permission to view advance payment ledger.");
+    }
     
     $requestData = $_REQUEST;
     $getData = [];
@@ -960,11 +985,12 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
 		$previous_balance = easySelectD("
 			SELECT 
 				@balance := (
-						if(total_advance_payment_before_filtered_date is null, 0, total_advance_payment_before_filtered_date)
+
+                    if(total_payment_before_filtered_date is null, 0, total_payment_before_filtered_date) +
+                    if(total_return_before_filtered_date is null, 0, total_return_before_filtered_date)
 						
 				) - (
-						if(total_payment_before_filtered_date is null, 0, total_payment_before_filtered_date) +
-						if(total_return_before_filtered_date is null, 0, total_return_before_filtered_date)
+                    if(total_advance_payment_before_filtered_date is null, 0, total_advance_payment_before_filtered_date)
 				)
 			FROM {$table_prefix}employees as employees
 			left join (select
@@ -1002,8 +1028,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
                     advance_payment_pay_to as empl_id,
                     advance_payment_date as ledger_date,
                     combine_description( 'Advance Payment', advance_payment_description) as description,
-                    0 as debit,
-                    advance_payment_amount as credit
+                    advance_payment_amount as debit,
+                    0 as credit
                 from {$table_prefix}advance_payments
                 where is_trash = 0 and advance_payment_date between '{$dateRange[0]}' and '{$dateRange[1]}' group by advance_payment_id
 				UNION ALL
@@ -1012,8 +1038,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
 					payment_to_employee as empl_id,
 					payment_date as ledger_date,
 					concat('Adjusted on ', item_description),
-					payment_amount as debit,
-					0 as credit
+					0 as debit,
+					payment_amount as credit
 				from {$table_prefix}payments as payment
 				left join ( select
 						payment_items_category_id,
@@ -1031,8 +1057,8 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
                     payments_return_emp_id as empl_id,
                     payments_return_date as ledger_date,
                     combine_description( 'Payment Return', payments_return_description) as description,
-                    payments_return_amount as debit,
-                    0 as credit
+                    0 as debit,
+                    payments_return_amount as credit
                 from {$table_prefix}payments_return
                 where is_trash = 0 and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' group by payments_return_id
 			) as get_data
@@ -1071,6 +1097,7 @@ if(isset($_GET['page']) and $_GET['page'] == "advancePaymentLedger") {
     
     // Encode in Json Formate
     echo json_encode($jsonData); 
+    
 }
 
 ?>

@@ -39,13 +39,15 @@
                 <thead>
                   <tr>
                     <th></th>
-                    <th><?= __("Date"); ?></th>
-                    <th><?= __("Referense"); ?></th>
+                    <th><?= __("Entry Date"); ?></th>
+                    <th><?= __("Bill Date"); ?></th>
+                    <th><?= __("Reference"); ?></th>
                     <th><?= __("Customer"); ?></th>
                     <th class="countTotal text-right"><?= __("Grand Total"); ?></th>
                     <th class="countTotal text-right"><?= __("Paid Amount"); ?></th>
                     <th class="countTotal text-right"><?= __("Due"); ?></th>
                     <th><?= __("Details"); ?></th>
+                    <th><?= __("Attachment"); ?></th>
                     <th class="text-center no-sort no-print" width="100px"><?= __("Action"); ?></th>
                   </tr>
                 </thead>
@@ -53,13 +55,15 @@
                 <tfoot>
                   <tr>
                     <th></th>
-                    <th><?= __("Data"); ?></th>
-                    <th><?= __("Referense"); ?></th>
+                    <th><?= __("Entry Date"); ?></th>
+                    <th><?= __("Bill Date"); ?></th>
+                    <th><?= __("Reference"); ?></th>
                     <th><?= __("Customer"); ?></th>
                     <th><?= __("Grand Total"); ?></th>
                     <th></th>
                     <th></th>
                     <th><?= __("Details"); ?></th>
+                    <th><?= __("Attachment"); ?></th>
                     <th><?= __("Action"); ?></th>
                   </tr>
                 </tfoot>

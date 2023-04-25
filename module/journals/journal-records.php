@@ -41,11 +41,33 @@
                 <tfoot>
                   <tr>
                     <th></th>
-                    <th><?= __("Date"); ?></th>
+                    <th class="no-print">
+                        <input style="width: 130px;" type="text" placeholder="<?= __("Select Date"); ?>" id="journalRecordEntryDate" class="form-control" autocomplete="off">
+                    </th>
                     <th><?= __("Reference"); ?></th>
-                    <th><?= __("Journal Name"); ?></th>
-                    <th><?= __("Accounts"); ?></th>
-                    <th><?= __("Payment type"); ?></th>
+                    <th>
+                        <select id="journalRecordJournalId" class="form-control select2Ajax" select2-ajax-url="<?php echo full_website_address() ?>/info/?module=select2&page=journalList" style="width: 100%;" required>
+                            <option value=""><?= __("Select Journal"); ?>....</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select style="width: 180px" id="journalRecordPaymentAccounts" class="form-control select2" style="width: 100%">
+                            <option value="">All Accounts...</option>
+                            <?php
+                                $selectAccounts = easySelect("accounts", "accounts_id, accounts_name", array(), array("is_trash" => 0));
+                                foreach($selectAccounts["data"] as $accounts) {
+                                    echo "<option {$selected} value='{$accounts['accounts_id']}'>{$accounts['accounts_name']}</option>";
+                                }
+                            ?>
+                        </select>
+                    </th>
+                    <th>
+                        <select style="width: 180px" id="journalRecordPaymentType" class="form-control select2" style="width: 100%">
+                            <option value="">All Type</option>
+                            <option value="Incoming">Incoming</option>
+                            <option value="Outgoing">Outgoing</option>
+                        </select>
+                    </th>
                     <th><?= __("Amount"); ?></th>
                     <th><?= __("Narration"); ?></th>
                     <th><?= __("Action"); ?></th>
@@ -69,4 +91,7 @@
     
     var scrollY = "";
     var DataTableAjaxPostUrl = "<?php echo full_website_address(); ?>/xhr/?module=journals&page=journalRecordList";
+
+    BMS.FUNCTIONS.dateRangePickerPreDefined({selector: "#journalRecordEntryDate"});
+
   </script>

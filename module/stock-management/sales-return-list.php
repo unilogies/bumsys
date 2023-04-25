@@ -96,6 +96,7 @@
     /* Column Defference target column of data table */
     var DataTableAjaxPostUrl = "<?php echo full_website_address(); ?>/xhr/?module=stock-management&page=ProductReturnList";
 
-    BMS.FUNCTIONS.datePicker({selector: "#salesDate"});
+
+    BMS.FUNCTIONS.dateRangePickerPreDefined({selector: "#salesDate"});
 
   </script>

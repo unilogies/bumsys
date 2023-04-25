@@ -12,7 +12,7 @@
 </IfModule>
 
 # Allow Javascript, css and images
-<FilesMatch "\.(js|css|jpg|jpeg|png|woff|woff2|ttf|ico|mp3|sql)$">
+<FilesMatch "\.(js|css|jpg|jpeg|png|woff|woff2|ttf|ico|mp3|sql|docx|doc|pdf|xls|xlsx|ppt|pptx)$">
 	<IfModule !mod_authz_core.c>
 		Allow from all
 	</IfModule>
