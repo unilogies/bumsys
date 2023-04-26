@@ -1572,16 +1572,21 @@ function easyUpload(
                 return "Error creating directory";
             }
 
+            // Checking if the file location is inside the DIR_UPLOAD directory
+            if( strpos( realpath($uploadDir), realpath(DIR_UPLOAD) ) !== 0 ) {
+                return "Can not upload the file";
+            }
+
             // If newFileName is not empty then change the file name by given
-            $file_name = rand().$file["name"];
+            $file_name = basename(rand().$file["name"]);
             if(!empty($newFileName)) {
 
-                $file_name = $newFileName . "." . $extension;
+                $file_name = basename($newFileName . "." . $extension);
 
             }
 
 
-            if(move_uploaded_file($file["tmp_name"], $uploadDir ."/" . $file_name )) {
+            if( move_uploaded_file($file["tmp_name"], $uploadDir ."/" . $file_name )) {
 
                 return array (
                     "success"      => true,
