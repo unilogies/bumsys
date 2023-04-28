@@ -1565,6 +1565,16 @@ function easyUpload(
             );
 
         } else {
+
+            // Remove path traversal characters
+            $location = str_replace(
+                array(
+                    "./",
+                    "../"
+                ),
+                "",
+                $location
+            );
             
             $uploadDir = DIR_UPLOAD . $location;
 

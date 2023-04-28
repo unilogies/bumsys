@@ -777,7 +777,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getEmpSalaryData") {
                 loan_ids, sum(loan_installment_paying_amount) as loan_installment_paid_amount 
             from {$table_prefix}loan_installment where is_trash = 0 group by loan_ids
         ) as loan_installment on loan_id = loan_ids
-        where emp_id = {$emp_id}
+        where emp_id = '{$emp_id}'
         order by loan_id 
         desc limit 1"
     )["data"][0];
@@ -824,7 +824,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getCustomerPaymentInfo") {
                 sum(payments_return_amount) as payments_return_amount
             from {$table_prefix}payments_return where is_trash = 0 and payments_return_type = 'Outgoing' group by payments_return_customer_id
         ) as payment_return on customer_id = payments_return_customer_id
-        where customer_id = {$customer_id}"
+        where customer_id = '{$customer_id}'"
     )["data"][0];
 
     echo json_encode($customerPaymentsData);
@@ -896,7 +896,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getCustomerStatementInfo") {
             where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) between '{$dateRange[0]}' and '{$dateRange[1]}' 
             group by payments_return_customer_id
         ) as payment_return on customer_id = payments_return_customer_id
-        where customer_id = {$customer_id}"
+        where customer_id = '{$customer_id}'"
     )["data"][0];
 
     $customerPaymentsData["previous_balance"] = easySelectD("
@@ -935,7 +935,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getCustomerStatementInfo") {
                 where is_trash = 0 and payments_return_type = 'Outgoing' and date(payments_return_date) < '{$dateRange[0]}'
                 group by payments_return_customer_id
             ) as payment_return on customer_id = payments_return_customer_id
-			where customer_id = {$customer_id}
+			where customer_id = '{$customer_id}'
 	")["data"][0]["previous_balance"];
 
     echo json_encode($customerPaymentsData);
@@ -962,18 +962,18 @@ if(isset($_GET['page']) and $_GET['page'] == "getEmpLoanLoanData") {
         left join (select 
                 loan_ids, 
                 1 as thisMonthInstallmentPayingStatus
-            from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
+            from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = '{$month}' and year(loan_installment_date) = '{$year}' group by loan_ids 
         ) as thisMonthStatus on loan_id = thisMonthStatus.loan_ids
-        where loan.is_trash = 0 and loan_borrower = {$emp_id} and loan_installment_starting_from <= '{$year}-{$month}-01'
+        where loan.is_trash = 0 and loan_borrower = '{$emp_id}' and loan_installment_starting_from <= '{$year}-{$month}-01'
         and ( loan_paid_amount is null or loan_paid_amount < loan_amount)" 
         // loan_paid_amount can be NULL on left join if there is no recrods, for that the is null check.
-        // We can also use HAVING cluese without using is null check. But it will raise a error with full_group_by mode.
+        // We can also use HAVING clause without using is null check. But it will raise a error with full_group_by mode.
     );
 
     $selectSalary = easySelectA(array(
         "table"     => "employees",
         "fields"    => "round(emp_salary, 2) as emp_salary",
-        "where"     => array("emp_id = {$emp_id}")
+        "where"     => array("emp_id = '{$emp_id}'")
     ))["data"][0]["emp_salary"];
 
     if(!isset($getLoanDetails["data"])) {
@@ -1042,7 +1042,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getEmployeeAdvancePaymentsData") {
                 sum(payments_return_amount) as payments_return_amount_sum 
             from {$table_prefix}payments_return where is_trash = 0 group by payments_return_emp_id 
         ) as get_advance_return on payments_return_emp_id = emp_id
-        where emp_id = {$emp_id}"
+        where emp_id = '{$emp_id}'"
     )["data"][0];
     
     echo json_encode($getEmpAdvancePaymentData);
@@ -1089,7 +1089,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getCompanyDueBillDetails") {
                 sum(CASE WHEN is_return = 1 then purchase_due end) as purchase_return_grand_total
             from {$table_prefix}purchases where is_trash = 0 group by purchase_company_id
         ) as purchaseBill on purchaseBill.purchase_company_id = company_id
-        where company_id = {$company_id}"
+        where company_id = '{$company_id}'"
     )["data"][0];
     
     echo json_encode($getEmpAdvancePaymentData);
@@ -1369,7 +1369,7 @@ if(isset($_GET['page']) and $_GET['page'] == "getAccountsInfo") {
 
 if(isset($_GET['page']) and $_GET['page'] == "customerPurchaseList") {
 
-    $invoiceSearch = ( isset($_GET["s"]) and !empty($_GET["s"]) ) ? "and sales_reference like '%{$_GET["s"]}%'" : "";
+    $invoiceSearch = ( isset($_GET["s"]) and !empty($_GET["s"]) ) ? "and sales_reference like '%". safe_input($_GET["s"]) ."%'" : "";
 
     $selectSales = easySelectA(array(
         "table"     => "sales",
@@ -1542,10 +1542,10 @@ if(isset($_GET['page']) and $_GET['page'] == "productVisualList") {
 
     $productCategoryFilter = ( isset($_GET["catId"]) and !empty($_GET["catId"]) ) ? $_GET["catId"] : "";
     $productBrandFilter = ( isset($_GET["brand"]) and !empty($_GET["brand"]) ) ? $_GET["brand"] : "";
-    $productEditionFilter = ( isset($_GET["edition"]) and !empty($_GET["edition"]) ) ? " AND product.product_edition = '{$_GET["edition"]}'" : " AND product_type != 'Child' ";
+    $productEditionFilter = ( isset($_GET["edition"]) and !empty($_GET["edition"]) ) ? " AND product.product_edition = '". safe_input($_GET["edition"]) ."'" : " AND product_type != 'Child' ";
     $productGenericFilter = ( isset($_GET["generic"]) and !empty($_GET["generic"]) ) ? $_GET["generic"] : "";
     $productAuthorFilter = ( isset($_GET["author"]) and !empty($_GET["author"]) ) ? $_GET["author"] : "";
-    $productTerms = ( isset($_GET["terms"]) and !empty($_GET["terms"]) ) ? " AND product_name like '%{$_GET["terms"]}%'" : "";
+    $productTerms = ( isset($_GET["terms"]) and !empty($_GET["terms"]) ) ? " AND product_name like '%". safe_input($_GET["terms"]) ."%'" : "";
     $productSort = ( isset($_GET["sort"]) and !empty($_GET["sort"]) ) ? $_GET["sort"] : "";
 
     $oderBy = array(
@@ -1692,7 +1692,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productVisualList") {
 if(isset($_GET['page']) and $_GET['page'] == "getChildProductData") {
 
 
-    $warehouse_filter = empty($_GET["wid"]) ? "" : " = " . safe_input($_GET["wid"]);
+    $warehouse_filter = empty($_GET["wid"]) ? "" : " = '" . safe_input($_GET["wid"]) . "'";
 
     $getChildProductData = easySelectA(array(
         "table"     => "products as product",

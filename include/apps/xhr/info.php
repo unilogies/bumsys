@@ -12,9 +12,23 @@ if(is_login() !== true) {
 
 
 if(isset($_GET['module'])) {
+
+    $module = $_GET['module'];
+
+    // Remove directory browsing elements
+    $module = str_replace(
+        array(
+            "./",
+            "../",
+            ".",
+            ".."
+        ),
+        "",
+        $module
+    );
     
     // Biuld the page location
-    $ajaxModulePage = DIR_BASE . "core/ajax/ajax_" . $_GET['module'] . ".php";
+    $ajaxModulePage = DIR_BASE . "core/ajax/ajax_" . $module . ".php";
 
     // Check if the ajax page is exists
     if(file_exists($ajaxModulePage)) {

@@ -1014,7 +1014,8 @@ if(isset($_GET['page']) and $_GET['page'] == "batchList") {
         "table"   => "product_batches",
         "fields"  => "batch_id, batch_number",
         "where"   => array(
-            "is_trash = 0 and date(batch_expiry_date) >= curdate() and batch_number LIKE '". $search ."%'",
+            "is_trash = 0 and date(batch_expiry_date) >= curdate()",
+            " and batch_number LIKE " => "{$search}%",
             " and product_id"   => $product_id
         ),
         "limit"   => array (

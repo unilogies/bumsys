@@ -863,7 +863,7 @@ BMS.FUNCTIONS = {
         var noResults = "";
         if ( $(selector).attr("select2-create-new-url") === undefined  ) {
 
-            noResults = "<?php echo __('Nothing found')?>";
+            noResults = "<?php echo __('Nothing found'); ?>";
 
         } else {
 
@@ -907,12 +907,22 @@ BMS.FUNCTIONS = {
                 },
                 cache: true
             },
+            templateSelection: function(state) {
+
+                if(!state.id) {
+                    return state.text;
+                } else {
+                    return $("<div>").text(state.text).html();
+                }
+
+                // console.log(state.text);
+            },
             templateResult: function(state) {
                 
                 if(!state.id) {
                     return state.text;
                 }
-            
+        
                 
                 if (typeof state.text === "object" ) {
 
@@ -940,7 +950,8 @@ BMS.FUNCTIONS = {
 
                 } else {
 
-                    return state.text;
+                    // return state.text;
+                    return $("<div>").text(state.text).html();
 
                 }
 

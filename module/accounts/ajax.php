@@ -1525,6 +1525,11 @@ if(isset($_GET['page']) and $_GET['page'] == "payableReport") {
     }
 
 
+    $orderby = "ASC";
+    if($requestData['order'][0]['dir'] === "DESC") {
+        $orderby = "DESC";
+    }
+
          
     $getData = easySelectD(
         "select 
@@ -1558,8 +1563,8 @@ if(isset($_GET['page']) and $_GET['page'] == "payableReport") {
         ) as payment_adjustment on pa_company = company_id
 
         where company.is_trash = 0 and company_name like '{$search}%'
-        group by company_id order by company_name ". safe_input($requestData['order'][0]['dir']) ."
-        LIMIT ". safe_input($requestData['start']) .", ". safe_input($requestData['length']) ."
+        group by company_id order by company_name {$orderby}
+        LIMIT ". intval(safe_input($requestData['start'])) .", ". intval(safe_input($requestData['length'])) ."
         "
     );
 

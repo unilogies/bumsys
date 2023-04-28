@@ -1,6 +1,6 @@
 <?php
 
-// Remove directory browsing elements
+// Remove path traversal characters
 $pageSlug = str_replace(
     array(
         "./",

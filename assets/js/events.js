@@ -1844,7 +1844,7 @@ $(document).on('dblclick', 'iledit', function (event) {
                         // Display changed items
                         if (type === 'select2' || type === 'select') {
 
-                            $thistd.html(`<iledit data-val='` + $(that).val() + `'>` + $("option:selected", that).text() + `</iledit>`);
+                            $thistd.html(`<iledit data-val='` + $(that).val() + `'>` + $("option:selected", that).html() + `</iledit>`);
 
                         } else {
 
@@ -1863,7 +1863,9 @@ $(document).on('dblclick', 'iledit', function (event) {
             // Display data items if not changed
             if (type === 'select2' || type === 'select') {
 
-                $thistd.html(`<iledit data-val='` + $(that).val() + `'>` + $("option:selected", that).text() + `</iledit>`);
+                console.log( $("option:selected", that).html() );
+
+                $thistd.html(`<iledit data-val='` + $(that).val() + `'>` + $("option:selected", that).html() + `</iledit>`);
 
             } else {
 

@@ -10,10 +10,10 @@
     <link rel="shortcut icon" href="<?php echo full_website_address() . "/assets/images/logo.png" ?>" type="image/x-icon">
 
     <!-- Include all CSS -->
-    <link rel="stylesheet" href="<?php echo full_website_address(); ?>/css/?v=2.1.1">
+    <link rel="stylesheet" href="<?php echo full_website_address(); ?>/css/?v=2.2.0">
 
     <!-- Include all Header JS -->
-    <script src="<?php echo full_website_address(); ?>/js/?q=head&v=2.1.1"></script>
+    <script src="<?php echo full_website_address(); ?>/js/?q=head&v=2.2.0"></script>
 
 
     <script>
