@@ -1876,7 +1876,7 @@ function getCustomerPaymentInfo_back(int $customer_id) {
                 sum(received_payments_bonus) as received_payments_bonus 
             from {$table_prefix}received_payments where is_trash = 0 group by received_payments_from
         ) as {$table_prefix}received_payments on customer_id = received_payments_from
-        where customer_id = {$customer_id}"
+        where customer_id = '{$customer_id}'"
     );
 
 }
@@ -2042,7 +2042,7 @@ function updateAccountBalance(int $accounts_id) {
             where is_trash = 0  
             group by journal_records_accounts 
         ) as journal_incoming_records on journal_incoming_records.journal_records_accounts = accounts_id
-        where accounts_id = {$accounts_id}"
+        where accounts_id = '{$accounts_id}'"
     )["data"][0];
 
 
@@ -2090,7 +2090,7 @@ function getEmployeePayableAmount(int $emp_id, string $salary_type) {
         from {$table_prefix}employees
         left join ( select salary_emp_id, salary_type, sum(salary_amount) as salary_amount_sum from {$table_prefix}salaries where is_trash = 0 and salary_type='{$salary_type}' group by salary_emp_id ) as {$table_prefix}salaries on salary_emp_id = emp_id
         left join ( select payment_items_employee, sum(payment_items_amount) as payment_items_amount_sum from {$table_prefix}payment_items where is_trash = 0 and payment_items_type='{$salary_type}' group by payment_items_employee ) as get_payments_items on payment_items_employee = emp_id
-        where emp_id = {$emp_id}
+        where emp_id = '{$emp_id}'
     ")["data"][0]["emp_payable_amount"];
 
     // if salary type is salary then add the installment amount with payable amount
@@ -2425,12 +2425,10 @@ function get_title() {
 
         global $table_prefix;
 
-        //$url = "http://66.45.237.70/maskingapi.php";
-	    $url = "http://66.45.237.70/api.php";
+	    $url = "URL";
         $data= array(
-            'username'=>"Royal",
-            'password'=>"CZXAPH@K8",
-            //'senderid'=> "The Royal",
+            'username'=>"username",
+            'password'=>"password",
             'number'=>$number,
             'message'=>$msg
         );

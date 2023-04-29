@@ -29,7 +29,7 @@
                     payment_date, 
                     sum(payment_amount) as payment_amount_sum 
                 from {$table_prefix}payments 
-                where payment_from = {$accountsId} 
+                where payment_from = '{$accountsId}' 
                 group by payment_date
             ) as get_payments on payment_date = db_date
             where db_date = CURRENT_DATE

@@ -266,7 +266,8 @@
                                         "table"     => "cases",
                                         "fields"    => "case_id, case_title, case_status",
                                         "where"     => array(
-                                            "is_trash = 0 and case_id != {$_GET["case_id"]} and case_person" => $case["case_person"]
+                                            "is_trash = 0 and case_id != '{$_GET["case_id"]}'",
+                                            " and case_person" => $case["case_person"]
                                         ),
                                         "orderby"   => array(
                                             "case_id"   => "DESC"
@@ -348,7 +349,8 @@
                                         "table"     => "cases",
                                         "fields"    => "case_id, case_title, case_status",
                                         "where"     => array(
-                                            "is_trash = 0 and case_id != {$_GET["case_id"]} and case_customer" => $case["case_customer"]
+                                            "is_trash = 0 and case_id != '{$_GET["case_id"]}'",
+                                            " and case_customer" => $case["case_customer"]
                                         ),
                                         "orderby"   => array(
                                             "case_id"   => "DESC"

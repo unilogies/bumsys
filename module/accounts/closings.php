@@ -16,7 +16,7 @@
 
                     <!-- Box header -->
                     <div class="box-header">
-                        <h3 class="box-title"><?= __("Capital List"); ?></h3>
+                        <h3 class="box-title"><?= __("Closing List"); ?></h3>
                         <div class="printButtonPosition"></div>
                     </div>
 

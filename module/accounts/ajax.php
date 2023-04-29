@@ -125,6 +125,7 @@ if(isset($_GET['page']) and $_GET['page'] == "accountList") {
 
     // List of all columns name
     $columns = array(
+        "",
         "accounts_name",
         "accounts_type",
         "accounts_balance",
@@ -446,7 +447,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newTransfer") {
         
         <div class="form-group required">
             <label for="transferAmount"><?= __("Amount:"); ?></label>
-            <input type="number" name="transferAmount" id="transferAmount" class="form-control" required>
+            <input type="number" min="0" name="transferAmount" id="transferAmount" class="form-control" required>
         </div>
         <div class="form-group">
             <label for="transferDescription"><?= __("Description:"); ?></label>
@@ -492,6 +493,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewTransfer") {
         return _e("Please enter transfer amount");
     } else if( !negative_value_is_allowed($_POST["transferAcountsFrom"]) and $accounts_balance < $_POST["transferAmount"] ) {
         return _e('Transfer amount is exceeded of account balance (%s)', number_format($accounts_balance, 2) );
+    } else if( $_POST["transferAmount"] < 0 ) {
+        return _e("Transfer amount can not be negative value.");
     }
 
     $insertTransfer = easyInsert(
@@ -854,7 +857,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newCapital") {
         </div>     
         <div class="form-group required">
             <label for="capitalAmount"><?= __("Amount:"); ?></label>
-            <input type="number" name="capitalAmount" id="capitalAmount" class="form-control" required>
+            <input type="number" min="0" name="capitalAmount" id="capitalAmount" class="form-control" required>
         </div>
         <div class="form-group">
             <label for="capitalDescription"><?= __("Description:"); ?></label>
@@ -885,6 +888,8 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewCapital") {
         return _e("Please select accounts");
     } elseif(empty($_POST["capitalAmount"])) {
         return _e("Please enter amount");
+    } elseif ( $_POST["capitalAmount"] < 0 ) {
+        return _e("Capital amount can not be a negative amount.");
     }
 
     $insertCapital = easyInsert(
@@ -1114,6 +1119,7 @@ if(isset($_GET['page']) and $_GET['page'] == "closingList") {
 
     // List of all columns name
     $columns = array(
+        "",
         "customer_name",
         "closings_title",
         "closings_date"

@@ -266,7 +266,7 @@ if(isset($_GET['page']) and $_GET['page'] == "editLoan") {
             *
         from {$table_prefix}loan as loan
         left join {$table_prefix}employees on loan_borrower = emp_id
-        where loan.is_trash = 0 and loan_id = {$loan_id}
+        where loan.is_trash = 0 and loan_id = '{$loan_id}'
         "
     )["data"][0];
     
@@ -740,12 +740,12 @@ if(isset($_GET['page']) and $_GET['page'] == "addNewInstallment") {
         ) as totalPaidAmount on loan_id = totalPaidAmount.loan_ids
         left join (select 
                 loan_ids, 1 as thisMonthInstallmentPayingStatus
-            from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
+            from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = '{$month}' and year(loan_installment_date) = '{$year}' group by loan_ids 
         ) as thisMonthStatus on loan_id = thisMonthStatus.loan_ids
-        where loan.is_trash = 0 and loan_borrower = {$emp_id} and loan_installment_starting_from <= '{$year}-{$month}-01'
+        where loan.is_trash = 0 and loan_borrower = '{$emp_id}' and loan_installment_starting_from <= '{$year}-{$month}-01'
         and ( loan_paid_amount is null or loan_paid_amount < loan_amount)" 
-        // loan_paid_amount can be NULL on left join if there is no recrods, for that the is null check.
-        // We can also use HAVING cluese without using is null check. But it will raise a error with full_group_by mode.
+        // loan_paid_amount can be NULL on left join if there is no records, for that the is null check.
+        // We can also use HAVING clause without using is null check. But it will raise a error with full_group_by mode.
     );
 
     // Check if there any Loan Data Exists

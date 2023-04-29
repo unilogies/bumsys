@@ -378,7 +378,7 @@ if(isset($_GET['page']) and $_GET['page'] == "productDetailsForPos") {
                 ) as product_price on product_price.product_id = sub_product.product_id"
             ),
             "where"     => array(
-                "is_raw_materials = 0 and bg_product_id = {$product_id}"
+                "is_raw_materials = 0 and bg_product_id = '{$product_id}'"
             )
 
         ));

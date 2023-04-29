@@ -175,7 +175,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchase") {
                         ) as product_price on product_price.product_id = bg_item_product_id"
                     ),
                     "where"     => array(
-                        "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
+                        "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = '{$productId}'"
                     )
                 ));
 
@@ -511,7 +511,7 @@ if(isset($_GET['page']) and $_GET['page'] == "updatePurchase") {
                     ) as product_price on product_price.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
-                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
+                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = '{$productId}'"
                 )
             ));
 
@@ -1118,7 +1118,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newPurchaseReturn") {
                     ) as product_price on product_price.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
-                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
+                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = '{$productId}'"
                 )
             ));
 
@@ -1651,7 +1651,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newReturn") {
                     "inner join {$table_prefix}bg_product_items as bg_product on bg_product_id = product_id"
                 ),
                 "where"     => array(
-                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
+                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = '{$productId}'"
                 )
             ));
             
@@ -1973,7 +1973,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockTransfer") {
                     ) as product_price on product_price.product_id = bg_item_product_id"
                 ),
                 "where"     => array(
-                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
+                    "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = '{$productId}'"
                 )
             ));
 
@@ -3287,7 +3287,7 @@ if(isset($_GET['page']) and $_GET['page'] == "newStockEntry") {
                         "left join {$table_prefix}products as sub_product on sub_product.product_id = bg_item_product_id"
                     ),
                     "where"     => array(
-                        "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = {$productId}"
+                        "( product.has_sub_product = 1 or product.product_type = 'Bundle' ) and bg_product.is_raw_materials = 0 and product.product_id = '{$productId}'"
                     )
                 ));
 

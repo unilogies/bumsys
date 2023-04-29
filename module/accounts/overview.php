@@ -80,7 +80,7 @@
             ) as get_bills on bills_date = db_date
             where month(CURRENT_DATE) = month(db_date) and year(CURRENT_DATE) = year(db_date)
             order by db_date ASC
-        ")["data"];
+        ");
 
       $dates = array();
       $incomes = array();
@@ -90,22 +90,25 @@
       $profit = array();
       $profitable = array();
 
-      // loop all data and push data into relavent array
-      foreach($overview as $key => $data) {
+      if( $overview !== false ) {
 
-        array_push($dates, $data["db_date"]);
-        array_push($incomes, $data["total_income"]);
-        array_push($receivable, $data["receivables_amount"]);
-        array_push($expence, $data["total_expence"]);
-        array_push($payable, ($data["payables_amount"]) < 0 ? 0 : $data["payables_amount"] );
+            // loop all data and push data into relavent array
+            foreach($overview["data"] as $key => $data) {
 
-        // Calculate Profit
-        $calculateProfit = $data["total_income"] - $data["total_expence"]; 
-        
-        array_push($profit,  $calculateProfit);
+                array_push($dates, $data["db_date"]);
+                array_push($incomes, $data["total_income"]);
+                array_push($receivable, $data["receivables_amount"]);
+                array_push($expence, $data["total_expence"]);
+                array_push($payable, ($data["payables_amount"]) < 0 ? 0 : $data["payables_amount"] );
 
-      }
+                // Calculate Profit
+                $calculateProfit = $data["total_income"] - $data["total_expence"]; 
+                
+                array_push($profit,  $calculateProfit);
 
+            }
+
+        }
 
     ?>
 

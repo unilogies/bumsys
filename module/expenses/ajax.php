@@ -1558,12 +1558,12 @@ if(isset($_GET['page']) and $_GET['page'] == "addMonthlySalary") {
             ) as totalPaidAmount on loan_id = totalPaidAmount.loan_ids
             left join (select 
                     loan_ids, 1 as thisMonthInstallmentPayingStatus
-                from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = {$month} and year(loan_installment_date) = {$year} group by loan_ids 
+                from {$table_prefix}loan_installment where is_trash = 0 and MONTH(loan_installment_date) = '{$month}' and year(loan_installment_date) = '{$year}' group by loan_ids 
             ) as thisMonthStatus on loan_id = thisMonthStatus.loan_ids
-            where loan.is_trash = 0 and loan_borrower = {$emp_id} and loan_installment_starting_from <= '{$year}-{$month}-01'
+            where loan.is_trash = 0 and loan_borrower = '{$emp_id}' and loan_installment_starting_from <= '{$year}-{$month}-01'
             and ( loan_paid_amount is null or loan_paid_amount < loan_amount)" 
-            // loan_paid_amount can be NULL on left join if there is no recrods, for that the is null check.
-            // We can also use HAVING cluese without using is null check. But it will raise a error with full_group_by mode.
+            // loan_paid_amount can be NULL on left join if there is no records, for that the is null check.
+            // We can also use HAVING clause without using is null check. But it will raise a error with full_group_by mode.
         );
 
         // Check if there any Loan Data Exists
@@ -3881,7 +3881,7 @@ if(isset($_GET['page']) and $_GET['page'] == "returnAdvancePaymentSubmit") {
         left join ( select advance_payment_pay_to, sum(advance_payment_amount) as advance_payment_amount_sum from {$table_prefix}advance_payments where is_trash = 0 group by advance_payment_pay_to ) as get_advance_payments on advance_payment_pay_to = emp_id
         left join ( select payment_to_employee, sum(payment_amount) as payment_amount_sum from {$table_prefix}payments where is_trash = 0 and payment_type = 'Advance Adjustment' group by payment_to_employee ) as get_payments on payment_to_employee = emp_id
         left join ( select payments_return_emp_id, sum(payments_return_amount) as payments_return_amount_sum from {$table_prefix}payments_return where is_trash = 0 group by payments_return_emp_id ) as get_advance_return on payments_return_emp_id = emp_id
-            where emp_id = {$emp_id}"
+            where emp_id = '{$emp_id}'"
     )["data"][0];
 
     if( ( $_POST["returnableAdvancePaymentAmount"] + $getEmpAdvancePaymentData["advance_adjust_amount"] ) >  $getEmpAdvancePaymentData["advance_paid_amount"] ) {
