@@ -1,24 +1,26 @@
 <?php 
 
+  // Max width = 360px;
+  $selectPayment = easySelect(
+    "payments",
+    "*",
+    array (
+      "left join {$table_prefix}employees on payment_to_employee = emp_id",
+      "left join {$table_prefix}companies on payment_to_company = company_id"
+    ),
+    array (
+      "payment_id"  => $_GET["id"]
+    )
+  )["data"][0];
 
-    $selectLoan = easySelectA(array(
-        "table"     => "loan",
-        "fields"    => "emp_firstname, emp_lastname, loan_amount, loan_installment_interval, ",
-        "join"      => array(
-            "left join {$table_prefix}employees on loan_borrower = emp_id"
-        )
-    ));
+  // Print error msg if there has no sales
+  if(!is_array($selectPayment)) {
+    echo "<div class='no-print'>
+            <div class='alert alert-danger'>Sorry there is no payment found! Please check the payment id.</div>
+          </div>";
+    exit();
+  }
 
-    // Print error msg if there has no sales
-    if($selectLoan === false) {
-        echo "<div class='no-print'>
-                <div class='alert alert-danger'>Sorry there is no payment found! Please check the payment id.</div>
-            </div>";
-        exit();
-    }
-
-
-    $loan = $selectLoan["data"][0];
   
 ?>
 
