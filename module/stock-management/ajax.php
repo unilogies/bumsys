@@ -765,7 +765,7 @@ if(isset($_GET['page']) and $_GET['page'] == "addPurchasePayments") {
         </div>
         <div class="form-group required">
             <label for="addPurchasePaymentsAmount"><?= __("Amount:"); ?></label>
-            <input type="number" name="addPurchasePaymentsAmount" id="addPurchasePaymentsAmount" onclick="this.select();" value="<?php echo number_format($purchaseDueAmount, 2, ".", ""); ?>" class="form-control" required>
+            <input type="number" name="addPurchasePaymentsAmount" id="addPurchasePaymentsAmount" onclick="this.select();" value="<?php echo number_format($purchaseDueAmount, 2, ".", ""); ?>" step="any" class="form-control" required>
         </div>
         <div class="form-group required">
             <label for="addPurchasePaymentsMethod"><?= __("Payment Method:"); ?></label>

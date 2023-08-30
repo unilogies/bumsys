@@ -216,10 +216,11 @@
                                     <tr class="bg-primary">
                                         <th class="col-md-4 text-center"><?= __("Product Name"); ?></th>
                                         <th class="col-md-2 text-center"><?= __("Batch No"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Quantity"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Unit"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Price"); ?></th>
-                                        <th class="col-md-1 text-center"><?= __("Discount"); ?></th>
+                                        <th style="width: 165px;" class="text-center"><?= __("Alert | Sold | Stock Qty"); ?></th>
+                                        <th class="text-center"><?= __("Quantity"); ?></th>
+                                        <th class="text-center"><?= __("Unit"); ?></th>
+                                        <th class="text-center"><?= __("Price"); ?></th>
+                                        <th class="text-center"><?= __("Discount"); ?></th>
                                         <th class="text-center"><?= __("Subtotal"); ?></th>
                                         <th style="width: 30px !important;">
                                             <i class="fa fa-trash-o" style="opacity:0.5; filter:alpha(opacity=50);"></i>
@@ -249,11 +250,12 @@
                                                         <input type="hidden" name="productBatch[]" class="productBatch" value="'. $stock["stock_batch_id"] .'">
                                                         <td class="col-md-4">'. $stock["product_name"] .'</td>
                                                         <td class="col-md-2">'. $stock["stock_batch_id"] .'</td>
-                                                        <td class="col-md-1"><input onclick = "this.select()" type="text" name="productQnt[]" value="'. $stock["stock_item_qty"] .'" class="productQnt form-control text-center"></td>
-                                                        <td class="col-md-1">'. $stock["product_unit"] .'</td>
-                                                        <td class="text-right col-md-1"><input onclick = "this.select()" type="text" name="productPurchasePrice[]" value="'. $stock["stock_item_price"] .'" class="productPurchasePrice form-control text-center" step="any"></td>
+                                                        <td class="stock_col" style="width: 155px;"></td>
+                                                        <td><input onclick = "this.select()" type="text" name="productQnt[]" value="'. $stock["stock_item_qty"] .'" class="productQnt form-control text-center"></td>
+                                                        <td>'. $stock["product_unit"] .'</td>
+                                                        <td class="text-right"><input onclick = "this.select()" type="text" name="productPurchasePrice[]" value="'. $stock["stock_item_price"] .'" class="productPurchasePrice form-control text-center" step="any"></td>
                                                         <input type="hidden" name="productMainPurchasePrice[]" class="productMainPurchasePrice" value="'. $stock["stock_item_price"] .'" step="any">
-                                                        <td class="text-right col-md-1"><input onclick = "this.select()" type="text" name="productPurchaseDiscount[]" value="'. $stock["stock_item_discount"] .'" placeholder="10% or 10" class="productPurchaseDiscount form-control text-center"></td>
+                                                        <td class="text-right"><input onclick = "this.select()" type="text" name="productPurchaseDiscount[]" value="'. $stock["stock_item_discount"] .'" placeholder="10% or 10" class="productPurchaseDiscount form-control text-center"></td>
                                                         <td class="text-right subTotal">'. $stock["stock_item_subtotal"] .'</td>
                                                         <td style="width: 30px; !important">
                                                             <i style="cursor: pointer;" class="fa fa-trash-o removeThisProduct"></i>
