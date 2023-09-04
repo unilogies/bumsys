@@ -37,8 +37,8 @@
 
 
 
-        $todayEarns = $shopOverview === false ? 0 : $shopOverview["received_payments_amount_sum"];
-        $todayCashIn = $shopOverview === false ? 0 : $todayEarns - $shopOverview["payment_amount_sum"];
+        $todayEarns = $shopOverview === false ? 0 : $shopOverview["data"][0]["received_payments_amount_sum"];
+        $todayCashIn = $shopOverview === false ? 0 : $todayEarns - $shopOverview["data"][0]["payment_amount_sum"];
         $todayCashIn = $todayCashIn < 0 ? 0 : $todayCashIn;
 	  
     ?>
