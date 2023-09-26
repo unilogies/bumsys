@@ -31,9 +31,9 @@ MySQL Version: At least 5.6
 
 ## Demo
 For see a demo please visit following address:
-- Link: https://demo.bumsys.org/
+- Link: ******
 - Username: bumsys
-- Password: 12345678
+- Password: *******
 
 ## Our Future Plan
 -  
