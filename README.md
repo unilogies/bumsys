@@ -1,3 +1,7 @@
+
+This repository has been removed due to security issue. We are working on it and update soon...
+#
+
 # Bumsys
 An open sources project called Business Management System.
 
