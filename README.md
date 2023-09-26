@@ -1,5 +1,5 @@
 
-# This repository has been removed due to security issue. We are working on it and update soon...
+# This repository has been temporarily taken down due to a security issue. We are actively addressing the situation and will soon bring it back to you with a new version and enhanced features.
 #
 #
 
